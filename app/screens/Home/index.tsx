@@ -1,10 +1,13 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Dimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Theme } from '@/constants/Theme';
 import { Ionicons } from '@expo/vector-icons';
 import Header from '@/components/Header';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const SCALE = SCREEN_WIDTH / 375; // Base width dari design
 
 // Data untuk aktivitas harian
 const dailyActivities = [
@@ -44,13 +47,11 @@ const challenges = [
         id: 1,
         title: 'Jalan kaki pagi hari 30 menit',
         date: '13 - 17 Agustus',
-        image: require('@/assets/images/challenge.png')
     },
     {
         id: 2,
         title: 'Jalan kaki 10.000 langkah',
         date: '28 - 30 Agustus',
-        image: require('@/assets/images/challenge.png')
     }
 ];
 
@@ -201,7 +202,7 @@ export default function Home() {
             >
                 {challenges.map((challenge) => (
                     <View key={challenge.id} style={styles(theme).challengeCard}>
-                        <Image source={challenge.image} style={styles(theme).challengeImage} />
+                        <Image source={require('@/assets/images/challenge.png')} style={styles(theme).challengeImage} />
                         <Text style={styles(theme).challengeTitle}>{challenge.title}</Text>
                         <Text style={styles(theme).challengeDate}>{challenge.date}</Text>
                         <TouchableOpacity style={styles(theme).joinButton}>
@@ -240,9 +241,9 @@ const styles = (theme: Theme) => StyleSheet.create({
         backgroundColor: theme.background,
     },
     header: {
-        paddingHorizontal: 16,
+        paddingHorizontal: 16 * SCALE,
         gap: 16,
-        marginBottom: 32,
+        marginBottom: 32 * SCALE,
     },
     headerLeft: {
         flexDirection: 'row',
@@ -280,15 +281,15 @@ const styles = (theme: Theme) => StyleSheet.create({
     },
     statsContainer: {
         alignItems: 'center',
-        marginBottom: 24,
+        marginBottom: 24 * SCALE,
     },
     circleContainer: {
-        marginBottom: 24,
+        marginBottom: 24 * SCALE,
     },
     circle: {
-        width: 200,
-        height: 200,
-        borderRadius: 100,
+        width: 200 * SCALE,
+        height: 200 * SCALE,
+        borderRadius: (200 * SCALE) / 2,
         borderWidth: 16,
         borderColor: '#F3F4F6',
         justifyContent: 'center',
@@ -330,12 +331,12 @@ const styles = (theme: Theme) => StyleSheet.create({
     },
     
     profileCard: {
-        marginHorizontal: 16,
+        marginHorizontal: 16 * SCALE,
         padding: 20,
         paddingRight: 72,
         backgroundColor: '#F0FDFA',
         borderRadius: 24,
-        marginBottom: 28,
+        marginBottom: 28 * SCALE,
         position: 'relative',
     },
     profileCardTitle: {
@@ -413,9 +414,9 @@ const styles = (theme: Theme) => StyleSheet.create({
         zIndex: 0,
     },
     activitiesContainer: {
-        marginHorizontal: 16,
+        marginHorizontal: 16 * SCALE,
         gap: 16,
-        marginBottom: 32,
+        marginBottom: 32 * SCALE,
     },
     activityCard: {
         flexDirection: 'row',
@@ -493,57 +494,60 @@ const styles = (theme: Theme) => StyleSheet.create({
         marginBottom: 32,
     },
     challengeCard: {
-        width: 152,
+        width: 150 * SCALE,
         marginRight: 16,
         padding: 12,
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: 16,
-        borderRadius: 16,
-        borderWidth: 1,
-        borderColor: 'rgba(12, 12, 13, 0.10)',
         backgroundColor: '#FFFFFF',
-        shadowColor: 'rgba(12, 12, 13, 0.10)',
+        borderRadius: 20,
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        borderWidth: 1,
+        borderColor: '#E2E8F0',
+        shadowColor: '#000',
         shadowOffset: {
             width: 0,
-            height: 1,
+            height: 2,
         },
-        shadowOpacity: 0.2,
-        shadowRadius: 2,
+        shadowOpacity: 0.05,
+        shadowRadius: 4,
         elevation: 2,
     },
     challengeImage: {
-        width: 48,
-        height: 48,
-        borderRadius: 24,
+        // alignSelf: 'center',
+        width: 64,
+        height: 64,
         marginBottom: 12,
     },
     challengeTitle: {
-        fontSize: 14,
+        fontSize: 16,
+        width: '100%',
         fontWeight: '600',
-        color: '#2B6872',
-        marginBottom: 4,
+        color: '#1F2937',
+        // textAlign: 'left',
+        marginVertical: 4,
+        lineHeight: 24
+        // paddingHorizontal: 8,
     },
     challengeDate: {
-        fontSize: 12,
-        color: theme.textSecondary,
-        marginBottom: 12,
+        fontSize: 14,
+        color: '#64748B',
+        marginBottom: 16,
+        fontStyle: 'normal',
+        textAlign: 'left',
+        alignSelf: 'flex-start'
     },
     joinButton: {
-        alignSelf: 'stretch',
-        height: 40,
-        paddingHorizontal: 16,
-        borderRadius: 16,
-        borderWidth: 1.5,
-        borderColor: '#2B6872',
+        width: '100%',
+        paddingVertical: 12,
         backgroundColor: 'transparent',
-        justifyContent: 'center',
-        alignItems: 'center',
+        borderRadius: 12,
+        borderWidth: 1.5,
+        borderColor: '#0F766E',
     },
     joinButtonText: {
         fontSize: 14,
-        fontWeight: '500',
-        color: '#2B6872',
+        fontWeight: '600',
+        color: '#0F766E',
         textAlign: 'center',
     },
     articlesContainer: {
@@ -552,7 +556,7 @@ const styles = (theme: Theme) => StyleSheet.create({
         marginBottom: 32,
     },
     articleCard: {
-        width: 152,
+        width: 152 * SCALE,
         marginRight: 16,
         flexDirection: 'column',
         alignItems: 'flex-start',
@@ -561,7 +565,7 @@ const styles = (theme: Theme) => StyleSheet.create({
     },
     articleImage: {
         width: '100%',
-        height: 120,
+        height: 120 * SCALE,
         borderRadius: 12,
         marginBottom: 8,
     },
@@ -574,9 +578,9 @@ const styles = (theme: Theme) => StyleSheet.create({
         marginBottom: 24,
     },
     activityIconCompleted: {
-        backgroundColor: '#F3F4F6',  // Warna abu-abu untuk status completed
+        backgroundColor: '#F3F4F6',  
     },
     backButton: {
-        padding: 4,  // Biar area tap lebih besar
+        padding: 4, 
     },
 });
