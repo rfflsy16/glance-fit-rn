@@ -1,0 +1,47 @@
+{
+  "expo": {
+    "name": "glance-fit",
+    "slug": "glance-fit",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#2B6872"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.glancefit.app",
+      "config": {
+        "googleMapsApiKey": "API_KEY_IOS_KAMU_DISINI"
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#2B6872"
+      },
+      "package": "com.glancefit.app",
+      "config": {
+        "googleMaps": {
+          "apiKey": "API_KEY_ANDROID_KAMU_DISINI"
+        }
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "819191b5-a1ba-48d3-8456-375caeaf88be"
+      }
+    },
+    "runtimeVersion": "1.0.0",
+    "updates": {
+      "url": "https://u.expo.dev/819191b5-a1ba-48d3-8456-375caeaf88be"
+    }
+  }
+}
