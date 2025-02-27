@@ -15,6 +15,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.glancefit.app",
+      "googleServicesFile": "./GoogleService-Info.plist",
       "config": {
         "googleMapsApiKey": "API_KEY_IOS_KAMU_DISINI"
       }
@@ -25,6 +26,7 @@
         "backgroundColor": "#2B6872"
       },
       "package": "com.glancefit.app",
+      "googleServicesFile": "./google-services.json",
       "config": {
         "googleMaps": {
           "apiKey": "API_KEY_ANDROID_KAMU_DISINI"
