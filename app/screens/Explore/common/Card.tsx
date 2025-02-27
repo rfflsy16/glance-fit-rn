@@ -47,7 +47,7 @@ const styles = (theme: Theme) => StyleSheet.create({
         borderRadius: 12,
         backgroundColor: theme.cardBackground,
         overflow: 'hidden',
-        marginRight: 12,
+        // marginRight: 12,
         elevation: 2,
         shadowColor: theme.shadowColor,
         shadowOffset: {

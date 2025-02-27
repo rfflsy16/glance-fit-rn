@@ -1,6 +1,11 @@
+
 import { Theme } from '@/constants/Theme';
 import { useTheme } from '@/contexts/ThemeContext';
 import { verifyOTP } from '@/services/auth';
+
+import  { useState, useRef, useEffect, useCallback } from 'react';
+import { View, Text, StyleSheet, Pressable, TextInput, KeyboardAvoidingView, Platform, TouchableOpacity, Keyboard } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import React, { useEffect, useRef, useState } from 'react';
@@ -54,22 +59,25 @@ export default function Verification() {
   const dismissKeyboard = () => {
     Keyboard.dismiss();
   };
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setTimer((prev) => (prev > 0 ? prev - 1 : 0));
+        }, 1000);
 
-  React.useEffect(() => {
-    const interval = setInterval(() => {
-      setTimer((prev) => (prev > 0 ? prev - 1 : 0));
-    }, 1000);
 
     return () => clearInterval(interval);
   }, []);
 
-  const formatTime = React.useCallback((seconds: number) => {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${String(minutes).padStart(2, '0')}.${String(
-      remainingSeconds
-    ).padStart(2, '0')}`;
-  }, []);
+    const formatTime = useCallback((seconds: number) => {
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = seconds % 60;
+        return `${String(minutes).padStart(2, '0')}.${String(remainingSeconds).padStart(2, '0')}`;
+    }, []);
+
+    const handleOtpChange = useCallback((value: string) => {
+        const numbersOnly = value.replace(/[^0-9]/g, '').slice(0, 6);
+        setOtpValue(numbersOnly);
+    }, []);
 
   const handleOtpChange = React.useCallback((value: string) => {
     const numbersOnly = value.replace(/[^0-9]/g, '').slice(0, 6);
