@@ -21,6 +21,7 @@
     "expo-linear-gradient": "^14.0.2",
     "expo-location": "^18.0.6",
     "expo-maps": "^0.7.3",
+    "expo-random": "^14.0.1",
     "expo-status-bar": "~2.0.1",
     "expo-system-ui": "^4.0.8",
     "expo-updates": "~0.26.17",

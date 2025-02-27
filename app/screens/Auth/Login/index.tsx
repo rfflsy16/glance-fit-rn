@@ -1,8 +1,14 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import * as Google from 'expo-auth-session/providers/google';
+import * as WebBrowser from 'expo-web-browser';
+import { useEffect, useState } from 'react';
 import {
+  ActivityIndicator,
+  Alert,
   Dimensions,
   Image,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -20,10 +26,72 @@ import useSlide from './useSlide';
 // Ambil ukuran layar
 const { width } = Dimensions.get('window');
 
+WebBrowser.maybeCompleteAuthSession();
+
+// Get Google OAuth credentials from environment variables
+const GOOGLE_WEB_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID;
+const GOOGLE_IOS_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID;
+const GOOGLE_ANDROID_CLIENT_ID =
+  process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID;
+
 export default function Login() {
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const [request, response, promptAsync] = Google.useAuthRequest({
+    androidClientId: GOOGLE_ANDROID_CLIENT_ID,
+    iosClientId: GOOGLE_IOS_CLIENT_ID,
+    webClientId: GOOGLE_WEB_CLIENT_ID,
+    scopes: [
+      'https://www.googleapis.com/auth/userinfo.profile',
+      'https://www.googleapis.com/auth/userinfo.email',
+    ],
+    redirectUri: Platform.select({
+      native: 'com.glancefit.app:/oauth2redirect/google',
+      default: 'https://auth.expo.io/@benzeta/glance-fit',
+    }),
+  });
+
+  useEffect(() => {
+    if (response?.type === 'success') {
+      const { authentication } = response;
+      handleGoogleResponse(authentication?.accessToken);
+    }
+  }, [response]);
+
+  const handleGoogleResponse = async (accessToken: string | undefined) => {
+    if (!accessToken) {
+      Alert.alert('Error', 'Failed to get access token from Google');
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      const response = await fetch(
+        'https://www.googleapis.com/userinfo/v2/me',
+        {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }
+      );
+
+      const userInfo = await response.json();
+      console.log('Google user info:', userInfo);
+
+      // Navigate to name input screen with Google account info
+      // @ts-ignore - Navigation typing issue
+      navigation.navigate('NameInput', {
+        authType: 'GOOGLE',
+        email: userInfo.email,
+      });
+    } catch (error) {
+      console.error('Google sign in error:', error);
+      Alert.alert('Error', 'Failed to sign in with Google. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Gunakan custom hook
   const {
@@ -102,11 +170,19 @@ export default function Login() {
         {/* Google Sign In */}
         <TouchableOpacity
           style={styles(theme).googleButton}
-          onPress={() => navigation.navigate('Google')}
-          activeOpacity={0.8}
+          onPress={() => promptAsync()}
+          disabled={isLoading}
         >
-          <Ionicons name="logo-google" size={20} color="#fff" />
-          <Text style={styles(theme).googleButtonText}>Login dgn Google</Text>
+          {isLoading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <View style={styles(theme).googleButton}>
+              <Ionicons name="logo-google" size={20} color="#fff" />
+              <Text style={styles(theme).googleButtonText}>
+                Login dgn Google
+              </Text>
+            </View>
+          )}
         </TouchableOpacity>
 
         {/* Phone Sign In */}
