@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Theme } from '@/constants/Theme';
@@ -309,6 +309,7 @@ export const exclusivePrograms: Program[] = [
 ];
 
 export default function ProgramScreen() {
+    const { width, height } = useWindowDimensions();
     const insets = useSafeAreaInsets();
     const { theme } = useTheme();
     const [selectedCategory, setSelectedCategory] = useState('Semua');
@@ -334,29 +335,29 @@ export default function ProgramScreen() {
 
     return (
         <ScrollView 
-            style={[styles(theme).container, { paddingTop: insets.top }]}
+            style={[styles(theme, width, height).container, { paddingTop: insets.top }]}
             showsVerticalScrollIndicator={false}
         >
-            <Text style={styles(theme).pageTitle}>Program</Text>
+            <Text style={styles(theme, width, height).pageTitle}>Program</Text>
             
             {/* Categories */}
             <ScrollView 
                 horizontal 
                 showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles(theme).categoriesContainer}
+                contentContainerStyle={styles(theme, width, height).categoriesContainer}
             >
                 {categories.map(category => (
                     <TouchableOpacity 
                         key={category.id}
                         style={[
-                            styles(theme).categoryButton,
-                            selectedCategory === category.name && styles(theme).categoryButtonActive
+                            styles(theme, width, height).categoryButton,
+                            selectedCategory === category.name && styles(theme, width, height).categoryButtonActive
                         ]}
                         onPress={() => setSelectedCategory(category.name)}
                     >
                         <Text style={[
-                            styles(theme).categoryText,
-                            selectedCategory === category.name && styles(theme).categoryTextActive
+                            styles(theme, width, height).categoryText,
+                            selectedCategory === category.name && styles(theme, width, height).categoryTextActive
                         ]}>
                             {category.name}
                         </Text>
@@ -365,21 +366,21 @@ export default function ProgramScreen() {
             </ScrollView>
 
             {/* Rekomendasi */}
-            <View style={styles(theme).section}>
-                <Text style={styles(theme).sectionTitle}>Rekomendasi untukmu</Text>
-                <Text style={styles(theme).sectionSubtitle}>
+            <View style={styles(theme, width, height).section}>
+                <Text style={styles(theme, width, height).sectionTitle}>Rekomendasi untukmu</Text>
+                <Text style={styles(theme, width, height).sectionSubtitle}>
                     Temukan yang sesuai dengan kebutuhanmu
                 </Text>
                 <ScrollView 
                     horizontal 
                     showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={styles(theme).programsContainer}
+                    contentContainerStyle={styles(theme, width, height).programsContainer}
                 >
                     {filteredRecommendations.map((item, index) => (
                         <View 
                             key={item.id} 
                             style={[
-                                styles(theme).cardWrapper,
+                                styles(theme, width, height).cardWrapper,
                                 index === 0 && { marginLeft: 16 },
                                 index === filteredRecommendations.length - 1 && { marginRight: 16 }
                             ]}
@@ -391,21 +392,21 @@ export default function ProgramScreen() {
             </View>
 
             {/* Program Eksklusif */}
-            <View style={styles(theme).section}>
-                <Text style={styles(theme).sectionTitle}>Program eksklusif dari Glance Fit</Text>
-                <Text style={styles(theme).sectionSubtitle}>
+            <View style={styles(theme, width, height).section}>
+                <Text style={styles(theme, width, height).sectionTitle}>Program eksklusif dari Glance Fit</Text>
+                <Text style={styles(theme, width, height).sectionSubtitle}>
                     Temukan yang sesuai dengan kebutuhanmu
                 </Text>
                 <ScrollView 
                     horizontal 
                     showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={styles(theme).programsContainer}
+                    contentContainerStyle={styles(theme, width, height).programsContainer}
                 >
                     {filteredExclusives.map((item, index) => (
                         <View 
                             key={item.id}
                             style={[
-                                styles(theme).cardWrapper,
+                                styles(theme, width, height).cardWrapper,
                                 index === 0 && { marginLeft: 16 },
                                 index === filteredExclusives.length - 1 && { marginRight: 16 }
                             ]}
@@ -419,38 +420,38 @@ export default function ProgramScreen() {
     );
 }
 
-const styles = (theme: Theme) => StyleSheet.create({
+const styles = (theme: Theme, width: number, height: number) => StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: theme.background
     },
     pageTitle: {
-        fontSize: 24,
+        fontSize: width * 0.06,
         fontWeight: '600',
         color: theme.textPrimary,
-        marginHorizontal: 16,
-        marginVertical: 16,
+        marginHorizontal: width * 0.04,
+        marginVertical: height * 0.02,
         textAlign: 'center'
     },
     categoriesContainer: {
-        paddingHorizontal: 16,
-        paddingVertical: 8,
-        gap: 8
+        paddingHorizontal: width * 0.04,
+        paddingVertical: height * 0.01,
+        gap: width * 0.02
     },
     categoryButton: {
-        paddingHorizontal: 16,
-        paddingVertical: 8,
-        borderRadius: 20,
+        paddingHorizontal: width * 0.04,
+        paddingVertical: height * 0.01,
+        borderRadius: width * 0.05,
         borderWidth: 1,
         borderColor: theme.border,
-        marginRight: 8
+        marginRight: width * 0.02
     },
     categoryButtonActive: {
         backgroundColor: theme.primary,
         borderColor: theme.primary
     },
     categoryText: {
-        fontSize: 14,
+        fontSize: width * 0.035,
         color: theme.textPrimary
     },
     categoryTextActive: {
@@ -458,30 +459,30 @@ const styles = (theme: Theme) => StyleSheet.create({
         fontWeight: '500'
     },
     section: {
-        paddingTop: 24
+        paddingTop: height * 0.03
     },
     sectionTitle: {
-        fontSize: 20,
+        fontSize: width * 0.05,
         fontWeight: '600',
         color: theme.textPrimary,
-        marginBottom: 4,
-        marginHorizontal: 16
+        marginBottom: height * 0.005,
+        marginHorizontal: width * 0.04
     },
     sectionSubtitle: {
-        fontSize: 14,
+        fontSize: width * 0.035,
         color: theme.textSecondary,
-        marginBottom: 16,
-        marginHorizontal: 16
+        marginBottom: height * 0.02,
+        marginHorizontal: width * 0.04
     },
     programsContainer: {
-        paddingBottom: 16,
+        paddingBottom: height * 0.02,
     },
     cardWrapper: {
-        marginRight: 12
+        marginRight: width * 0.03
     },
     programCard: {
-        width: 280,
-        borderRadius: 12,
+        width: width * 0.7,
+        borderRadius: width * 0.03,
         backgroundColor: theme.cardBackground,
         overflow: 'hidden',
         elevation: 2,
@@ -495,25 +496,25 @@ const styles = (theme: Theme) => StyleSheet.create({
     },
     programImage: {
         width: '100%',
-        height: 160,
+        height: height * 0.2,
         resizeMode: 'cover'
     },
     programInfo: {
-        padding: 12
+        padding: width * 0.03
     },
     programTitle: {
-        fontSize: 16,
+        fontSize: width * 0.04,
         fontWeight: '600',
         color: theme.textPrimary,
-        marginBottom: 8
+        marginBottom: height * 0.01
     },
     durationContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 4
+        gap: width * 0.01
     },
     durationText: {
-        fontSize: 14,
+        fontSize: width * 0.035,
         color: theme.textSecondary
     }
 });
