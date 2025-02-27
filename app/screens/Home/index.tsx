@@ -79,159 +79,163 @@ export default function Home() {
     const { theme } = useTheme();
 
     return (
-        <ScrollView style={[styles(theme).container, { paddingTop: insets.top }]}>
-            {/* Header */}
-            <View style={styles(theme).header}>
-                <View style={styles(theme).headerLeft}>
-                    <View style={styles(theme).pointBadge}>
-                        <Text style={styles(theme).pointIcon}>P</Text>
-                        <Text style={styles(theme).pointText}>100 Poin</Text>
-                    </View>
-                    <TouchableOpacity>
-                        <Ionicons name="notifications-outline" size={24} color={theme.textSecondary} />
-                    </TouchableOpacity>
-                </View>
-                
-                <View style={styles(theme).headerCenter}>
-                    <TouchableOpacity style={styles(theme).backButton}>
-                        <Ionicons name="chevron-back" size={24} color={theme.textPrimary} />
-                    </TouchableOpacity>
-                    <Text style={styles(theme).headerTitle}>Hari Ini</Text>
-                    <TouchableOpacity>
-                        <Ionicons name="calendar-outline" size={24} color={theme.textPrimary} />
-                    </TouchableOpacity>
-                </View>
-            </View>
-
-            {/* Stats Circle */}
-            <View style={styles(theme).statsContainer}>
-                <View style={styles(theme).circleContainer}>
-                    <View style={styles(theme).circle}>
-                        <Text style={styles(theme).circleNumber}>0</Text>
-                        <Text style={styles(theme).circleLabel}>Langkah</Text>
-                    </View>
-                </View>
-                
-                {/* Stats Icons */}
-                <View style={styles(theme).statsIconsContainer}>
-                    <View style={styles(theme).statItem}>
-                        <View style={[styles(theme).statIcon, { backgroundColor: '#E6F4EA' }]}>
-                            <Ionicons name="flag-outline" size={20} color="#34A853" />
+        <View style={{ flex: 1 }}>
+            <ScrollView style={[styles(theme).container, { paddingTop: insets.top }]}>
+                {/* Header */}
+                <View style={styles(theme).header}>
+                    <View style={styles(theme).headerLeft}>
+                        <View style={styles(theme).pointBadge}>
+                            <Text style={styles(theme).pointIcon}>P</Text>
+                            <Text style={styles(theme).pointText}>100 Poin</Text>
                         </View>
-                        <Text style={styles(theme).statValue}>0</Text>
-                        <Text style={styles(theme).statLabel}>-</Text>
-                    </View>
-                    <View style={styles(theme).statItem}>
-                        <View style={[styles(theme).statIcon, { backgroundColor: '#FEF3C7' }]}>
-                            <Ionicons name="gift-outline" size={20} color="#F59E0B" />
-                        </View>
-                        <Text style={styles(theme).statValue}>0</Text>
-                        <Text style={styles(theme).statLabel}>K.Cal</Text>
-                    </View>
-                    <View style={styles(theme).statItem}>
-                        <View style={[styles(theme).statIcon, { backgroundColor: '#E0F2F1' }]}>
-                            <Ionicons name="flame-outline" size={20} color="#2B6872" />
-                        </View>
-                        <Text style={styles(theme).statValue}>0</Text>
-                        <Text style={styles(theme).statLabel}>Kal</Text>
-                    </View>
-                </View>
-            </View>
-
-            {/* Profile Progress Card */}
-            <View style={styles(theme).profileCard}>
-                <Text style={styles(theme).profileCardTitle}>
-                    Profile anda baru saja dimulai!
-                </Text>
-                <Text style={styles(theme).profileCardSubtitle}>
-                    Jawab beberapa pertanyaan untuk lengkapi informasi profil
-                </Text>
-                <View style={styles(theme).progressBarContainer}>
-                    <View style={styles(theme).progressContainer}>
-                        <View style={styles(theme).progressFill}>
-                            <View style={styles(theme).progressDot} />
-                        </View>
-                    </View>
-                    <Text style={styles(theme).percentageText}>30%</Text>
-                </View>
-                <TouchableOpacity style={styles(theme).addButton}>
-                    <Ionicons name="add" size={24} color={theme.background} />
-                </TouchableOpacity>
-            </View>
-
-            {/* Daily Activities */}
-            <View style={styles(theme).activitiesSection}>
-                <Text style={styles(theme).sectionTitle}>Aktivitas harian</Text>
-                <View style={styles(theme).activitiesContainer}>
-                    {dailyActivities.map((activity) => (
-                        <View key={activity.id} style={styles(theme).activityCard}>
-                            <View style={[
-                                styles(theme).activityIconContainer,
-                                activity.status === 'completed' && styles(theme).activityIconCompleted
-                            ]}>
-                                <Ionicons 
-                                    name={activity.icon as any} 
-                                    size={20} 
-                                    color={activity.status === 'completed' ? theme.textSecondary : theme.primary} 
-                                />
-                            </View>
-                            <View style={styles(theme).activityContent}>
-                                <Text style={[
-                                    styles(theme).activityTitle,
-                                    activity.status === 'completed' && styles(theme).activityTitleCompleted
-                                ]}>
-                                    {activity.title}
-                                </Text>
-                                {activity.status === 'completed' ? (
-                                    <Text style={styles(theme).activityStatus}>Selesai</Text>
-                                ) : (
-                                    <Text style={styles(theme).activityPoints}>+{activity.points} Poin</Text>
-                                )}
-                            </View>
-                        </View>
-                    ))}
-                </View>
-            </View>
-
-            {/* Challenges */}
-            <Text style={styles(theme).sectionTitle}>Tantangan</Text>
-            <ScrollView 
-                horizontal 
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles(theme).challengesContainer}
-            >
-                {challenges.map((challenge) => (
-                    <View key={challenge.id} style={styles(theme).challengeCard}>
-                        <Image source={require('@/assets/images/challenge.png')} style={styles(theme).challengeImage} />
-                        <Text style={styles(theme).challengeTitle}>{challenge.title}</Text>
-                        <Text style={styles(theme).challengeDate}>{challenge.date}</Text>
-                        <TouchableOpacity style={styles(theme).joinButton}>
-                            <Text style={styles(theme).joinButtonText}>Gabung</Text>
+                        <TouchableOpacity>
+                            <Ionicons name="notifications-outline" size={24} color={theme.textSecondary} />
                         </TouchableOpacity>
                     </View>
-                ))}
+                    
+                    <View style={styles(theme).headerCenter}>
+                        <TouchableOpacity style={styles(theme).backButton}>
+                            <Ionicons name="chevron-back" size={24} color={theme.textPrimary} />
+                        </TouchableOpacity>
+                        <Text style={styles(theme).headerTitle}>Hari Ini</Text>
+                        <TouchableOpacity>
+                            <Ionicons name="calendar-outline" size={24} color={theme.textPrimary} />
+                        </TouchableOpacity>
+                    </View>
+                </View>
+
+                {/* Stats Circle */}
+                <View style={styles(theme).statsContainer}>
+                    <View style={styles(theme).circleContainer}>
+                        <View style={styles(theme).circle}>
+                            <Text style={styles(theme).circleNumber}>0</Text>
+                            <Text style={styles(theme).circleLabel}>Langkah</Text>
+                        </View>
+                    </View>
+                    
+                    {/* Stats Icons */}
+                    <View style={styles(theme).statsIconsContainer}>
+                        <View style={styles(theme).statItem}>
+                            <View style={[styles(theme).statIcon, { backgroundColor: '#E6F4EA' }]}>
+                                <Ionicons name="flag-outline" size={20} color="#34A853" />
+                            </View>
+                            <Text style={styles(theme).statValue}>0</Text>
+                            <Text style={styles(theme).statLabel}>-</Text>
+                        </View>
+                        <View style={styles(theme).statItem}>
+                            <View style={[styles(theme).statIcon, { backgroundColor: '#FEF3C7' }]}>
+                                <Ionicons name="gift-outline" size={20} color="#F59E0B" />
+                            </View>
+                            <Text style={styles(theme).statValue}>0</Text>
+                            <Text style={styles(theme).statLabel}>K.Cal</Text>
+                        </View>
+                        <View style={styles(theme).statItem}>
+                            <View style={[styles(theme).statIcon, { backgroundColor: '#E0F2F1' }]}>
+                                <Ionicons name="flame-outline" size={20} color="#2B6872" />
+                            </View>
+                            <Text style={styles(theme).statValue}>0</Text>
+                            <Text style={styles(theme).statLabel}>Kal</Text>
+                        </View>
+                    </View>
+                </View>
+
+                {/* Profile Progress Card */}
+                <View style={styles(theme).profileCard}>
+                    <Text style={styles(theme).profileCardTitle}>
+                        Profile anda baru saja dimulai!
+                    </Text>
+                    <Text style={styles(theme).profileCardSubtitle}>
+                        Jawab beberapa pertanyaan untuk lengkapi informasi profil
+                    </Text>
+                    <View style={styles(theme).progressBarContainer}>
+                        <View style={styles(theme).progressContainer}>
+                            <View style={styles(theme).progressFill}>
+                                <View style={styles(theme).progressDot} />
+                            </View>
+                        </View>
+                        <Text style={styles(theme).percentageText}>30%</Text>
+                    </View>
+                </View>
+
+                {/* Daily Activities */}
+                <View style={styles(theme).activitiesSection}>
+                    <Text style={styles(theme).sectionTitle}>Aktivitas harian</Text>
+                    <View style={styles(theme).activitiesContainer}>
+                        {dailyActivities.map((activity) => (
+                            <View key={activity.id} style={styles(theme).activityCard}>
+                                <View style={[
+                                    styles(theme).activityIconContainer,
+                                    activity.status === 'completed' && styles(theme).activityIconCompleted
+                                ]}>
+                                    <Ionicons 
+                                        name={activity.icon as any} 
+                                        size={20} 
+                                        color={activity.status === 'completed' ? theme.textSecondary : theme.primary} 
+                                    />
+                                </View>
+                                <View style={styles(theme).activityContent}>
+                                    <Text style={[
+                                        styles(theme).activityTitle,
+                                        activity.status === 'completed' && styles(theme).activityTitleCompleted
+                                    ]}>
+                                        {activity.title}
+                                    </Text>
+                                    {activity.status === 'completed' ? (
+                                        <Text style={styles(theme).activityStatus}>Selesai</Text>
+                                    ) : (
+                                        <Text style={styles(theme).activityPoints}>+{activity.points} Poin</Text>
+                                    )}
+                                </View>
+                            </View>
+                        ))}
+                    </View>
+                </View>
+
+                {/* Challenges */}
+                <Text style={styles(theme).sectionTitle}>Tantangan</Text>
+                <ScrollView 
+                    horizontal 
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={styles(theme).challengesContainer}
+                >
+                    {challenges.map((challenge) => (
+                        <View key={challenge.id} style={styles(theme).challengeCard}>
+                            <Image source={require('@/assets/images/challenge.png')} style={styles(theme).challengeImage} />
+                            <Text style={styles(theme).challengeTitle}>{challenge.title}</Text>
+                            <Text style={styles(theme).challengeDate}>{challenge.date}</Text>
+                            <TouchableOpacity style={styles(theme).joinButton}>
+                                <Text style={styles(theme).joinButtonText}>Gabung</Text>
+                            </TouchableOpacity>
+                        </View>
+                    ))}
+                </ScrollView>
+
+                {/* Articles */}
+                <Text style={styles(theme).sectionTitle}>Artikel</Text>
+                <ScrollView 
+                    horizontal 
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={styles(theme).articlesContainer}
+                >
+                    {articles.map((article) => (
+                        <TouchableOpacity key={article.id} style={styles(theme).articleCard}>
+                            <Image 
+                                source={{ uri: article.image }} 
+                                style={styles(theme).articleImage} 
+                            />
+                            <Text style={styles(theme).articleTitle} numberOfLines={2}>
+                                {article.title}
+                            </Text>
+                        </TouchableOpacity>
+                    ))}
+                </ScrollView>
             </ScrollView>
 
-            {/* Articles */}
-            <Text style={styles(theme).sectionTitle}>Artikel</Text>
-            <ScrollView 
-                horizontal 
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles(theme).articlesContainer}
-            >
-                {articles.map((article) => (
-                    <TouchableOpacity key={article.id} style={styles(theme).articleCard}>
-                        <Image 
-                            source={{ uri: article.image }} 
-                            style={styles(theme).articleImage} 
-                        />
-                        <Text style={styles(theme).articleTitle} numberOfLines={2}>
-                            {article.title}
-                        </Text>
-                    </TouchableOpacity>
-                ))}
-            </ScrollView>
-        </ScrollView>
+            {/* Floating Action Button */}
+            <TouchableOpacity style={styles(theme).addButton}>
+                <Ionicons name="add" size={24} color={theme.background} />
+            </TouchableOpacity>
+        </View>
     );
 }
 
@@ -383,26 +387,6 @@ const styles = (theme: Theme) => StyleSheet.create({
         color: '#2B6872',
         fontWeight: '500',
         marginRight: 16,
-    },
-    addButton: {
-        position: 'absolute',
-        right: 1, // Tambah right 16 untuk sejajar dgn margin card
-        bottom: -55, // Ganti top jadi bottom dan nilai translateY
-        width: 66,
-        height: 66,
-        borderRadius: 16,
-        backgroundColor: '#2B6872',
-        justifyContent: 'center',
-        alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 4,
-        },
-        shadowOpacity: 0.2,
-        shadowRadius: 8,
-        elevation: 5,
-        zIndex: 1,
     },
     sectionTitle: {
         fontSize: 20,
@@ -582,5 +566,17 @@ const styles = (theme: Theme) => StyleSheet.create({
     },
     backButton: {
         padding: 4, 
+    },
+    addButton: {
+        position: 'absolute',
+        right: 16,
+        bottom: 32,
+        width: 66,
+        height: 66,
+        borderRadius: 16,
+        backgroundColor: '#2B6872',
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 999,
     },
 });
