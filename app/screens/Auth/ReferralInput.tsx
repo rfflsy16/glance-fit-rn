@@ -12,8 +12,8 @@ export default function ReferralInput() {
     const [referralCode, setReferralCode] = useState('');
     const [isFocused, setIsFocused] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const [showModal, setShowModal] = useState(false);
-    const [isValid, setIsValid] = useState(false);
+    const [isError, setIsError] = useState(false);
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
     
     const navigation = useNavigation();
     const insets = useSafeAreaInsets();
@@ -52,12 +52,14 @@ export default function ReferralInput() {
         // Simulate API call with timeout
         setTimeout(() => {
             const isValidCode = VALID_REFERRAL_CODES.includes(referralCode);
-            setIsValid(isValidCode);
-            setShowModal(true);
+            if (isValidCode) {
+                setShowSuccessModal(true);
+            } else {
+                setIsError(true);
+            }
             setIsLoading(false);
         }, 1000);
     };
-
 
     // Handle continue button press
     const handleSubmit = () => {
@@ -70,15 +72,13 @@ export default function ReferralInput() {
         navigation.navigate('BottomTab');
     };
 
-     // Handle close modal and navigate if valid
-     const handleCloseModal = () => {
-        setShowModal(false);
-        if (isValid) {
-            // Wait a bit before navigating for better UX
-            setTimeout(() => {
-                navigation.navigate('BottomTab');
-            }, 300);
-        }
+    // Handle close modal and navigate
+    const handleCloseModal = () => {
+        setShowSuccessModal(false);
+        // Wait a bit before navigating for better UX
+        setTimeout(() => {
+            navigation.navigate('BottomTab');
+        }, 300);
     };
 
     return (
@@ -105,18 +105,27 @@ export default function ReferralInput() {
                             style={[
                                 styles(theme).input,
                                 isFocused && styles(theme).inputFocused,
-                                referralCode && styles(theme).inputFilled
+                                referralCode && !isError && styles(theme).inputFilled,
+                                isError && styles(theme).inputError
                             ]}
                             placeholder="Contoh: AGD45"
                             placeholderTextColor={theme.textTertiary}
                             value={referralCode}
-                            onChangeText={handleReferralChange}
+                            onChangeText={(text) => {
+                                handleReferralChange(text);
+                                setIsError(false);
+                            }}
                             onFocus={() => setIsFocused(true)}
                             onBlur={() => setIsFocused(false)}
                             autoCapitalize="characters"
                             maxLength={10}
                             autoFocus
                         />
+                        {isError && (
+                            <Text style={styles(theme).errorText}>
+                                Kode referral anda tidak valid
+                            </Text>
+                        )}
                     </View>
 
                     <View style={[styles(theme).footer, { paddingBottom: insets.bottom || 16 }]}>
@@ -152,8 +161,7 @@ export default function ReferralInput() {
                 </View>
             </TouchableOpacity>
             <RefferalModal 
-                visible={showModal}
-                isValid={isValid}
+                visible={showSuccessModal}
                 onClose={handleCloseModal}
             />
         </KeyboardAvoidingView>
@@ -207,6 +215,16 @@ const styles = (theme: Theme) => StyleSheet.create({
         borderColor: theme.primary,
         color: theme.primary,
         fontWeight: '500',
+    },
+    inputError: {
+        borderColor: '#EC221F',
+        color: '#C00F0C',
+    },
+    errorText: {
+        color: theme.textTertiary,
+        fontSize: 14,
+        marginTop: 8,
+        marginLeft: 4,
     },
     footer: {
         position: 'absolute',
