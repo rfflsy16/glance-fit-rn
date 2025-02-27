@@ -1,257 +1,237 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Dimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Theme } from '@/constants/Theme';
 import { Ionicons } from '@expo/vector-icons';
+import Header from '@/components/Header';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const SCALE = SCREEN_WIDTH / 375; // Base width dari design
+
+// Data untuk aktivitas harian
+const dailyActivities = [
+    { 
+        id: 1, 
+        icon: 'walk', 
+        title: 'Jalan kaki minimal 4000 langkah',
+        points: 30,
+        status: 'active'
+    },
+    { 
+        id: 2, 
+        icon: 'restaurant', 
+        title: 'Catat konsumsi makanan',
+        points: 20,
+        status: 'active'
+    },
+    { 
+        id: 3, 
+        icon: 'flame', 
+        title: 'Bakar kalori min. 300 kalori',
+        points: 25,
+        status: 'active'
+    },
+    { 
+        id: 4, 
+        icon: 'walk', 
+        title: 'Lari minimal 10 menit',
+        points: 0,
+        status: 'completed'
+    }
+];
+
+// Data untuk tantangan
+const challenges = [
+    {
+        id: 1,
+        title: 'Jalan kaki pagi hari 30 menit',
+        date: '13 - 17 Agustus',
+    },
+    {
+        id: 2,
+        title: 'Jalan kaki 10.000 langkah',
+        date: '28 - 30 Agustus',
+    }
+];
+
+// Data untuk artikel
+const articles = [
+    {
+        id: 1,
+        title: 'Tingkatkan Stamina dengan Latihan Ka...',
+        image: 'https://picsum.photos/seed/fitness1/400/300'
+    },
+    {
+        id: 2,
+        title: 'Panduan Lengkap Latihan Beban un...',
+        image: 'https://picsum.photos/seed/gym1/400/300'
+    },
+    {
+        id: 3,
+        title: 'Basic Movement yang Perlu Kamu...',
+        image: 'https://picsum.photos/seed/workout1/400/300'
+    }
+];
 
 export default function Home() {
     const insets = useSafeAreaInsets();
     const { theme } = useTheme();
 
     return (
-        <View style={[styles(theme).container, { paddingTop: insets.top }]}>
-            {/* Points and Notification at the very top */}
-            <View style={styles(theme).topContainer}>
-                <View style={styles(theme).pointsBadge}>
-                    <View style={styles(theme).pointsIconContainer}>
-                        <Text style={styles(theme).pointsIcon}>P</Text>
+        <ScrollView style={[styles(theme).container, { paddingTop: insets.top }]}>
+            {/* Header */}
+            <View style={styles(theme).header}>
+                <View style={styles(theme).headerLeft}>
+                    <View style={styles(theme).pointBadge}>
+                        <Text style={styles(theme).pointIcon}>P</Text>
+                        <Text style={styles(theme).pointText}>100 Poin</Text>
                     </View>
-                    <Text style={styles(theme).pointsText}>100 Poin</Text>
+                    <TouchableOpacity>
+                        <Ionicons name="notifications-outline" size={24} color={theme.textSecondary} />
+                    </TouchableOpacity>
                 </View>
                 
-                <TouchableOpacity style={styles(theme).notificationButton}>
-                    <Ionicons name="notifications-outline" size={24} color="#9CA3AF" />
-                </TouchableOpacity>
+                <View style={styles(theme).headerCenter}>
+                    <TouchableOpacity style={styles(theme).backButton}>
+                        <Ionicons name="chevron-back" size={24} color={theme.textPrimary} />
+                    </TouchableOpacity>
+                    <Text style={styles(theme).headerTitle}>Hari Ini</Text>
+                    <TouchableOpacity>
+                        <Ionicons name="calendar-outline" size={24} color={theme.textPrimary} />
+                    </TouchableOpacity>
+                </View>
             </View>
-            
-            {/* Custom Header exactly like in the image */}
-            <View style={styles(theme).headerContainer}>
-                <TouchableOpacity style={styles(theme).backButton}>
-                    <Ionicons name="chevron-back" size={28} color="#9CA3AF" />
-                </TouchableOpacity>
+
+            {/* Stats Circle */}
+            <View style={styles(theme).statsContainer}>
+                <View style={styles(theme).circleContainer}>
+                    <View style={styles(theme).circle}>
+                        <Text style={styles(theme).circleNumber}>0</Text>
+                        <Text style={styles(theme).circleLabel}>Langkah</Text>
+                    </View>
+                </View>
                 
-                <Text style={styles(theme).headerTitle}>Hari Ini</Text>
-                
-                <TouchableOpacity style={styles(theme).calendarButton}>
-                    <Ionicons name="calendar-outline" size={24} color="#9CA3AF" />
-                </TouchableOpacity>
+                {/* Stats Icons */}
+                <View style={styles(theme).statsIconsContainer}>
+                    <View style={styles(theme).statItem}>
+                        <View style={[styles(theme).statIcon, { backgroundColor: '#E6F4EA' }]}>
+                            <Ionicons name="flag-outline" size={20} color="#34A853" />
+                        </View>
+                        <Text style={styles(theme).statValue}>0</Text>
+                        <Text style={styles(theme).statLabel}>-</Text>
+                    </View>
+                    <View style={styles(theme).statItem}>
+                        <View style={[styles(theme).statIcon, { backgroundColor: '#FEF3C7' }]}>
+                            <Ionicons name="gift-outline" size={20} color="#F59E0B" />
+                        </View>
+                        <Text style={styles(theme).statValue}>0</Text>
+                        <Text style={styles(theme).statLabel}>K.Cal</Text>
+                    </View>
+                    <View style={styles(theme).statItem}>
+                        <View style={[styles(theme).statIcon, { backgroundColor: '#E0F2F1' }]}>
+                            <Ionicons name="flame-outline" size={20} color="#2B6872" />
+                        </View>
+                        <Text style={styles(theme).statValue}>0</Text>
+                        <Text style={styles(theme).statLabel}>Kal</Text>
+                    </View>
+                </View>
             </View>
-            
-            <ScrollView showsVerticalScrollIndicator={false}>
-                {/* Steps Circle */}
-                <View style={styles(theme).stepsCircleContainer}>
-                    <View style={styles(theme).stepsCircleOuter}>
-                        <View style={styles(theme).stepsCircleInner}>
-                            <Text style={styles(theme).stepsCount}>0</Text>
-                            <Text style={styles(theme).stepsLabel}>Langkah</Text>
-                        </View>
-                    </View>
-                </View>
-                
-                {/* Activity Stats */}
-                <View style={styles(theme).activityStatsContainer}>
-                    {/* Steps */}
-                    <View style={styles(theme).activityStat}>
-                        <View style={styles(theme).activityIconContainer}>
-                            <View style={[styles(theme).iconCircle, { backgroundColor: '#E6F7EC' }]}>
-                                <Ionicons name="flag" size={20} color="#22C55E" />
-                            </View>
-                        </View>
-                        <Text style={styles(theme).activityValue}>0</Text>
-                        <Text style={styles(theme).activityLabel}>-</Text>
-                    </View>
-                    
-                    {/* Calories */}
-                    <View style={styles(theme).activityStat}>
-                        <View style={styles(theme).activityIconContainer}>
-                            <View style={[styles(theme).iconCircle, { backgroundColor: '#FFF8E6' }]}>
-                                <Ionicons name="restaurant-outline" size={20} color="#F59E0B" />
-                            </View>
-                        </View>
-                        <Text style={styles(theme).activityValue}>0</Text>
-                        <Text style={styles(theme).activityLabel}>K.Cal</Text>
-                    </View>
-                    
-                    {/* Burned */}
-                    <View style={styles(theme).activityStat}>
-                        <View style={styles(theme).activityIconContainer}>
-                            <View style={[styles(theme).iconCircle, { backgroundColor: '#E6F0F7' }]}>
-                                <Ionicons name="water" size={20} color="#2B6872" />
-                            </View>
-                        </View>
-                        <Text style={styles(theme).activityValue}>0</Text>
-                        <Text style={styles(theme).activityLabel}>Kal</Text>
-                    </View>
-                </View>
-                
-                {/* Profile Completion Card - Updated to match image exactly */}
-                <View style={styles(theme).profileCompletionCard}>
-                    <View style={styles(theme).profileCompletionContent}>
-                        <Text style={styles(theme).profileCompletionTitle}>
-                            Profile anda baru saja dimulai!
-                        </Text>
-                        <Text style={styles(theme).profileCompletionSubtitle}>
-                            Jawab beberapa pertanyaan untuk lengkapi informasi profil
-                        </Text>
-                    </View>
+
+            {/* Profile Progress Card */}
+            <View style={styles(theme).profileCard}>
+                <Text style={styles(theme).profileCardTitle}>
+                    Profile anda baru saja dimulai!
+                </Text>
+                <Text style={styles(theme).profileCardSubtitle}>
+                    Jawab beberapa pertanyaan untuk lengkapi informasi profil
+                </Text>
+                <View style={styles(theme).progressBarContainer}>
                     <View style={styles(theme).progressContainer}>
-                        <View style={styles(theme).progressBar}>
-                            <View style={[styles(theme).progressFill, { width: '30%' }]} />
+                        <View style={styles(theme).progressFill}>
+                            <View style={styles(theme).progressDot} />
                         </View>
-                        <Text style={styles(theme).progressText}>30%</Text>
                     </View>
+                    <Text style={styles(theme).percentageText}>30%</Text>
                 </View>
-                
-                {/* Daily Activities Section - Updated to match image exactly */}
-                <View style={styles(theme).sectionContainer}>
-                    <Text style={styles(theme).sectionTitle}>Aktivitas harian</Text>
-                </View>
-                
-                {/* Activity Cards - Updated to match image exactly */}
-                <View style={styles(theme).activityCardsContainer}>
-                    {/* Walking Card */}
-                    <TouchableOpacity style={styles(theme).activityCard}>
-                        <View style={styles(theme).activityCardIconContainer}>
-                            <Ionicons name="walk" size={24} color="#F59E0B" />
-                        </View>
-                        <View style={styles(theme).activityCardTextContainer}>
-                            <Text style={styles(theme).activityCardTitle}>
-                                Jalan kaki minimal 4000 langkah
-                            </Text>
-                        </View>
-                        <View style={styles(theme).activityCardPoints}>
-                            <View style={styles(theme).pointCircle}>
-                                <Text style={styles(theme).pointCircleText}>P</Text>
+                <TouchableOpacity style={styles(theme).addButton}>
+                    <Ionicons name="add" size={24} color={theme.background} />
+                </TouchableOpacity>
+            </View>
+
+            {/* Daily Activities */}
+            <View style={styles(theme).activitiesSection}>
+                <Text style={styles(theme).sectionTitle}>Aktivitas harian</Text>
+                <View style={styles(theme).activitiesContainer}>
+                    {dailyActivities.map((activity) => (
+                        <View key={activity.id} style={styles(theme).activityCard}>
+                            <View style={[
+                                styles(theme).activityIconContainer,
+                                activity.status === 'completed' && styles(theme).activityIconCompleted
+                            ]}>
+                                <Ionicons 
+                                    name={activity.icon as any} 
+                                    size={20} 
+                                    color={activity.status === 'completed' ? theme.textSecondary : theme.primary} 
+                                />
                             </View>
-                            <Text style={styles(theme).activityCardPointsText}>+30 Poin</Text>
-                        </View>
-                    </TouchableOpacity>
-                    
-                    {/* Food Tracking Card */}
-                    <TouchableOpacity style={styles(theme).activityCard}>
-                        <View style={[styles(theme).activityCardIconContainer, { backgroundColor: '#FFEBEB' }]}>
-                            <Ionicons name="pencil" size={24} color="#EF4444" />
-                        </View>
-                        <View style={styles(theme).activityCardTextContainer}>
-                            <Text style={styles(theme).activityCardTitle}>
-                                Catat konsumsi makanan
-                            </Text>
-                        </View>
-                        <View style={styles(theme).activityCardPoints}>
-                            <View style={styles(theme).pointCircle}>
-                                <Text style={styles(theme).pointCircleText}>P</Text>
+                            <View style={styles(theme).activityContent}>
+                                <Text style={[
+                                    styles(theme).activityTitle,
+                                    activity.status === 'completed' && styles(theme).activityTitleCompleted
+                                ]}>
+                                    {activity.title}
+                                </Text>
+                                {activity.status === 'completed' ? (
+                                    <Text style={styles(theme).activityStatus}>Selesai</Text>
+                                ) : (
+                                    <Text style={styles(theme).activityPoints}>+{activity.points} Poin</Text>
+                                )}
                             </View>
-                            <Text style={styles(theme).activityCardPointsText}>+20 Poin</Text>
                         </View>
-                    </TouchableOpacity>
-                    
-                    {/* Calorie Burn Card */}
-                    <TouchableOpacity style={styles(theme).activityCard}>
-                        <View style={[styles(theme).activityCardIconContainer, { backgroundColor: '#E6F0F7' }]}>
-                            <Ionicons name="flame" size={24} color="#2B6872" />
-                        </View>
-                        <View style={styles(theme).activityCardTextContainer}>
-                            <Text style={styles(theme).activityCardTitle}>
-                                Bakar kalori min. 300 kalori
-                            </Text>
-                        </View>
-                        <View style={styles(theme).activityCardPoints}>
-                            <View style={styles(theme).pointCircle}>
-                                <Text style={styles(theme).pointCircleText}>P</Text>
-                            </View>
-                            <Text style={styles(theme).activityCardPointsText}>+25 Poin</Text>
-                        </View>
-                    </TouchableOpacity>
-                    
-                    {/* Running Card */}
-                    <TouchableOpacity style={[styles(theme).activityCard, styles(theme).completedActivityCard]}>
-                        <View style={[styles(theme).activityCardIconContainer, { backgroundColor: '#F3F4F6' }]}>
-                            <Ionicons name="walk" size={24} color="#9CA3AF" />
-                        </View>
-                        <View style={styles(theme).activityCardTextContainer}>
-                            <Text style={[styles(theme).activityCardTitle, styles(theme).completedActivityText]}>
-                                Lari minimal 10 menit
-                            </Text>
-                        </View>
-                        <View style={styles(theme).activityCardStatus}>
-                            <Text style={styles(theme).completedText}>Selesai</Text>
-                        </View>
-                    </TouchableOpacity>
+                    ))}
                 </View>
-                
-                {/* Challenges Section */}
-                <View style={styles(theme).sectionContainer}>
-                    <Text style={styles(theme).sectionTitle}>Tantangan</Text>
-                </View>
-                
-                {/* Challenge Cards */}
-                <ScrollView 
-                    horizontal 
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={styles(theme).challengeCardsContainer}
-                >
-                    {/* Morning Walk Challenge */}
-                    <TouchableOpacity style={styles(theme).challengeCard}>
-                        <Image 
-                            source={{ uri: 'https://via.placeholder.com/100' }} 
-                            style={styles(theme).challengeImage} 
-                        />
-                        <Text style={styles(theme).challengeTitle}>Jalan kaki pagi hari 30 menit</Text>
-                        <Text style={styles(theme).challengeDate}>16 - 17 Agustus</Text>
+            </View>
+
+            {/* Challenges */}
+            <Text style={styles(theme).sectionTitle}>Tantangan</Text>
+            <ScrollView 
+                horizontal 
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles(theme).challengesContainer}
+            >
+                {challenges.map((challenge) => (
+                    <View key={challenge.id} style={styles(theme).challengeCard}>
+                        <Image source={require('@/assets/images/challenge.png')} style={styles(theme).challengeImage} />
+                        <Text style={styles(theme).challengeTitle}>{challenge.title}</Text>
+                        <Text style={styles(theme).challengeDate}>{challenge.date}</Text>
                         <TouchableOpacity style={styles(theme).joinButton}>
                             <Text style={styles(theme).joinButtonText}>Gabung</Text>
                         </TouchableOpacity>
-                    </TouchableOpacity>
-                    
-                    {/* 10k Steps Challenge */}
-                    <TouchableOpacity style={styles(theme).challengeCard}>
-                        <Image 
-                            source={{ uri: 'https://via.placeholder.com/100' }} 
-                            style={styles(theme).challengeImage} 
-                        />
-                        <Text style={styles(theme).challengeTitle}>Jalan kaki 10.000 langkah</Text>
-                        <Text style={styles(theme).challengeDate}>28 - 30 Agustus</Text>
-                        <TouchableOpacity style={styles(theme).joinButton}>
-                            <Text style={styles(theme).joinButtonText}>Gabung</Text>
-                        </TouchableOpacity>
-                    </TouchableOpacity>
-                </ScrollView>
-                
-                {/* Articles Section */}
-                <View style={styles(theme).sectionContainer}>
-                    <Text style={styles(theme).sectionTitle}>Artikel</Text>
-                </View>
-                
-                {/* Article Cards */}
-                <ScrollView 
-                    horizontal 
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={styles(theme).articleCardsContainer}
-                >
-                    {/* Stamina Article */}
-                    <TouchableOpacity style={styles(theme).articleCard}>
-                        <Image 
-                            source={{ uri: 'https://via.placeholder.com/150' }} 
-                            style={styles(theme).articleImage} 
-                        />
-                        <Text style={styles(theme).articleTitle}>Tingkatkan Stamina dengan Latihan Kardio</Text>
-                    </TouchableOpacity>
-                    
-                    {/* Weight Training Article */}
-                    <TouchableOpacity style={styles(theme).articleCard}>
-                        <Image 
-                            source={{ uri: 'https://via.placeholder.com/150' }} 
-                            style={styles(theme).articleImage} 
-                        />
-                        <Text style={styles(theme).articleTitle}>Panduan Lengkap Latihan Beban untuk Pemula</Text>
-                    </TouchableOpacity>
-                </ScrollView>
-                
-                {/* Bottom padding */}
-                <View style={{ height: 80 }} />
+                    </View>
+                ))}
             </ScrollView>
-        </View>
+
+            {/* Articles */}
+            <Text style={styles(theme).sectionTitle}>Artikel</Text>
+            <ScrollView 
+                horizontal 
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles(theme).articlesContainer}
+            >
+                {articles.map((article) => (
+                    <TouchableOpacity key={article.id} style={styles(theme).articleCard}>
+                        <Image 
+                            source={{ uri: article.image }} 
+                            style={styles(theme).articleImage} 
+                        />
+                        <Text style={styles(theme).articleTitle} numberOfLines={2}>
+                            {article.title}
+                        </Text>
+                    </TouchableOpacity>
+                ))}
+            </ScrollView>
+        </ScrollView>
     );
 }
 
@@ -260,295 +240,347 @@ const styles = (theme: Theme) => StyleSheet.create({
         flex: 1,
         backgroundColor: theme.background,
     },
-    topContainer: {
+    header: {
+        paddingHorizontal: 16 * SCALE,
+        gap: 16,
+        marginBottom: 32 * SCALE,
+    },
+    headerLeft: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        paddingHorizontal: 16,
-        paddingVertical: 8,
     },
-    headerContainer: {
+    headerCenter: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    pointBadge: {
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: 16,
-        paddingVertical: 12,
+        backgroundColor: '#FEF3C7',
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 20,
+        gap: 4,
     },
-    backButton: {
-        padding: 4,
+    pointIcon: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#F59E0B',
+    },
+    pointText: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#F59E0B',
     },
     headerTitle: {
-        fontSize: 18,
+        fontSize: 16,
         fontWeight: '600',
         color: theme.textPrimary,
     },
-    calendarButton: {
-        padding: 4,
-    },
-    notificationButton: {
-        padding: 4,
-    },
-    pointsBadge: {
-        flexDirection: 'row',
+    statsContainer: {
         alignItems: 'center',
-        backgroundColor: 'transparent',
-        borderWidth: 1,
-        borderColor: theme.secondary,
-        borderRadius: 20,
-        paddingVertical: 6,
-        paddingHorizontal: 8,
-        paddingRight: 16,
+        marginBottom: 24 * SCALE,
     },
-    pointsIconContainer: {
-        width: 24,
-        height: 24,
-        borderRadius: 12,
-        backgroundColor: theme.secondary,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginRight: 8,
+    circleContainer: {
+        marginBottom: 24 * SCALE,
     },
-    pointsIcon: {
-        color: 'white',
-        fontSize: 14,
-        fontWeight: '700',
-    },
-    pointsText: {
-        color: theme.secondary,
-        fontWeight: '600',
-        fontSize: 14,
-    },
-    stepsCircleContainer: {
-        alignItems: 'center',
-        marginTop: 20,
-    },
-    stepsCircleOuter: {
-        width: 180,
-        height: 180,
-        borderRadius: 90,
-        borderWidth: 12,
+    circle: {
+        width: 200 * SCALE,
+        height: 200 * SCALE,
+        borderRadius: (200 * SCALE) / 2,
+        borderWidth: 16,
         borderColor: '#F3F4F6',
         justifyContent: 'center',
         alignItems: 'center',
     },
-    stepsCircleInner: {
-        alignItems: 'center',
-    },
-    stepsCount: {
+    circleNumber: {
         fontSize: 48,
         fontWeight: '700',
-        color: theme.primary,
+        color: theme.textPrimary,
     },
-    stepsLabel: {
-        fontSize: 16,
+    circleLabel: {
+        fontSize: 14,
         color: theme.textSecondary,
     },
-    activityStatsContainer: {
+    statsIconsContainer: {
         flexDirection: 'row',
-        justifyContent: 'space-around',
-        marginTop: 24,
-        paddingHorizontal: 16,
+        justifyContent: 'center',
+        gap: 40,
     },
-    activityStat: {
+    statItem: {
         alignItems: 'center',
+        gap: 4,
     },
-    activityIconContainer: {
-        marginBottom: 8,
-    },
-    iconCircle: {
-        width: 60,
-        height: 60,
-        borderRadius: 30,
+    statIcon: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
         justifyContent: 'center',
         alignItems: 'center',
     },
-    activityValue: {
-        fontSize: 24,
-        fontWeight: '700',
-        color: theme.textPrimary,
-        marginBottom: 4,
-    },
-    activityLabel: {
-        fontSize: 14,
-        color: theme.textSecondary,
-    },
-    profileCompletionCard: {
-        backgroundColor: '#E6F7EC',
-        borderRadius: 12,
-        padding: 16,
-        marginHorizontal: 16,
-        marginTop: 24,
-    },
-    profileCompletionContent: {
-        marginBottom: 12,
-    },
-    profileCompletionTitle: {
+    statValue: {
         fontSize: 16,
         fontWeight: '600',
         color: theme.textPrimary,
-        marginBottom: 4,
     },
-    profileCompletionSubtitle: {
-        fontSize: 14,
+    statLabel: {
+        fontSize: 12,
         color: theme.textSecondary,
     },
-    progressContainer: {
+    
+    profileCard: {
+        marginHorizontal: 16 * SCALE,
+        padding: 20,
+        paddingRight: 72,
+        backgroundColor: '#F0FDFA',
+        borderRadius: 24,
+        marginBottom: 28 * SCALE,
+        position: 'relative',
+    },
+    profileCardTitle: {
+        fontSize: 20,
+        fontWeight: '600',
+        color: '#2B6872',
+        marginBottom: 8,
+    },
+    profileCardSubtitle: {
+        fontSize: 14,
+        color: '#64748B',
+        marginBottom: 16,
+        lineHeight: 20,
+    },
+    progressBarContainer: {
         flexDirection: 'row',
         alignItems: 'center',
+        justifyContent: 'space-between',
+        marginRight: -56,
     },
-    progressBar: {
+    progressContainer: {
         flex: 1,
         height: 4,
-        backgroundColor: '#D1D5DB',
+        backgroundColor: '#E2E8F0',
         borderRadius: 2,
         marginRight: 8,
     },
     progressFill: {
+        width: '30%',
         height: '100%',
-        backgroundColor: theme.primary,
-        borderRadius: 2,
+        backgroundColor: '#2B6872',
     },
-    progressText: {
+    progressDot: {
+        width: 6,
+        height: 6,
+        borderRadius: 3,
+        backgroundColor: '#2B6872',
+        position: 'absolute',
+        right: -3,
+        top: -1,
+    },
+    percentageText: {
         fontSize: 14,
-        fontWeight: '600',
-        color: theme.primary,
+        color: '#2B6872',
+        fontWeight: '500',
+        marginRight: 16,
     },
-    sectionContainer: {
-        marginTop: 24,
-        marginHorizontal: 16,
+    addButton: {
+        position: 'absolute',
+        right: 1, // Tambah right 16 untuk sejajar dgn margin card
+        bottom: -55, // Ganti top jadi bottom dan nilai translateY
+        width: 66,
+        height: 66,
+        borderRadius: 16,
+        backgroundColor: '#2B6872',
+        justifyContent: 'center',
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 4,
+        },
+        shadowOpacity: 0.2,
+        shadowRadius: 8,
+        elevation: 5,
+        zIndex: 1,
     },
     sectionTitle: {
-        fontSize: 18,
-        fontWeight: '700',
+        fontSize: 20,
+        fontWeight: '600',
         color: theme.textPrimary,
+        marginBottom: 20,
+        marginHorizontal: 16,
+        position: 'relative',
+        zIndex: 0,
     },
-    activityCardsContainer: {
-        marginTop: 16,
-        paddingHorizontal: 16,
+    activitiesContainer: {
+        marginHorizontal: 16 * SCALE,
+        gap: 16,
+        marginBottom: 32 * SCALE,
     },
     activityCard: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: theme.background,
-        borderRadius: 12,
         padding: 16,
-        marginBottom: 12,
+        gap: 12,
+        backgroundColor: '#FFFFFF',
+        borderRadius: 16,
         borderWidth: 1,
-        borderColor: '#E5E7EB',
+        borderColor: 'rgba(12, 12, 13, 0.10)',
+        shadowColor: 'rgba(12, 12, 13, 0.10)',
+        shadowOffset: {
+            width: 0,
+            height: 1,
+        },
+        shadowOpacity: 0.2,
+        shadowRadius: 2,
+        elevation: 2,
     },
-    activityCardIconContainer: {
-        width: 50,
-        height: 50,
-        borderRadius: 25,
-        backgroundColor: '#FFF8E6',
+    activityIconContainer: {
+        width: 48,
+        height: 48,
+        borderRadius: 24,
         justifyContent: 'center',
         alignItems: 'center',
-        marginRight: 16,
     },
-    activityCardTextContainer: {
+    activityContent: {
         flex: 1,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
     },
-    activityCardTitle: {
+    activityTitle: {
         fontSize: 16,
-        fontWeight: '600',
         color: theme.textPrimary,
+        fontWeight: '500',
     },
-    completedActivityCard: {
-        backgroundColor: theme.background,
+    activitySubtitle: {
+        fontSize: 16,
+        color: theme.textPrimary,
+        fontWeight: '500',
     },
-    completedActivityText: {
+    activityTitleCompleted: {
         color: theme.textSecondary,
     },
-    activityCardPoints: {
+    pointContainer: {
         flexDirection: 'row',
         alignItems: 'center',
+        gap: 4,
     },
-    pointCircle: {
-        width: 24,
-        height: 24,
-        borderRadius: 12,
-        backgroundColor: theme.secondary,
+    pointBadgeSmall: {
+        width: 20,
+        height: 20,
+        borderRadius: 10,
+        backgroundColor: '#F59E0B',
         justifyContent: 'center',
         alignItems: 'center',
-        marginRight: 4,
     },
-    pointCircleText: {
-        color: 'white',
+    pointBadgeText: {
+        fontSize: 12,
+        color: '#FFFFFF',
+        fontWeight: '600',
+    },
+    activityPoints: {
         fontSize: 14,
-        fontWeight: '700',
+        color: theme.textPrimary,
     },
-    activityCardPointsText: {
-        fontSize: 14,
-        fontWeight: '500',
-        color: theme.textSecondary,
-    },
-    activityCardStatus: {
-        paddingHorizontal: 12,
-    },
-    completedText: {
+    activityStatus: {
         fontSize: 14,
         color: theme.textSecondary,
     },
-    challengeCardsContainer: {
-        paddingHorizontal: 16,
-        paddingTop: 16,
-        paddingBottom: 8,
+    challengesContainer: {
+        paddingLeft: 16,
+        paddingRight: 0,
+        marginBottom: 32,
     },
     challengeCard: {
-        width: 160,
-        backgroundColor: theme.cardBackground,
-        borderRadius: 12,
+        width: 150 * SCALE,
+        marginRight: 16,
         padding: 12,
-        marginRight: 12,
+        backgroundColor: '#FFFFFF',
+        borderRadius: 20,
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        borderWidth: 1,
+        borderColor: '#E2E8F0',
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.05,
+        shadowRadius: 4,
+        elevation: 2,
     },
     challengeImage: {
-        width: '100%',
-        height: 100,
-        borderRadius: 8,
-        marginBottom: 8,
-    },
-    challengeTitle: {
-        fontSize: 14,
-        fontWeight: '600',
-        color: theme.textPrimary,
-        marginBottom: 4,
-    },
-    challengeDate: {
-        fontSize: 12,
-        color: theme.textSecondary,
+        // alignSelf: 'center',
+        width: 64,
+        height: 64,
         marginBottom: 12,
     },
+    challengeTitle: {
+        fontSize: 16,
+        width: '100%',
+        fontWeight: '600',
+        color: '#1F2937',
+        // textAlign: 'left',
+        marginVertical: 4,
+        lineHeight: 24
+        // paddingHorizontal: 8,
+    },
+    challengeDate: {
+        fontSize: 14,
+        color: '#64748B',
+        marginBottom: 16,
+        fontStyle: 'normal',
+        textAlign: 'left',
+        alignSelf: 'flex-start'
+    },
     joinButton: {
-        backgroundColor: theme.cardBackground,
-        borderWidth: 1,
-        borderColor: theme.border,
-        borderRadius: 20,
-        paddingVertical: 6,
-        alignItems: 'center',
+        width: '100%',
+        paddingVertical: 12,
+        backgroundColor: 'transparent',
+        borderRadius: 12,
+        borderWidth: 1.5,
+        borderColor: '#0F766E',
     },
     joinButtonText: {
         fontSize: 14,
         fontWeight: '600',
-        color: theme.textPrimary,
+        color: '#0F766E',
+        textAlign: 'center',
     },
-    articleCardsContainer: {
-        paddingHorizontal: 16,
-        paddingTop: 16,
-        paddingBottom: 8,
+    articlesContainer: {
+        paddingLeft: 16,
+        paddingRight: 0,
+        marginBottom: 32,
     },
     articleCard: {
-        width: 200,
-        marginRight: 12,
+        width: 152 * SCALE,
+        marginRight: 16,
+        flexDirection: 'column',
+        alignItems: 'flex-start',
+        gap: 8,
+        flexShrink: 0,
     },
     articleImage: {
         width: '100%',
-        height: 120,
-        borderRadius: 8,
+        height: 120 * SCALE,
+        borderRadius: 12,
         marginBottom: 8,
     },
     articleTitle: {
         fontSize: 14,
         fontWeight: '600',
         color: theme.textPrimary,
+    },
+    activitiesSection: {
+        marginBottom: 24,
+    },
+    activityIconCompleted: {
+        backgroundColor: '#F3F4F6',  
+    },
+    backButton: {
+        padding: 4, 
     },
 });
