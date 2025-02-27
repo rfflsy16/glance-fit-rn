@@ -1,12 +1,29 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, KeyboardAvoidingView, Platform, TouchableOpacity, Keyboard, ActivityIndicator } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useTheme } from '@/contexts/ThemeContext';
 import { Theme } from '@/constants/Theme';
+import { useTheme } from '@/contexts/ThemeContext';
+import { completePhoneProfile, handleGoogleSignIn } from '@/services/auth';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import React, { useEffect, useState } from 'react';
+import {
+  ActivityIndicator,
+  Alert,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import RefferalModal from './RefferalModal';
 
-const VALID_REFERRAL_CODES = ['A34D8', 'AGD45', 'TEST123'];
+interface RouteParams {
+  authType: 'GOOGLE' | 'PHONE';
+  email?: string;
+  phoneNumber?: string;
+  fullName: string;
+}
 
 export default function ReferralInput() {
     const [referralCode, setReferralCode] = useState('');
@@ -38,67 +55,124 @@ export default function ReferralInput() {
         Keyboard.dismiss();
     };
 
-    // Handle referral code input
-    const handleReferralChange = (text: string) => {
-        // Convert to uppercase and remove spaces
-        const formattedText = text.toUpperCase().replace(/\s/g, '');
-        setReferralCode(formattedText);
-    };
+  const navigation = useNavigation();
+  const route = useRoute();
+  const insets = useSafeAreaInsets();
+  const { theme } = useTheme();
 
-    // Validate referral code
-    const validateReferralCode = () => {
-        setIsLoading(true);
-        
-        // Simulate API call with timeout
-        setTimeout(() => {
-            const isValidCode = VALID_REFERRAL_CODES.includes(referralCode);
-            if (isValidCode) {
-                setShowSuccessModal(true);
-            } else {
-                setIsError(true);
-            }
-            setIsLoading(false);
-        }, 1000);
-    };
+  // Get auth data from route params
+  const { authType, email, phoneNumber, fullName } =
+    (route.params as RouteParams) || {};
 
-    // Handle continue button press
-    const handleSubmit = () => {
-        dismissKeyboard();
-        validateReferralCode();
-    };
+  // Setup keyboard dismiss when tapping outside
+  useEffect(() => {
+    const keyboardDismissListener = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
+      () => {
+        setIsFocused(false);
+      }
+    );
 
-    // Handle skip button press
-    const handleSkip = () => {
+    return () => {
+      keyboardDismissListener.remove();
+    };
+  }, []);
+
+  // Handle screen tap to dismiss keyboard
+  const dismissKeyboard = () => {
+    Keyboard.dismiss();
+  };
+
+  // Handle referral code input
+  const handleReferralChange = (text: string) => {
+    // Convert to uppercase and remove spaces
+    const formattedText = text.toUpperCase().replace(/\s/g, '');
+    setReferralCode(formattedText);
+  };
+
+  // Complete profile with API
+  const completeProfile = async () => {
+    try {
+      setIsLoading(true);
+      if (authType === 'GOOGLE' && email) {
+        await handleGoogleSignIn(email, fullName, referralCode);
+      } else if (authType === 'PHONE' && phoneNumber) {
+        await completePhoneProfile(phoneNumber, fullName, referralCode);
+      }
+
+      setShowSuccessModal(true);
+    } catch (error) {
+      console.error('Profile completion error:', error);
+      
+      setIsError(true);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Handle continue button press
+  const handleSubmit = () => {
+    dismissKeyboard();
+    completeProfile();
+  };
+
+  // Handle skip button press
+  const handleSkip = async () => {
+    try {
+      setIsLoading(true);
+
+      if (authType === 'GOOGLE' && email) {
+        await handleGoogleSignIn(email, fullName);
+      } else if (authType === 'PHONE' && phoneNumber) {
+        console.log('phoneNumber', phoneNumber);
+
+        await completePhoneProfile(phoneNumber, fullName);
+      }
+
+      navigation.navigate('BottomTab');
+    } catch (error) {
+      console.error('Profile completion error:', error);
+      Alert.alert(
+        'Error',
+        error instanceof Error ? error.message : 'Failed to complete profile'
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Handle close modal and navigate if valid
+  const handleCloseModal = () => {
+    setShowSuccessModal(false);
+      // Wait a bit before navigating for better UX
+      setTimeout(() => {
         navigation.navigate('BottomTab');
-    };
+      }, 300);
+    
+  };
 
-    // Handle close modal and navigate
-    const handleCloseModal = () => {
-        setShowSuccessModal(false);
-        // Wait a bit before navigating for better UX
-        setTimeout(() => {
-            navigation.navigate('BottomTab');
-        }, 300);
-    };
-
-    return (
-        <KeyboardAvoidingView 
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            style={styles(theme).keyboardAvoidingView}
-            keyboardVerticalOffset={Platform.OS === 'ios' ? 10 : 0}
+  return (
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles(theme).keyboardAvoidingView}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 10 : 0}
+    >
+      <TouchableOpacity
+        activeOpacity={1}
+        style={styles(theme).dismissArea}
+        onPress={dismissKeyboard}
+      >
+        <View
+          style={[styles(theme).container, { paddingTop: insets.top + 20 }]}
         >
-            <TouchableOpacity 
-                activeOpacity={1} 
-                style={styles(theme).dismissArea} 
-                onPress={dismissKeyboard}
-            >
-                <View style={[styles(theme).container, { paddingTop: insets.top + 20 }]}>
-                    <View style={styles(theme).headerContainer}>
-                        <Text style={styles(theme).title}>Punya kode referral?</Text>
-                        <Text style={styles(theme).subtitle}>
-                            Tambahkan kode referral anda pada form berikut
-                        </Text>
-                    </View>
+
+          <View style={styles(theme).headerContainer}>
+            <Text style={styles(theme).title}>Punya kode referral?</Text>
+            <Text style={styles(theme).subtitle}>
+              Tambahkan kode referral anda pada form berikut
+            </Text>
+          </View>
+
 
                     <View style={styles(theme).inputContainer}>
                         <TextInput
@@ -164,11 +238,62 @@ export default function ReferralInput() {
                 visible={showSuccessModal}
                 onClose={handleCloseModal}
             />
-        </KeyboardAvoidingView>
-    );
+          </View>
+
+          <View
+            style={[
+              styles(theme).footer,
+              { paddingBottom: insets.bottom || 16 },
+            ]}
+          >
+            <View style={styles(theme).buttonContainer}>
+              <TouchableOpacity
+                style={styles(theme).skipButton}
+                onPress={handleSkip}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <ActivityIndicator color={theme.primary} size="small" />
+                ) : (
+                  <Text style={styles(theme).skipButtonText}>Lewati</Text>
+                )}
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles(theme).submitButton,
+                  !referralCode && styles(theme).submitButtonDisabled,
+                ]}
+                disabled={!referralCode || isLoading}
+                onPress={handleSubmit}
+              >
+                {isLoading ? (
+                  <ActivityIndicator color="#FFFFFF" size="small" />
+                ) : (
+                  <Text
+                    style={[
+                      styles(theme).submitButtonText,
+                      !referralCode && styles(theme).submitButtonTextDisabled,
+                    ]}
+                  >
+                    Kirim
+                  </Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </TouchableOpacity>
+      <RefferalModal
+        visible={showSuccessModal}
+        onClose={handleCloseModal}
+      />
+    </KeyboardAvoidingView>
+  );
 }
 
-const styles = (theme: Theme) => StyleSheet.create({
+const styles = (theme: Theme) =>
+  StyleSheet.create({
     keyboardAvoidingView: {
         flex: 1,
         backgroundColor: theme.background,
