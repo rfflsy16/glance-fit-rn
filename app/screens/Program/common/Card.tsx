@@ -2,14 +2,9 @@ import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { Theme } from '@/constants/Theme';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import type { Program } from '..';
 
-interface Program {
-    id: number;
-    title: string;
-    duration: string;
-    image: string;
-    category: string;
-}
 
 interface CardProps {
     item: Program;
@@ -19,9 +14,17 @@ interface CardProps {
 
 export default function Card({ item, exclusive = false, onPress }: CardProps) {
     const { theme } = useTheme();
+    const navigation = useNavigation();
+    
+    const handlePress = () => {
+        navigation.navigate('ProgramStack', {
+            screen: 'Detail',
+            params: { id: item.id }
+        });
+    };
     
     return (
-        <TouchableOpacity style={styles(theme).card} onPress={onPress}>
+        <TouchableOpacity style={styles(theme).card} onPress={handlePress}>
             <Image 
                 source={{ uri: item.image }}
                 style={styles(theme).image}

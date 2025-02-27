@@ -3,7 +3,7 @@ import { CustomTabBar } from './CustomTab';
 import React from 'react';
 
 import HomeScreen from '@/screens/Home';
-import ExploreScreen from '@/screens/Explore';
+import ProgramScreen from '@/screens/Program';
 import ProfileScreen from '@/screens/Profile';
 
 // Definisi tipe untuk konfigurasi tab dengan komponen
@@ -17,7 +17,7 @@ type TabConfigWithComponent = {
 // Konfigurasi tab
 const TAB_CONFIG: TabConfigWithComponent[] = [
   { name: 'HariIni', component: HomeScreen, label: 'Hari ini', icon: 'sunny-outline' },
-  { name: 'Program', component: ExploreScreen, label: 'Program', icon: 'grid-outline' },
+  { name: 'Program', component: ProgramScreen, label: 'Program', icon: 'grid-outline' },
   { name: 'Profile', component: ProfileScreen, label: 'Profil', icon: 'person-outline' },
 ];
 

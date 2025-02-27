@@ -6,7 +6,7 @@ import Chat from '@/screens/Community/Chat';
 import AuthStack from './Auth';
 import NameInput from '@/screens/Auth/NameInput';
 import ReferralInput from '@/screens/Auth/ReferralInput';
-
+import ProgramStack from './Program';
 export type RootStackParamList = {
     BottomTab: undefined;
     Settings: undefined;
@@ -15,6 +15,12 @@ export type RootStackParamList = {
     Auth: undefined;
     NameInput: undefined;
     ReferralInput: undefined;
+    ProgramStack: {
+        screen: string;
+        params: {
+            id: number;
+        };
+    } | undefined;
 };
 
 declare global {
@@ -41,6 +47,8 @@ export default function StackNavigator() {
             <Stack.Screen name="Auth" component={AuthStack} options={{ animation: 'scale_from_center' }} />
             <Stack.Screen name="NameInput" component={NameInput} options={{ animation: 'slide_from_right' }}/>
             <Stack.Screen name="ReferralInput" component={ReferralInput} options={{ animation: 'slide_from_right' }}/>
+            <Stack.Screen name="ProgramStack" component={ProgramStack} options={{ animation: 'slide_from_right', headerShown: false }} />
+						
         </Stack.Navigator>
     );
 }
