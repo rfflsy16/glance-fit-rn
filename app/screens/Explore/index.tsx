@@ -3,7 +3,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Theme } from '@/constants/Theme';
 import { useState } from 'react';
-import { Ionicons } from '@expo/vector-icons';
 import Card from './common/Card';
 
 interface Program {
@@ -140,8 +139,15 @@ export default function Explore() {
                     showsHorizontalScrollIndicator={false}
                     contentContainerStyle={styles(theme).programsContainer}
                 >
-                    {filteredRecommendations.map(item => (
-                        <View key={item.id}>
+                    {filteredRecommendations.map((item, index) => (
+                        <View 
+                            key={item.id} 
+                            style={[
+                                styles(theme).cardWrapper,
+                                index === 0 && { marginLeft: 16 },
+                                index === filteredRecommendations.length - 1 && { marginRight: 16 }
+                            ]}
+                        >
                             {renderProgramCard({ item })}
                         </View>
                     ))}
@@ -159,8 +165,15 @@ export default function Explore() {
                     showsHorizontalScrollIndicator={false}
                     contentContainerStyle={styles(theme).programsContainer}
                 >
-                    {filteredExclusives.map(item => (
-                        <View key={item.id}>
+                    {filteredExclusives.map((item, index) => (
+                        <View 
+                            key={item.id}
+                            style={[
+                                styles(theme).cardWrapper,
+                                index === 0 && { marginLeft: 16 },
+                                index === filteredExclusives.length - 1 && { marginRight: 16 }
+                            ]}
+                        >
                             {renderProgramCard({ item, exclusive: true })}
                         </View>
                     ))}
@@ -209,30 +222,32 @@ const styles = (theme: Theme) => StyleSheet.create({
         fontWeight: '500'
     },
     section: {
-        paddingHorizontal: 16,
         paddingTop: 24
     },
     sectionTitle: {
         fontSize: 20,
         fontWeight: '600',
         color: theme.textPrimary,
-        marginBottom: 4
+        marginBottom: 4,
+        marginHorizontal: 16
     },
     sectionSubtitle: {
         fontSize: 14,
         color: theme.textSecondary,
-        marginBottom: 16
+        marginBottom: 16,
+        marginHorizontal: 16
     },
     programsContainer: {
         paddingBottom: 16,
-        gap: 12
+    },
+    cardWrapper: {
+        marginRight: 12
     },
     programCard: {
         width: 280,
         borderRadius: 12,
         backgroundColor: theme.cardBackground,
         overflow: 'hidden',
-        marginRight: 12,
         elevation: 2,
         shadowColor: theme.shadowColor,
         shadowOffset: {
