@@ -7,7 +7,7 @@
 // 4. The /api prefix is included in the URL
 const API_URL =
   process.env.EXPO_PUBLIC_API_URL ||
-  'https://e1f6-2a09-bac5-3a25-155f-00-221-b.ngrok-free.app/api';
+  'https://c04f-2a09-bac1-34a0-18-00-da-e7.ngrok-free.app/api';
 
 // Validate API URL
 if (!API_URL) {
@@ -42,7 +42,6 @@ export const handleGoogleSignIn = async (
     let data;
     try {
       const textResponse = await response.text();
-      console.log('Raw response:', textResponse); // Debug log
       try {
         data = JSON.parse(textResponse);
       } catch (parseError) {
@@ -72,7 +71,6 @@ export const initiatePhoneLogin = async (
   phoneNumber: string
 ): Promise<void> => {
   try {
-    console.log('Initiating phone login for:', phoneNumber); // Debug log
     const response = await fetch(`${API_URL}/auth/login/phone/initiate`, {
       method: 'POST',
       headers: {
