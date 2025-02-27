@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import  { useState, useRef, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, Pressable, TextInput, KeyboardAvoidingView, Platform, TouchableOpacity, Keyboard } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -34,7 +34,7 @@ export default function Verification() {
         Keyboard.dismiss();
     };
 
-    React.useEffect(() => {
+    useEffect(() => {
         const interval = setInterval(() => {
             setTimer((prev) => (prev > 0 ? prev - 1 : 0));
         }, 1000);
@@ -42,13 +42,13 @@ export default function Verification() {
         return () => clearInterval(interval);
     }, []);
 
-    const formatTime = React.useCallback((seconds: number) => {
+    const formatTime = useCallback((seconds: number) => {
         const minutes = Math.floor(seconds / 60);
         const remainingSeconds = seconds % 60;
         return `${String(minutes).padStart(2, '0')}.${String(remainingSeconds).padStart(2, '0')}`;
     }, []);
 
-    const handleOtpChange = React.useCallback((value: string) => {
+    const handleOtpChange = useCallback((value: string) => {
         const numbersOnly = value.replace(/[^0-9]/g, '').slice(0, 6);
         setOtpValue(numbersOnly);
     }, []);
