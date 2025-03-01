@@ -1,6 +1,12 @@
+import ExploreScreen from '@/screens/Explore';
+import Home from '@/screens/Home';
+import ProfileScreen from '@/screens/Profile';
+import { Ionicons } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { CustomTabBar } from './CustomTab';
 import React from 'react';
+import { CustomTabBar } from './CustomTab';
+
+type IconName = keyof typeof Ionicons.glyphMap;
 
 import HomeScreen from '@/screens/Home';
 import ProgramScreen from '@/screens/Program';
@@ -11,14 +17,29 @@ type TabConfigWithComponent = {
   name: string;
   component: React.ComponentType<object>;
   label: string;
-  icon: string;
-}
+  icon: IconName;
+};
 
 // Konfigurasi tab
 const TAB_CONFIG: TabConfigWithComponent[] = [
-  { name: 'HariIni', component: HomeScreen, label: 'Hari ini', icon: 'sunny-outline' },
-  { name: 'Program', component: ProgramScreen, label: 'Program', icon: 'grid-outline' },
-  { name: 'Profile', component: ProfileScreen, label: 'Profil', icon: 'person-outline' },
+  {
+    name: 'HariIni',
+    component: Home,
+    label: 'Hari ini',
+    icon: 'sunny-outline',
+  },
+  {
+    name: 'Program',
+    component: ExploreScreen,
+    label: 'Program',
+    icon: 'grid-outline',
+  },
+  {
+    name: 'Profile',
+    component: ProfileScreen,
+    label: 'Profil',
+    icon: 'person-outline',
+  },
 ];
 
 const Tab = createBottomTabNavigator();
@@ -28,12 +49,19 @@ export default function BottomTab(): React.ReactElement {
     <Tab.Navigator
       tabBar={(props) => <CustomTabBar {...props} />}
       screenOptions={{ headerShown: false }}
+      initialRouteName="HariIni"
     >
-      {TAB_CONFIG.map(tab => (
-        <Tab.Screen 
+      {TAB_CONFIG.map((tab) => (
+        <Tab.Screen
           key={tab.name}
-          name={tab.name} 
-          component={tab.component} 
+          name={tab.name}
+          component={tab.component}
+          options={{
+            tabBarLabel: tab.label,
+            tabBarIcon: ({ focused, color, size }) => (
+              <Ionicons name={tab.icon} color={color} size={size} />
+            ),
+          }}
         />
       ))}
     </Tab.Navigator>
