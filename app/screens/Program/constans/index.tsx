@@ -59,7 +59,7 @@ export const ProgramData: Program[] = [
         image: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800",
         description: "Sulit untuk menaikan berat badan, padahal sudah mencoba berbagai cara? tenang, Program Gain Weight in 21 Days dari Glance Fit dirancang khusus untuk membantumu mencapai berat badan ideal dengan metode yang sehat dan terbukti efektif.\n\nSelama tiga minggu, Kamu akan belajar lebih mendalam mengenai hal - hal yang dibutuhkan untuk menerapkan pola makan yang tepat demi menaikan berat badan.",
         isExclusive: false,
-        isFollow: false,
+        isFollow: true,
         equipment: [
             { id: 1, name: "Timbang badan", icon: "scale-bathroom", bgColor: "#FFF7ED" },
             { id: 2, name: "Matras olahraga", icon: "yoga", bgColor: "#FFF7ED" },
