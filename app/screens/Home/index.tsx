@@ -211,7 +211,19 @@ export default function Home({ navigation }: any) {
           <Text style={styles(theme).sectionTitle}>Aktivitas harian</Text>
           <View style={styles(theme).activitiesContainer}>
             {dailyActivities.map((activity) => (
-              <View key={activity.id} style={styles(theme).activityCard}>
+              <TouchableOpacity
+                key={activity.id}
+                style={styles(theme).activityCard}
+                onPress={() =>
+                  navigation.navigate('Activity', {
+                    id: activity.id,
+                    title: activity.title,
+                    icon: activity.icon,
+                    points: activity.points,
+                    status: activity.status,
+                  })
+                }
+              >
                 <View
                   style={[
                     styles(theme).activityIconContainer,
@@ -247,7 +259,7 @@ export default function Home({ navigation }: any) {
                     </Text>
                   )}
                 </View>
-              </View>
+              </TouchableOpacity>
             ))}
           </View>
         </View>

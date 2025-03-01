@@ -1,6 +1,7 @@
 import NameInput from '@/screens/Auth/NameInput';
 import ReferralInput from '@/screens/Auth/ReferralInput';
 import Chat from '@/screens/Community/Chat';
+import Activity from '@/screens/Home/Activity';
 import CaloriesIn from '@/screens/Home/CaloriesIn';
 import CaloriesOut from '@/screens/Home/CaloriesOut';
 import ChallengeDetail from '@/screens/Home/Challenge';
@@ -26,6 +27,13 @@ export type RootStackParamList = {
   Distance: undefined;
   CaloriesIn: undefined;
   CaloriesOut: undefined;
+  Activity: {
+    id: number;
+    title: string;
+    icon: string;
+    points: number;
+    status: string;
+  };
   ChallengeDetail: {
     id: number;
     title: string;
@@ -87,6 +95,11 @@ export default function StackNavigator() {
       <Stack.Screen
         name="CaloriesOut"
         component={CaloriesOut}
+        options={{ animation: 'slide_from_right' }}
+      />
+      <Stack.Screen
+        name="Activity"
+        component={Activity}
         options={{ animation: 'slide_from_right' }}
       />
       <Stack.Screen
