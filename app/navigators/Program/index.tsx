@@ -1,9 +1,13 @@
 import { createStackNavigator } from "@react-navigation/stack";
 import Detail from "@/screens/Program/Detail";
-
+import Instruction from "@/screens/Program/Detail/Instruction";
 export type ProgramStackParamList = {
     Detail: {
         id: number;
+    };
+    Instruction: {
+        programId: number;
+        weekId: number;
     };
 };
 
@@ -18,6 +22,7 @@ export default function ProgramStack() {
             }}
         >
             <Stack.Screen name="Detail" component={Detail} />
+            <Stack.Screen name="Instruction" component={Instruction} />
         </Stack.Navigator>
     );
 }

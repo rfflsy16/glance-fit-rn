@@ -7,7 +7,7 @@
 // 4. The /api prefix is included in the URL
 const API_URL =
   process.env.EXPO_PUBLIC_API_URL ||
-  'https://c04f-2a09-bac1-34a0-18-00-da-e7.ngrok-free.app/api';
+  'https://cd61-103-125-57-159.ngrok-free.app/api';
 
 // Validate API URL
 if (!API_URL) {

@@ -179,7 +179,7 @@ export default function Login() {
             <View style={styles(theme).googleButton}>
               <Ionicons name="logo-google" size={20} color="#fff" />
               <Text style={styles(theme).googleButtonText}>
-                Login dgn Google
+                Login dengan Google
               </Text>
             </View>
           )}
@@ -196,7 +196,7 @@ export default function Login() {
             size={20}
             color={theme.primary}
           />
-          <Text style={styles(theme).phoneButtonText}>Login dgn No. HP</Text>
+          <Text style={styles(theme).phoneButtonText}>Login dengan No. HP</Text>
         </TouchableOpacity>
       </View>
     </View>

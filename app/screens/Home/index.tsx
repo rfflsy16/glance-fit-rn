@@ -4,7 +4,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Theme } from '@/constants/Theme';
 import { Ionicons } from '@expo/vector-icons';
-import Header from '@/components/Header';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const SCALE = SCREEN_WIDTH / 375; // Base width dari design

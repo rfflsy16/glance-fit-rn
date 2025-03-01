@@ -48,7 +48,7 @@ export default function StackNavigator() {
             <Stack.Screen name="NameInput" component={NameInput} options={{ animation: 'slide_from_right' }}/>
             <Stack.Screen name="ReferralInput" component={ReferralInput} options={{ animation: 'slide_from_right' }}/>
             <Stack.Screen name="ProgramStack" component={ProgramStack} options={{ animation: 'slide_from_right', headerShown: false }} />
-						
+
         </Stack.Navigator>
     );
 }
