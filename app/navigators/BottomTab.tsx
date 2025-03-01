@@ -6,8 +6,11 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import React from 'react';
 import { CustomTabBar } from './CustomTab';
 
-// Define valid Ionicons names type
 type IconName = keyof typeof Ionicons.glyphMap;
+
+import HomeScreen from '@/screens/Home';
+import ProgramScreen from '@/screens/Program';
+import ProfileScreen from '@/screens/Profile';
 
 // Definisi tipe untuk konfigurasi tab dengan komponen
 type TabConfigWithComponent = {

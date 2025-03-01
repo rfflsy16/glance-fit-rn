@@ -13,6 +13,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import React from 'react';
 import AuthStack from './Auth';
 import MyTabs from './BottomTab';
+import ProgramStack from './Program';
 
 export type RootStackParamList = {
   BottomTab: undefined;
@@ -39,7 +40,13 @@ export type RootStackParamList = {
     title: string;
     date: string;
   };
-};
+    ProgramStack: {
+        screen: string;
+        params: {
+            id: number;
+        };
+    } | undefined;
+}
 
 declare global {
   namespace ReactNavigation {
@@ -107,6 +114,7 @@ export default function StackNavigator() {
         component={ChallengeDetail}
         options={{ animation: 'slide_from_right' }}
       />
+      <Stack.Screen name="ProgramStack" component={ProgramStack} options={{ animation: 'slide_from_right', headerShown: false }} />
     </Stack.Navigator>
   );
 }

@@ -2,30 +2,38 @@ import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { Theme } from '@/constants/Theme';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
-
-interface Program {
-    id: number;
-    title: string;
-    duration: string;
-    image: string;
-    category: string;
-}
+import { useNavigation } from '@react-navigation/native';
+import type { Program } from '../constans';
 
 interface CardProps {
     item: Program;
     exclusive?: boolean;
-    onPress?: () => void;
 }
 
-export default function Card({ item, exclusive = false, onPress }: CardProps) {
+export default function Card({ item, exclusive = false }: CardProps) {
     const { theme } = useTheme();
+    const navigation = useNavigation();
+    
+    const handlePress = () => {
+        navigation.navigate('ProgramStack', {
+            screen: 'Detail',
+            params: { id: item.id }
+        });
+    };
     
     return (
-        <TouchableOpacity style={styles(theme).card} onPress={onPress}>
-            <Image 
-                source={{ uri: item.image }}
-                style={styles(theme).image}
-            />
+        <TouchableOpacity style={styles(theme).card} onPress={handlePress}>
+            <View style={styles(theme).imageContainer}>
+                <Image 
+                    source={{ uri: item.image }}
+                    style={styles(theme).image}
+                />
+                {exclusive && (
+                    <View style={styles(theme).exclusiveTag}>
+                        <Text style={styles(theme).exclusiveText}>Exclusive</Text>
+                    </View>
+                )}
+            </View>
             <View style={styles(theme).info}>
                 <Text style={styles(theme).title} numberOfLines={2}>
                     {item.title}
@@ -47,7 +55,6 @@ const styles = (theme: Theme) => StyleSheet.create({
         borderRadius: 12,
         backgroundColor: theme.cardBackground,
         overflow: 'hidden',
-        // marginRight: 12,
         elevation: 2,
         shadowColor: theme.shadowColor,
         shadowOffset: {
@@ -57,10 +64,27 @@ const styles = (theme: Theme) => StyleSheet.create({
         shadowOpacity: 0.1,
         shadowRadius: 4
     },
+    imageContainer: {
+        position: 'relative'
+    },
     image: {
         width: '100%',
         height: 160,
         resizeMode: 'cover'
+    },
+    exclusiveTag: {
+        position: 'absolute',
+        top: 12,
+        right: 12,
+        backgroundColor: theme.primary,
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 16
+    },
+    exclusiveText: {
+        color: '#FFFFFF',
+        fontSize: 12,
+        fontWeight: '600'
     },
     info: {
         padding: 12
