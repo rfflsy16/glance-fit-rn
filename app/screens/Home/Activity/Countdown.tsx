@@ -1,7 +1,7 @@
 import { Theme } from '@/constants/Theme';
 import { useTheme } from '@/contexts/ThemeContext';
-import React, { useEffect, useState } from 'react';
-import { Dimensions, StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useState, useRef } from 'react';
+import { Animated, Dimensions, Easing, StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -18,111 +18,110 @@ export default function Countdown({
 }: CountdownProps) {
   const { theme, isDark } = useTheme();
   const [count, setCount] = useState(5);
-
-  // Constants for the circle
+  const [filledAngle, setFilledAngle] = useState(360); // Mulai dengan lingkaran penuh (360 derajat)
+  
+  // Ukuran lingkaran
   const size = 200 * SCALE;
   const strokeWidth = 16;
   const radius = (size - strokeWidth) / 2;
   const center = size / 2;
-
+  
+  // Setup animasi untuk progress lingkaran
+  const animatedProgress = useRef(new Animated.Value(1)).current; // Mulai dari 1 (penuh)
+  
   useEffect(() => {
-    // Start countdown
+    // Jalankan animasi dari 1 ke 0 dalam 5 detik
+    Animated.timing(animatedProgress, {
+      toValue: 0, // Menuju 0 (kosong)
+      duration: 5000, // 5 detik
+      easing: Easing.linear, // Kecepatan tetap
+      useNativeDriver: true,
+    }).start();
+    
+    // Dengarkan perubahan nilai animasi
+    const listener = animatedProgress.addListener(({ value }) => {
+      // Konversi nilai animasi (1-0) menjadi sudut (360-0)
+      setFilledAngle(value * 360);
+    });
+    
+    // Setup hitungan mundur (5,4,3,2,1)
     const interval = setInterval(() => {
       setCount((prevCount) => {
         if (prevCount <= 1) {
           clearInterval(interval);
-          // Trigger onComplete immediately when count reaches 1
           onComplete();
-          return 1; // Keep showing 1 until navigation happens
+          return 1;
         }
         return prevCount - 1;
       });
-    }, 1000);
-
-    return () => clearInterval(interval);
+    }, 1000); // Update angka tiap 1 detik
+    
+    return () => {
+      // Cleanup
+      clearInterval(interval);
+      animatedProgress.removeListener(listener);
+    };
   }, [onComplete]);
-
-  // When count is 5, we want a full circle with no gray portion
-  const isFullCircle = count === 5;
-
-  // Calculate the angle for the arc based on the current count
-  // When count is 5, we want a full circle (360 degrees)
-  // When count is 1, we want 1/5 of the circle (72 degrees)
-  const filledAngle = (count / 5) * 360;
-
-  // Create the arc path for the filled portion
+  
+  // Buat path untuk bagian terisi dan tidak terisi
   const createArc = (startAngle: number, endAngle: number) => {
-    // Convert angles to radians
-    const startRad = ((startAngle - 90) * Math.PI) / 180; // Start from the top (12 o'clock)
+    // Hitung dalam radian (mulai dari atas/jam 12)
+    const startRad = ((startAngle - 90) * Math.PI) / 180;
     const endRad = ((endAngle - 90) * Math.PI) / 180;
-
-    // Calculate start and end points
+    
+    // Hitung titik awal dan akhir
     const startX = center + radius * Math.cos(startRad);
     const startY = center + radius * Math.sin(startRad);
     const endX = center + radius * Math.cos(endRad);
     const endY = center + radius * Math.sin(endRad);
-
-    // Determine if the arc should be drawn the long way around
+    
+    // Tentukan arah path
     const largeArcFlag = endAngle - startAngle <= 180 ? 0 : 1;
-
-    // Create the arc path
+    
+    // Buat path SVG
     return `M ${startX} ${startY} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${endX} ${endY}`;
   };
-
-  // Create the paths for the filled and unfilled portions
+  
+  // Hitung path untuk lingkaran
   const filledPath = createArc(0, filledAngle);
   const unfilledPath = createArc(filledAngle, 360);
-
+  
   return (
     <View style={styles(theme, isDark).container}>
       <View style={styles(theme, isDark).content}>
-        {/* Activity title just above the circle */}
+        {/* Judul aktivitas */}
         {activityTitle && (
           <Text style={styles(theme, isDark).activityTitle}>
             {activityTitle}
           </Text>
         )}
-
-        {/* Circle */}
+        
+        {/* Lingkaran countdown */}
         <View style={styles(theme, isDark).circleWrapper}>
           <Svg width={size} height={size}>
-            {/* Background Circle (transparent) */}
+            {/* Lingkaran background */}
             <Circle cx={center} cy={center} r={radius} fill="transparent" />
-
-            {/* When count is 5, show only the filled circle with no gray portion */}
-            {isFullCircle ? (
-              <Circle
-                cx={center}
-                cy={center}
-                r={radius}
-                stroke={theme.primary}
-                strokeWidth={strokeWidth}
-                fill="transparent"
-              />
-            ) : (
-              <>
-                {/* Unfilled portion (gray) */}
-                <Path
-                  d={unfilledPath}
-                  stroke="#F3F4F6"
-                  strokeWidth={strokeWidth}
-                  fill="transparent"
-                  strokeLinecap="round"
-                />
-
-                {/* Filled portion (primary color) */}
-                <Path
-                  d={filledPath}
-                  stroke={theme.primary}
-                  strokeWidth={strokeWidth}
-                  fill="transparent"
-                  strokeLinecap="round"
-                />
-              </>
-            )}
+            
+            {/* Bagian yang belum terisi (abu-abu) */}
+            <Path
+              d={unfilledPath}
+              stroke="#F3F4F6"
+              strokeWidth={strokeWidth}
+              fill="transparent"
+              strokeLinecap="round"
+            />
+            
+            {/* Bagian yang terisi (warna primary) */}
+            <Path
+              d={filledPath}
+              stroke={theme.primary}
+              strokeWidth={strokeWidth}
+              fill="transparent"
+              strokeLinecap="round"
+            />
           </Svg>
-
-          {/* Count Text */}
+          
+          {/* Angka countdown di tengah lingkaran */}
           <View style={styles(theme, isDark).countTextContainer}>
             <Text style={styles(theme, isDark).countText}>{count}</Text>
           </View>
