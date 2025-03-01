@@ -12,6 +12,7 @@ export interface Program {
     image: string;
     description: string;
     isExclusive: boolean;
+    isFollow: boolean;
     equipment: Equipment[];
 }
 
@@ -19,6 +20,7 @@ export interface Equipment {
     id: number;
     name: string;
     icon: string;
+    bgColor: string;
 }
 
 export interface Instruction {
@@ -27,6 +29,7 @@ export interface Instruction {
     week: number;
     title: string;
     subtitle: string;
+    isComplete: boolean;
     content: InstructionContent[];
 }
 
@@ -54,13 +57,14 @@ export const ProgramData: Program[] = [
         title: "Gain Weight in 21 Days",
         duration: "3 Minggu",
         image: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800",
-        description: "Sulit utk menaikan berat badan? Program ini dirancang khusus utk membantumu mencapai berat badan ideal dgn metode yg sehat dan terbukti efektif.",
+        description: "Sulit untuk menaikan berat badan, padahal sudah mencoba berbagai cara? tenang, Program Gain Weight in 21 Days dari Glance Fit dirancang khusus untuk membantumu mencapai berat badan ideal dengan metode yang sehat dan terbukti efektif.\n\nSelama tiga minggu, Kamu akan belajar lebih mendalam mengenai hal - hal yang dibutuhkan untuk menerapkan pola makan yang tepat demi menaikan berat badan.",
         isExclusive: false,
+        isFollow: false,
         equipment: [
-            { id: 1, name: "Timbang badan", icon: "scale-bathroom" },
-            { id: 2, name: "Matras olahraga", icon: "yoga" },
-            { id: 3, name: "Pakaian olahraga", icon: "tshirt-crew" },
-            { id: 4, name: "Sepatu olahraga", icon: "shoe-sneaker" }
+            { id: 1, name: "Timbang badan", icon: "scale-bathroom", bgColor: "#FFF7ED" },
+            { id: 2, name: "Matras olahraga", icon: "yoga", bgColor: "#FFF7ED" },
+            { id: 3, name: "Pakaian olahraga", icon: "tshirt-crew", bgColor: "#FFF7ED" },
+            { id: 4, name: "Sepatu olahraga", icon: "shoe-sneaker", bgColor: "#FFF7ED" }
         ]
     },
     {
@@ -71,10 +75,11 @@ export const ProgramData: Program[] = [
         image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800",
         description: "Program diet sehat yg dirancang khusus utk membantumu mencapai berat badan ideal.",
         isExclusive: true,
+        isFollow: false,
         equipment: [
-            { id: 1, name: "Timbang badan", icon: "scale-bathroom" },
-            { id: 2, name: "Food container", icon: "restaurant" },
-            { id: 3, name: "Food scale", icon: "calculator" }
+            { id: 1, name: "Timbang badan", icon: "scale-bathroom", bgColor: "#FFF7ED" },
+            { id: 2, name: "Food container", icon: "restaurant", bgColor: "#FFF7ED" },
+            { id: 3, name: "Food scale", icon: "calculator", bgColor: "#FFF7ED" }
         ]
     },
     {
@@ -85,9 +90,10 @@ export const ProgramData: Program[] = [
         image: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=800",
         description: "Program meditasi utk tingkatkan fokus dan produktivitas.",
         isExclusive: true,
+        isFollow: false,
         equipment: [
-            { id: 1, name: "Matras yoga", icon: "fitness" },
-            { id: 2, name: "Bantal meditasi", icon: "bed" }
+            { id: 1, name: "Matras yoga", icon: "fitness", bgColor: "#FFF7ED" },
+            { id: 2, name: "Bantal meditasi", icon: "bed", bgColor: "#FFF7ED" }
         ]
     }
 ];
@@ -96,10 +102,11 @@ export const ProgramData: Program[] = [
 export const InstructionData: Instruction[] = [
     {
         id: 1,
-        programId: 1, // Gain Weight Program
+        programId: 1,
         week: 1,
         title: "Minggu ke 1",
-        subtitle: "Menetapkan strategi yg tepat",
+        subtitle: "Menetapkan strategi yang tepat",
+        isComplete: true,
         content: [
             {
                 id: 1,
@@ -129,6 +136,7 @@ export const InstructionData: Instruction[] = [
         week: 2,
         title: "Minggu ke 2",
         subtitle: "Mengoptimalkan pola makan",
+        isComplete: false,
         content: [
             {
                 id: 1,
@@ -141,6 +149,15 @@ export const InstructionData: Instruction[] = [
                 ]
             }
         ]
+    },
+    {
+        id: 3,
+        programId: 1,
+        week: 3,
+        title: "Minggu ke 3",
+        subtitle: "Mempertahankan dan meningkatkan hasil",
+        isComplete: false,
+        content: [/* ... existing content ... */]
     }
 ];
 

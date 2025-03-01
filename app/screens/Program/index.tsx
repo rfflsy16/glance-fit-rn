@@ -1,11 +1,10 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, useWindowDimensions, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Theme } from '@/constants/Theme';
 import { useState } from 'react';
 import Card from './common/Card';
-import { CategoryData, ProgramData, getProgramsByCategory } from './constans';
-import { Ionicons } from '@expo/vector-icons';
+import { CategoryData, getProgramsByCategory } from './constans';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const SCALE = SCREEN_WIDTH / 375; // Base width dari design
@@ -34,7 +33,6 @@ export interface Program {
 }
 
 export default function ProgramScreen() {
-    const { width, height } = useWindowDimensions();
     const insets = useSafeAreaInsets();
     const { theme } = useTheme();
     const [selectedCategoryId, setSelectedCategoryId] = useState(1); // Default: Semua

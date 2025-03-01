@@ -5,10 +5,6 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
 import { getProgramById, getInstructionsByProgram } from "../constans";
 
-// Tambahin type untuk icon names
-type MaterialIconName = keyof typeof MaterialCommunityIcons.glyphMap;
-type IoniconsName = keyof typeof Ionicons.glyphMap;
-
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const SCALE = SCREEN_WIDTH / 375; // Base width dari design
 
@@ -24,18 +20,25 @@ export default function Detail() {
     
     if (!program) return null;
 
+    const handleStartProgram = () => {
+        console.log('Mulai program:', program.title);
+    };
+
     return (
-        <View style={styles(theme).mainContainer}>
+        <View style={styles(theme).container}>
             <StatusBar barStyle="light-content" />
             
-            <ScrollView showsVerticalScrollIndicator={false}>
-                {/* Header Section with Image and Overlay */}
+            <ScrollView 
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={styles(theme).scrollContent}
+            >
+                {/* Header Image */}
                 <View style={styles(theme).headerSection}>
                     <Image 
                         source={{ uri: program.image }}
                         style={styles(theme).headerImage}
                     />
-                    <View style={styles(theme).imageOverlay} />
+                    <View style={styles(theme).headerOverlay} />
                     
                     {/* Back & Menu Buttons */}
                     <View style={styles(theme).headerNav}>
@@ -43,117 +46,116 @@ export default function Detail() {
                             onPress={() => navigation.goBack()}
                             style={styles(theme).iconButton}
                         >
-                            <Ionicons 
-                                name={"chevron-back" as IoniconsName} 
-                                size={20 * SCALE} 
-                                color="white" 
-                            />
+                            <Ionicons name="chevron-back" size={24} color="#FFF" />
                         </TouchableOpacity>
-                        
                         <TouchableOpacity style={styles(theme).iconButton}>
-                            <MaterialCommunityIcons 
-                                name={"dots-vertical" as MaterialIconName} 
-                                size={20 * SCALE} 
-                                color="white" 
-                            />
+                            <MaterialCommunityIcons name="dots-vertical" size={24} color="#FFF" />
                         </TouchableOpacity>
                     </View>
 
-                    {/* Duration & Title */}
+                    {/* Duration Badge & Title */}
                     <View style={styles(theme).headerContent}>
-                        <Text style={styles(theme).duration}>{program.duration}</Text>
+                        <View style={styles(theme).durationBadge}>
+                            <Text style={styles(theme).durationText}>{program.duration}</Text>
+                        </View>
                         <Text style={styles(theme).headerTitle}>{program.title}</Text>
                     </View>
                 </View>
 
-                {/* Content Sections */}
-                <View style={styles(theme).contentContainer}>
-                    {/* About Section */}
-                    <View style={styles(theme).section}>
-                        <Text style={styles(theme).sectionTitle}>Tentang Program Ini</Text>
-                        <Text style={styles(theme).description}>
-                            {program.description}
-                        </Text>
-                    </View>
-
-                    {/* Weekly Guide */}
-                    <View style={styles(theme).section}>
-                        <Text style={styles(theme).sectionTitle}>Panduan Mingguan</Text>
-
-                        {instructions.map((instruction) => (
-                            <TouchableOpacity 
-                                key={instruction.id} 
-                                style={styles(theme).weekCard}
-                                onPress={() => navigation.navigate('ProgramStack', {
-                                    screen: 'Instruction',
-                                    params: { id: instruction.id }
-                                })}
-                            >
-                                <View style={styles(theme).weekHeader}>
-                                    <View>
-                                        <Text style={styles(theme).weekTitle}>
-                                            {instruction.title}
-                                        </Text>
-                                        <Text style={styles(theme).weekSubtitle}>
-                                            {instruction.subtitle}
-                                        </Text>
-                                    </View>
-                                    <MaterialCommunityIcons 
-                                        name={program.isExclusive ? "lock" : "chevron-right"} 
-                                        size={24 * SCALE} 
-                                        color={theme.textSecondary} 
-                                    />
-                                </View>
-                            </TouchableOpacity>
-                        ))}
-                    </View>
-
-                    {/* Equipment */}
-                    <View style={styles(theme).equipmentSection}>
-                        <Text style={styles(theme).sectionTitle}>Yang akan kamu butuhkan</Text>
-                        <View style={styles(theme).equipmentContainer}>
-                            {program.equipment.map((item) => (
-                                <View key={item.id} style={styles(theme).equipmentItem}>
-                                    <View style={styles(theme).equipmentIconBg}>
-                                        <MaterialCommunityIcons 
-                                            name={item.icon as MaterialIconName} 
-                                            size={40 * SCALE} 
-                                            color={theme.primary} 
-                                        />
-                                    </View>
-                                    <Text style={styles(theme).equipmentText}>{item.name}</Text>
-                                </View>
-                            ))}
+                {/* Progress Section - Only show if following */}
+                {program.isFollow && (
+                    <View style={styles(theme).progressCard}>
+                        <Text style={styles(theme).progressText}>1 hari dari 21 hari</Text>
+                        <View style={styles(theme).progressBar}>
+                            <View style={[styles(theme).progressFill, { width: '5%' }]} />
                         </View>
                     </View>
+                )}
 
-                    {/* Start Button */}
-                    <View style={styles(theme).startButtonSection}>
+                {/* About Section */}
+                <View style={styles(theme).section}>
+                    <Text style={styles(theme).sectionTitle}>Tentang Program Ini</Text>
+                    <Text style={styles(theme).description}>{program.description}</Text>
+                </View>
+
+                {/* Weekly Guide */}
+                <View style={styles(theme).section}>
+                    <Text style={styles(theme).sectionTitle}>Panduan Mingguan</Text>
+                    {instructions.map((instruction) => (
                         <TouchableOpacity 
-                            style={styles(theme).startButton}
-                            onPress={() => navigation.navigate('ProgramStack', {
-                                screen: 'Instruction',
-                                params: { id: instructions[0]?.id }
-                            })}
+                            key={instruction.id}
+                            style={[
+                                styles(theme).weekCard,
+                                program.isFollow && instruction.isComplete && styles(theme).weekCardActive
+                            ]}
+                            onPress={() => {
+                                if (program.isFollow && instruction.isComplete) {
+                                    navigation.navigate('ProgramStack', {
+                                        screen: 'Instruction',
+                                        params: { id: instruction.id }
+                                    });
+                                }
+                            }}
+                            disabled={!program.isFollow || !instruction.isComplete}
                         >
-                            <Text style={styles(theme).startButtonText}>
-                                Mulai transformasi
-                            </Text>
+                            <View>
+                                <Text style={styles(theme).weekTitle}>{instruction.title}</Text>
+                                <Text style={styles(theme).weekSubtitle}>{instruction.subtitle}</Text>
+                            </View>
+                            <MaterialCommunityIcons 
+                                name={program.isFollow && instruction.isComplete ? "chevron-right" : "lock"} 
+                                size={24} 
+                                color={theme.textSecondary}
+                            />
                         </TouchableOpacity>
+                    ))}
+                </View>
+
+                {/* Equipment Section */}
+                <View style={styles(theme).equipmentCard}>
+                    <Text style={styles(theme).sectionTitle}>Yang akan kamu butuhkan</Text>
+                    <View style={styles(theme).equipmentList}>
+                        {program.equipment.map((item) => (
+                            <View key={item.id} style={styles(theme).equipmentItem}>
+                                <View style={[styles(theme).equipmentIcon, { backgroundColor: item.bgColor }]}>
+                                    <MaterialCommunityIcons 
+                                        name={item.icon as any} 
+                                        size={24} 
+                                        color={theme.primary}
+                                    />
+                                </View>
+                                <Text style={styles(theme).equipmentText}>{item.name}</Text>
+                            </View>
+                        ))}
                     </View>
                 </View>
+
+                {/* Start Button - Only show if not following */}
+                {!program.isFollow && (
+                    <TouchableOpacity 
+                        style={styles(theme).startButton}
+                        onPress={handleStartProgram}
+                    >
+                        <Text style={styles(theme).startButtonText}>
+                            Mulai transformasi
+                        </Text>
+                    </TouchableOpacity>
+                )}
             </ScrollView>
         </View>
     );
 }
 
 const styles = (theme: Theme) => StyleSheet.create({
-    mainContainer: {
+    container: {
         flex: 1,
         backgroundColor: theme.background,
     },
+    scrollContent: {
+        paddingBottom: 24 * SCALE,
+    },
     headerSection: {
-        height: 250 * SCALE,
+        height: 220 * SCALE,
         position: 'relative',
     },
     headerImage: {
@@ -161,23 +163,23 @@ const styles = (theme: Theme) => StyleSheet.create({
         height: '100%',
         resizeMode: 'cover',
     },
-    imageOverlay: {
+    headerOverlay: {
         ...StyleSheet.absoluteFillObject,
         backgroundColor: 'rgba(0,0,0,0.4)',
     },
     headerNav: {
         position: 'absolute',
-        top: 40 * SCALE,
+        top: 44 * SCALE,
         left: 0,
         right: 0,
         flexDirection: 'row',
         justifyContent: 'space-between',
-        paddingHorizontal: 20 * SCALE,
+        paddingHorizontal: 16 * SCALE,
     },
     iconButton: {
-        width: 30 * SCALE,
-        height: 30 * SCALE,
-        borderRadius: 15 * SCALE,
+        width: 40 * SCALE,
+        height: 40 * SCALE,
+        borderRadius: 20 * SCALE,
         backgroundColor: 'rgba(0,0,0,0.3)',
         justifyContent: 'center',
         alignItems: 'center',
@@ -185,34 +187,56 @@ const styles = (theme: Theme) => StyleSheet.create({
     headerContent: {
         position: 'absolute',
         bottom: 20 * SCALE,
-        left: 20 * SCALE,
-        right: 20 * SCALE,
+        left: 16 * SCALE,
     },
-    duration: {
-        fontSize: 14 * SCALE,
-        fontWeight: '500',
-        color: theme.textPrimary,
-        backgroundColor: theme.background,
-        alignSelf: 'flex-start',
+    durationBadge: {
+        backgroundColor: '#FFF',
         paddingHorizontal: 12 * SCALE,
         paddingVertical: 6 * SCALE,
         borderRadius: 16 * SCALE,
-        marginBottom: 12 * SCALE,
+        alignSelf: 'flex-start',
+        marginBottom: 8 * SCALE,
+    },
+    durationText: {
+        fontSize: 14 * SCALE,
+        color: theme.textPrimary,
+        fontWeight: '500',
     },
     headerTitle: {
-        fontSize: 28 * SCALE,
+        fontSize: 24 * SCALE,
         fontWeight: '700',
-        color: '#FFFFFF',
+        color: '#FFF',
     },
-    contentContainer: {
-        flex: 1,
-        backgroundColor: theme.background,
+    progressCard: {
+        margin: 16 * SCALE,
+        padding: 16 * SCALE,
+        backgroundColor: '#FFF',
+        borderRadius: 12 * SCALE,
+        borderWidth: 1,
+        borderColor: theme.border,
+    },
+    progressText: {
+        fontSize: 14 * SCALE,
+        color: theme.textSecondary,
+        marginBottom: 8 * SCALE,
+    },
+    progressBar: {
+        height: 4 * SCALE,
+        backgroundColor: theme.border,
+        borderRadius: 2 * SCALE,
+    },
+    progressFill: {
+        height: '100%',
+        backgroundColor: theme.primary,
+        borderRadius: 2 * SCALE,
     },
     section: {
-        padding: 20 * SCALE,
+        paddingHorizontal: 16 * SCALE,
+        marginBottom: 24 * SCALE,
     },
     sectionTitle: {
-        fontSize: 20 * SCALE,
+        marginTop: 40 * SCALE,
+        fontSize: 18 * SCALE,
         fontWeight: '700',
         color: theme.textPrimary,
         marginBottom: 16 * SCALE,
@@ -223,15 +247,16 @@ const styles = (theme: Theme) => StyleSheet.create({
         lineHeight: 22 * SCALE,
     },
     weekCard: {
-        backgroundColor: theme.cardBackground,
-        borderRadius: 12 * SCALE,
-        padding: 16 * SCALE,
-        marginBottom: 12 * SCALE,
-    },
-    weekHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
+        padding: 16 * SCALE,
+        backgroundColor: '#F8FAFC',
+        borderRadius: 12 * SCALE,
+        marginBottom: 12 * SCALE,
+    },
+    weekCardActive: {
+        backgroundColor: '#E0F2FE',
     },
     weekTitle: {
         fontSize: 16 * SCALE,
@@ -243,16 +268,15 @@ const styles = (theme: Theme) => StyleSheet.create({
         fontSize: 14 * SCALE,
         color: theme.textSecondary,
     },
-    equipmentSection: {
-        marginHorizontal: 20 * SCALE,
-        padding: 20 * SCALE,
-        backgroundColor: '#FFFFFF',
-        borderRadius: 16 * SCALE,
+    equipmentCard: {
+        margin: 16 * SCALE,
+        padding: 16 * SCALE,
+        backgroundColor: '#FFF',
+        borderRadius: 12 * SCALE,
         borderWidth: 1,
-        borderColor: '#F1F5F9',
-        marginBottom: 20 * SCALE,
+        borderColor: theme.border,
     },
-    equipmentContainer: {
+    equipmentList: {
         gap: 16 * SCALE,
     },
     equipmentItem: {
@@ -260,7 +284,7 @@ const styles = (theme: Theme) => StyleSheet.create({
         alignItems: 'center',
         gap: 12 * SCALE,
     },
-    equipmentIconBg: {
+    equipmentIcon: {
         width: 40 * SCALE,
         height: 40 * SCALE,
         borderRadius: 8 * SCALE,
@@ -271,20 +295,16 @@ const styles = (theme: Theme) => StyleSheet.create({
         fontSize: 16 * SCALE,
         color: theme.textPrimary,
     },
-    startButtonSection: {
-        padding: 20 * SCALE,
-        backgroundColor: theme.background,
-        borderTopWidth: 1,
-        borderTopColor: '#F1F5F9',
-    },
     startButton: {
+        marginHorizontal: 16 * SCALE,
+        marginTop: 8 * SCALE,
         backgroundColor: theme.primary,
         padding: 16 * SCALE,
         borderRadius: 12 * SCALE,
         alignItems: 'center',
     },
     startButtonText: {
-        color: '#FFFFFF',
+        color: '#FFF',
         fontSize: 16 * SCALE,
         fontWeight: '600',
     },
