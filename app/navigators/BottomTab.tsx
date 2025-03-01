@@ -1,16 +1,13 @@
-import ExploreScreen from '@/screens/Explore';
-import Home from '@/screens/Home';
+
+import HomeScreen from '@/screens/Home';
 import ProfileScreen from '@/screens/Profile';
 import { Ionicons } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import React from 'react';
 import { CustomTabBar } from './CustomTab';
+import ProgramScreen from '@/screens/Program';
 
 type IconName = keyof typeof Ionicons.glyphMap;
-
-import HomeScreen from '@/screens/Home';
-import ProgramScreen from '@/screens/Program';
-import ProfileScreen from '@/screens/Profile';
 
 // Definisi tipe untuk konfigurasi tab dengan komponen
 type TabConfigWithComponent = {
@@ -24,13 +21,13 @@ type TabConfigWithComponent = {
 const TAB_CONFIG: TabConfigWithComponent[] = [
   {
     name: 'HariIni',
-    component: Home,
+    component: HomeScreen,
     label: 'Hari ini',
     icon: 'sunny-outline',
   },
   {
     name: 'Program',
-    component: ExploreScreen,
+    component: ProgramScreen,
     label: 'Program',
     icon: 'grid-outline',
   },

@@ -81,7 +81,7 @@ const articles = [
   },
 ];
 
-export default function Home({ navigation }: any) {
+export default function HomeScreen({ navigation }: any) {
   const insets = useSafeAreaInsets();
   const { theme } = useTheme();
 
