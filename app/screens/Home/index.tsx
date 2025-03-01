@@ -92,7 +92,10 @@ export default function Home({ navigation }: any) {
         <View style={styles(theme).header}>
           <View style={styles(theme).headerLeft}>
             <View style={styles(theme).pointBadge}>
-              <Text style={styles(theme).pointIcon}>P</Text>
+              <Image
+                source={require('@/assets/images/coin-v2.png')}
+                style={{ width: 20, height: 20 }}
+              />
               <Text style={styles(theme).pointText}>100 Poin</Text>
             </View>
             <TouchableOpacity>
@@ -266,7 +269,16 @@ export default function Home({ navigation }: any) {
                 {challenge.title}
               </Text>
               <Text style={styles(theme).challengeDate}>{challenge.date}</Text>
-              <TouchableOpacity style={styles(theme).joinButton}>
+              <TouchableOpacity
+                style={styles(theme).joinButton}
+                onPress={() =>
+                  navigation.navigate('ChallengeDetail', {
+                    id: challenge.id,
+                    title: challenge.title,
+                    date: challenge.date,
+                  })
+                }
+              >
                 <Text style={styles(theme).joinButtonText}>Gabung</Text>
               </TouchableOpacity>
             </View>
@@ -329,7 +341,7 @@ export const styles = (theme: Theme) =>
     pointBadge: {
       flexDirection: 'row',
       alignItems: 'center',
-      backgroundColor: '#FEF3C7',
+      backgroundColor: '#FFFBEB',
       paddingHorizontal: 12,
       paddingVertical: 6,
       borderRadius: 20,
@@ -338,12 +350,12 @@ export const styles = (theme: Theme) =>
     pointIcon: {
       fontSize: 14,
       fontWeight: '600',
-      color: '#F59E0B',
+      color: '#E5A000',
     },
     pointText: {
       fontSize: 14,
       fontWeight: '600',
-      color: '#F59E0B',
+      color: '#E5A000',
     },
     headerTitle: {
       fontSize: 16,

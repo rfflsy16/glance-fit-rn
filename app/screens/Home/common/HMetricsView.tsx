@@ -420,7 +420,20 @@ export default function MetricsView({
           >
             {data.datasets[0].data.map((value, index) => {
               const totalBars = data.datasets[0].data.length;
-              const barWidth = totalBars > 18 ? 10 * SCALE : 12 * SCALE;
+
+              // Calculate maximum number of bars that can fit with full width
+              const maxBarWidth = 12 * SCALE;
+              const minGap = 4 * SCALE;
+              const availableWidth = SCREEN_WIDTH - 35 * SCALE - 16 * SCALE * 2;
+              const maxBarsWithFullWidth = Math.floor(
+                availableWidth / (maxBarWidth + minGap)
+              );
+
+              // Determine actual bar width based on number of bars
+              const barWidth =
+                totalBars > maxBarsWithFullWidth
+                  ? availableWidth / totalBars - minGap
+                  : maxBarWidth;
 
               // Calculate height as a percentage of maximum value
               const heightPercentage = (value / data.maximum) * 100;
@@ -440,6 +453,7 @@ export default function MetricsView({
                         opacity: value === 0 ? 0.3 : 1,
                         backgroundColor: value === 0 ? '#E5E7EB' : '#ABE4E8',
                         borderColor: value === 0 ? '#D1D5DB' : '#55C8D1',
+                        borderRadius: Math.min(6, barWidth / 2),
                       },
                     ]}
                   />
