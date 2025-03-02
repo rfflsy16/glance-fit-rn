@@ -29,8 +29,8 @@ export default function Countdown({
   // Setup animasi untuk progress lingkaran
   const animatedProgress = useRef(new Animated.Value(1)).current; // Mulai dari 1 (penuh)
   
+  // Effect untuk animasi lingkaran
   useEffect(() => {
-    // Jalankan animasi dari 1 ke 0 dalam 5 detik
     Animated.timing(animatedProgress, {
       toValue: 0, // Menuju 0 (kosong)
       duration: 5000, // 5 detik
@@ -44,13 +44,19 @@ export default function Countdown({
       setFilledAngle(value * 360);
     });
     
-    // Setup hitungan mundur (5,4,3,2,1)
+    return () => {
+      // Cleanup
+      animatedProgress.removeListener(listener);
+    };
+  }, []);
+  
+  // Effect terpisah untuk hitungan mundur
+  useEffect(() => {
     const interval = setInterval(() => {
       setCount((prevCount) => {
         if (prevCount <= 1) {
           clearInterval(interval);
-          onComplete();
-          return 1;
+          return 0;
         }
         return prevCount - 1;
       });
@@ -59,9 +65,20 @@ export default function Countdown({
     return () => {
       // Cleanup
       clearInterval(interval);
-      animatedProgress.removeListener(listener);
     };
-  }, [onComplete]);
+  }, []);
+  
+  // Effect terpisah untuk menangani penyelesaian countdown
+  useEffect(() => {
+    if (count === 0) {
+      // Delay sedikit agar user bisa melihat angka 0 sebelum pindah ke screen berikutnya
+      const timeout = setTimeout(() => {
+        onComplete();
+      }, 100);
+      
+      return () => clearTimeout(timeout);
+    }
+  }, [count, onComplete]);
   
   // Buat path untuk bagian terisi dan tidak terisi
   const createArc = (startAngle: number, endAngle: number) => {

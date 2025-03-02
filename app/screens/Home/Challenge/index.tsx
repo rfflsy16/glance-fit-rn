@@ -15,6 +15,7 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ConfirmModal, LeaveModal } from './Modal';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const SCALE = SCREEN_WIDTH / 375;
@@ -276,84 +277,19 @@ export default function ChallengeDetail() {
         </Animated.View>
       )}
 
-      {/* Confirmation Modal */}
-      {showConfirmModal && (
-        <View style={styles(theme, isDark).modalOverlay}>
-          <Animated.View 
-            style={[
-              styles(theme, isDark).modalContainer,
-              {
-                opacity: modalOpacity,
-                transform: [{ scale: modalScale }]
-              }
-            ]}
-          >
-            <TouchableOpacity
-              style={styles(theme, isDark).closeButton}
-              onPress={handleCloseModal}
-            >
-              <Ionicons name="close" size={24} color={theme.textPrimary} />
-            </TouchableOpacity>
-
-            <View style={styles(theme, isDark).modalContentContainer}>
-              <Text style={styles(theme, isDark).modalTitle}>
-                2 Balance akan terpotong untuk mengikuti tantangan ini
-              </Text>
-
-              <TouchableOpacity
-                style={styles(theme, isDark).continueButton}
-                onPress={confirmJoinChallenge}
-              >
-                <Text style={styles(theme, isDark).continueButtonText}>
-                  Lanjutkan
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </Animated.View>
-        </View>
-      )}
-
-      {/* Leave Challenge Modal */}
-      {showLeaveModal && (
-        <View style={styles(theme, isDark).modalOverlay}>
-          <Animated.View 
-            style={[
-              styles(theme, isDark).leaveModalContainer,
-              {
-                opacity: modalOpacity,
-                transform: [{ scale: modalScale }]
-              }
-            ]}
-          >
-            <View style={styles(theme, isDark).modalContentContainer}>
-              <Text style={styles(theme, isDark).leaveModalTitle}>
-                Yakin ingin meninggalkan?
-              </Text>
-              <Text style={styles(theme, isDark).leaveModalSubtitle}>
-                2 Balance yang terpotong tidak dapat dikembalikan
-              </Text>
-              <View style={styles(theme, isDark).modalButtonsContainer}>
-                <TouchableOpacity
-                  style={styles(theme, isDark).cancelButton}
-                  onPress={() => setShowLeaveModal(false)}
-                >
-                  <Text style={styles(theme, isDark).cancelButtonText}>
-                    Batal
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles(theme, isDark).leaveButton}
-                  onPress={confirmLeaveChallenge}
-                >
-                  <Text style={styles(theme, isDark).leaveButtonText}>
-                    Tinggalkan
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </Animated.View>
-        </View>
-      )}
+      {/* Modal untuk konfirmasi bergabung */}
+      <ConfirmModal 
+        visible={showConfirmModal} 
+        onClose={handleCloseModal}
+        onConfirm={confirmJoinChallenge} 
+      />
+      
+      {/* Modal untuk konfirmasi keluar */}
+      <LeaveModal 
+        visible={showLeaveModal} 
+        onClose={() => setShowLeaveModal(false)}
+        onConfirm={confirmLeaveChallenge} 
+      />
 
       {/* Page Blur Overlay */}
       {pageBlurred && (
@@ -989,3 +925,4 @@ const styles = (theme: Theme, isDark: boolean) =>
       marginTop: 8,
     },
   });
+``
