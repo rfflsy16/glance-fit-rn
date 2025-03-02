@@ -40,13 +40,13 @@ export type RootStackParamList = {
     title: string;
     date: string;
   };
-    ProgramStack: {
+  ProgramStack:
+    | {
         screen: string;
-        params: {
-            id: number;
-        };
-    } | undefined;
-}
+        params: any;
+      }
+    | undefined;
+};
 
 declare global {
   namespace ReactNavigation {
@@ -114,7 +114,11 @@ export default function StackNavigator() {
         component={ChallengeDetail}
         options={{ animation: 'slide_from_right' }}
       />
-      <Stack.Screen name="ProgramStack" component={ProgramStack} options={{ animation: 'slide_from_right', headerShown: false }} />
+      <Stack.Screen
+        name="ProgramStack"
+        component={ProgramStack}
+        options={{ animation: 'slide_from_right', headerShown: false }}
+      />
     </Stack.Navigator>
   );
 }

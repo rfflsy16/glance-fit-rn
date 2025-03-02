@@ -1,238 +1,405 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Dimensions } from "react-native";
-import { useRoute, RouteProp, useNavigation } from "@react-navigation/native";
-import { useTheme } from "@/contexts/ThemeContext";
-import { Theme } from "@/constants/Theme";
-import { Ionicons } from "@expo/vector-icons";
-import { useState } from "react";
+import { Theme } from '@/constants/Theme';
+import { useTheme } from '@/contexts/ThemeContext';
+import { Ionicons } from '@expo/vector-icons';
+import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
+import { useEffect, useState } from 'react';
+import {
+  Dimensions,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { fetchInstructionsByProgramId, updateProgramProgress } from '../../api';
+import { Instruction as InstructionType } from '../../types';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const SCALE = SCREEN_WIDTH / 375;
+const SCALE = SCREEN_WIDTH / 375; // Base width from design
 
 type InstructionRouteParams = {
-    id: number;
-}
+  id: number;
+  programId?: number;
+  weekNumber?: number;
+  instructions?: InstructionType[];
+};
 
 export default function Instruction() {
-    const { theme } = useTheme();
-    const route = useRoute<RouteProp<Record<string, InstructionRouteParams>, string>>();
-    const navigation = useNavigation();
-    const { id } = route.params;
-    const [activeDay, setActiveDay] = useState(1);
-    
-    const weekData = {
-        title: "Minggu ke-1",
-        subtitle: "Menerapkan strategi yang tepat",
-        description: "Di minggu pertama, fokus utama adalah memahami tubuhmu dan menentukan strategi yang paling efektif untuk menambah berat badan. Kamu akan belajar tentang kebutuhan kalori harian, cara memilih makanan yang tepat, dan pentingnya keseimbangan nutrisi",
-        days: [
-            { id: 1, day: 1 },
-            { id: 2, day: 2 },
-            { id: 3, day: 3 },
-            { id: 4, day: 4 },
-            { id: 5, day: 5 },
-            { id: 6, day: 6 },
-            { id: 7, day: 7 },
-        ],
-        content: {
-            topik: "Mengetahui Kebutuhan Kalori",
-            sasaran: "Menghitung kebutuhan kalori harian berdasarkan berat badan, tinggi badan, usia, dan aktivitas fisik.",
-            panduan: "Menghitung kebutuhan kalori harian adalah langkah pertama yang sangat penting dalam perjalanan penambahan berat badan. Kalori adalah satuan energi yang diperoleh dari makanan, dan tubuh membutuhkan kalori ini untuk berfungsi secara optimal. Namun, jika tujuanmu adalah menambah berat badan, maka konsumsi kalori sesuai kebutuhan dasar tidak akan cukup.\n\nUntuk memulai, kamu perlu menghitung Basal Metabolic Rate (BMR), yaitu jumlah kalori yang dibutuhkan tubuhmu untuk menjalankan fungsi-fungsi dasar seperti bernapas, menjaga suhu tubuh, dan fungsi organ vital lainnya, bahkan saat kamu sedang beristirahat. Setelah itu, tambahkan kalori tambahan yang dibutuhkan sesuai dengan tingkat aktivitas fisikmu. Misalnya, jika kamu adalah orang yang cukup aktif, kalikan BMR dengan angka tertentu (biasanya sekitar 1.55 untuk aktivitas sedang).\n\nLangkah ini sangat penting karena tanpa memahami berapa banyak kalori yang tubuhmu butuhkan, akan sulit untuk mencapai penambahan berat badan yang diinginkan. Misalnya, jika BMR-mu adalah 1.800 kalori, dan kamu memiliki gaya hidup yang cukup aktif, kamu mungkin membutuhkan sekitar 2.800 kalori per hari untuk mempertahankan berat badanmu saat ini. Untuk menambah berat badan, kamu perlu mengonsumsi lebih dari itu, mungkin sekitar 3.000-3.200 kalori per hari. Dengan angka ini, kamu dapat mulai merencanakan pola makan harian yang tepat.\n\nSetelah kamu memahami kebutuhan kalori harianmu untuk menambah berat badan, langkah berikutnya adalah memastikan bahwa kalori tambahan ini berasal dari sumber makanan yang sehat dan bergizi. Fokus pada makanan yang kaya protein seperti daging tanpa lemak, ikan, telur, dan produk susu, serta karbohidrat kompleks seperti beras merah, quinoa, dan ubi jalar. Jangan lupa tambahkan lemak sehat seperti alpukat, kacang-kacangan, dan minyak zaitun.\n\nPenting juga untuk membagi asupan kalori harianmu menjadi beberapa kali makan, mungkin 5-6 kali sehari, daripada hanya 3 kali makan besar. Ini akan membantu tubuhmu menyerap nutrisi lebih efisien dan mencegah rasa kenyang berlebihan yang bisa mengurangi nafsu makan.\n\nJangan lupa, setiap tubuh berbeda-beda, dan kebutuhan kalori ini bisa saja berbeda seiring waktu dan dengan perubahan tingkat aktivitas. Oleh karena itu, penting untuk terus memantau asupan kalori dan berat badan, serta menyesuaikan sesuai hasil yang kamu capai.",
-            aktivitas: "Mengisi data melalui kalkulator kalori ini, simpan hasilnya untuk digunakan sebagai acuan di hari-hari berikutnya."
-        }
-    };
+  const { theme } = useTheme();
+  const route =
+    useRoute<RouteProp<Record<string, InstructionRouteParams>, string>>();
+  const navigation = useNavigation();
+  const insets = useSafeAreaInsets();
 
-    return (
-        <View style={styles(theme).container}>
-            <StatusBar barStyle="dark-content" />
-            
-            {/* Header dengan back button */}
-            <View style={styles(theme).header}>
-                <TouchableOpacity 
-                    style={styles(theme).backButton}
-                    onPress={() => navigation.goBack()}
-                >
-                    <Ionicons name="chevron-back" size={24} color={theme.textPrimary} />
-                </TouchableOpacity>
-            </View>
-            
-            <ScrollView showsVerticalScrollIndicator={false}>
-                {/* Judul dan subtitle */}
-                <View style={styles(theme).headerContent}>
-                    <Text style={styles(theme).title}>{weekData.title}</Text>
-                    <Text style={styles(theme).subtitle}>{weekData.subtitle}</Text>
-                </View>
-                
-                {/* Deskripsi minggu */}
-                <Text style={styles(theme).description}>
-                    {weekData.description}
-                </Text>
-                
-                {/* Tab hari */}
-                <View style={styles(theme).dayTabsWrapper}>
-                    <ScrollView 
-                        horizontal 
-                        showsHorizontalScrollIndicator={false}
-                        contentContainerStyle={styles(theme).dayTabsContent}
-                    >
-                        {weekData.days.map((day) => (
-                            <TouchableOpacity 
-                                key={day.id}
-                                style={[
-                                    styles(theme).dayTab,
-                                    activeDay === day.day && styles(theme).activeTab
-                                ]}
-                                onPress={() => setActiveDay(day.day)}
-                            >
-                                <Text style={[
-                                    styles(theme).dayTabText,
-                                    activeDay === day.day && styles(theme).activeTabText
-                                ]}>
-                                    Hari {day.day}
-                                </Text>
-                                {activeDay === day.day && <View style={styles(theme).tabIndicator} />}
-                            </TouchableOpacity>
-                        ))}
-                    </ScrollView>
-                </View>
-                
-                {/* Konten materi */}
-                <View style={styles(theme).content}>
-                    {/* Topik */}
-                    <View style={styles(theme).section}>
-                        <Text style={styles(theme).sectionLabel}>Topik</Text>
-                        <Text style={styles(theme).topicText}>{weekData.content.topik}</Text>
-                    </View>
-                    
-                    {/* Sasaran */}
-                    <View style={styles(theme).section}>
-                        <Text style={styles(theme).sectionLabel}>Sasaran</Text>
-                        <Text style={styles(theme).sectionText}>{weekData.content.sasaran}</Text>
-                    </View>
-                    
-                    {/* Panduan */}
-                    <View style={styles(theme).section}>
-                        <Text style={styles(theme).sectionLabel}>Panduan</Text>
-                        <Text style={styles(theme).sectionText}>{weekData.content.panduan}</Text>
-                    </View>
-                    
-                    {/* Aktivitas */}
-                    <View style={styles(theme).section}>
-                        <Text style={styles(theme).sectionLabel}>Aktivitas</Text>
-                        <Text style={styles(theme).sectionText}>{weekData.content.aktivitas}</Text>
-                    </View>
-                    
-                    {/* Button Selesaikan - Bagian dari konten, tidak floating */}
-                    <TouchableOpacity style={styles(theme).completeButton}>
-                        <Text style={styles(theme).completeButtonText}>
-                            Selesaikan Hari {activeDay}
-                        </Text>
-                    </TouchableOpacity>
-                </View>
-            </ScrollView>
+  // Get params from route
+  const {
+    id,
+    programId: routeProgramId,
+    weekNumber: routeWeekNumber,
+    instructions: routeInstructions,
+  } = route.params;
+
+  const [activeDay, setActiveDay] = useState(1);
+  const [instructions, setInstructions] = useState<InstructionType[]>(
+    routeInstructions || []
+  );
+  const [loading, setLoading] = useState(!routeInstructions);
+  const [weekNumber, setWeekNumber] = useState(routeWeekNumber || 1);
+  const [programId, setProgramId] = useState(routeProgramId || id);
+  const [completedDays, setCompletedDays] = useState<number[]>([]);
+
+  // Fetch instructions if not provided in route params
+  useEffect(() => {
+    if (!routeInstructions) {
+      const loadInstructions = async () => {
+        try {
+          setLoading(true);
+          const data = await fetchInstructionsByProgramId(programId);
+          setInstructions(data);
+
+          // Set week number from first instruction if not provided
+          if (!routeWeekNumber && data.length > 0) {
+            setWeekNumber(data[0].weekNumber);
+          }
+        } catch (error) {
+          console.error('Error loading instructions:', error);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      loadInstructions();
+    }
+  }, [programId, routeInstructions, routeWeekNumber]);
+
+  // Group instructions by day
+  const instructionsByDay = instructions.reduce((acc, instruction) => {
+    // Only include instructions for the current week
+    if (instruction.weekNumber !== weekNumber) return acc;
+
+    const dayNumber = instruction.dayNumber;
+    if (!acc[dayNumber]) {
+      acc[dayNumber] = [];
+    }
+    acc[dayNumber].push(instruction);
+    return acc;
+  }, {} as Record<number, InstructionType[]>);
+
+  // Sort days by dayNumber
+  const sortedDays = Object.keys(instructionsByDay)
+    .map(Number)
+    .sort((a, b) => a - b);
+
+  // Get the active day instruction
+  const activeDayInstruction = instructionsByDay[activeDay]?.[0];
+
+  // Get week description from the first instruction of the week
+  const weekDescription =
+    instructions.find((instruction) => instruction.weekNumber === weekNumber)
+      ?.description || '';
+
+  // Handle day completion
+  const handleCompleteDay = async () => {
+    if (!completedDays.includes(activeDay)) {
+      const newCompletedDays = [...completedDays, activeDay];
+      setCompletedDays(newCompletedDays);
+
+      // Calculate progress percentage
+      const totalDays = sortedDays.length;
+      const progress = (newCompletedDays.length / totalDays) * 100;
+
+      // Update progress in the backend
+      try {
+        await updateProgramProgress(programId, progress);
+      } catch (error) {
+        console.error('Error updating progress:', error);
+      }
+    }
+  };
+
+  return (
+    <View style={[styles(theme).container, { paddingTop: insets.top }]}>
+      <StatusBar barStyle="dark-content" />
+
+      {/* Custom Header */}
+      <View style={styles(theme).header}>
+        <TouchableOpacity
+          style={styles(theme).backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Ionicons name="chevron-back" size={24} color="#374151" />
+        </TouchableOpacity>
+        <Text style={styles(theme).headerTitle}>Minggu ke-{weekNumber}</Text>
+        <View style={{ width: 40 }} /> {/* Placeholder for alignment */}
+      </View>
+
+      <ScrollView
+        style={styles(theme).content}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles(theme).scrollContent}
+      >
+        <View style={styles(theme).weekDescriptionContainer}>
+          <Text style={styles(theme).weekTitle}>{weekDescription}</Text>
         </View>
-    );
+
+        {/* Day Tabs */}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles(theme).dayTabsContainer}
+          contentContainerStyle={styles(theme).dayTabsScrollContent}
+        >
+          {sortedDays.map((day) => (
+            <TouchableOpacity
+              key={`day-tab-${day}`}
+              style={styles(theme).dayTab}
+              onPress={() => setActiveDay(day)}
+            >
+              <View style={styles(theme).dayTabContent}>
+                <Text
+                  style={[
+                    styles(theme).dayTabText,
+                    activeDay === day && styles(theme).activeDayTabText,
+                  ]}
+                >
+                  Hari {day}
+                </Text>
+                {completedDays.includes(day) && (
+                  <View style={styles(theme).checkmarkContainer}>
+                    <Ionicons
+                      name="checkmark-circle"
+                      size={16 * SCALE}
+                      color={theme.primary}
+                    />
+                  </View>
+                )}
+              </View>
+              {activeDay === day && (
+                <View style={styles(theme).activeTabIndicator} />
+              )}
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+
+        {loading ? (
+          <View style={styles(theme).emptyContainer}>
+            <Text style={styles(theme).emptyText}>Loading...</Text>
+          </View>
+        ) : activeDayInstruction ? (
+          <View style={styles(theme).instructionContent}>
+            {/* Topic Section */}
+            <View style={styles(theme).section}>
+              <Text style={styles(theme).sectionLabel}>Topik</Text>
+              <Text style={styles(theme).topicText}>
+                {activeDayInstruction.title}
+              </Text>
+            </View>
+
+            {/* Target Section */}
+            <View style={styles(theme).section}>
+              <Text style={styles(theme).sectionLabel}>Sasaran</Text>
+              <Text style={styles(theme).sectionText}>
+                {activeDayInstruction.description}
+              </Text>
+            </View>
+
+            {/* Guide Section */}
+            <View style={styles(theme).section}>
+              <Text style={styles(theme).sectionLabel}>Panduan</Text>
+              <Text style={styles(theme).sectionText}>
+                {activeDayInstruction.steps}
+              </Text>
+            </View>
+
+            {/* Activity Section */}
+            <View style={styles(theme).section}>
+              <Text style={styles(theme).sectionLabel}>Aktivitas</Text>
+              <Text style={styles(theme).sectionText}>
+                {activeDayInstruction.tips}
+              </Text>
+            </View>
+          </View>
+        ) : (
+          <View style={styles(theme).emptyContainer}>
+            <Text style={styles(theme).emptyText}>
+              No instructions available for this day.
+            </Text>
+          </View>
+        )}
+      </ScrollView>
+
+      {/* Complete Button Container */}
+      {!loading && activeDayInstruction && (
+        <View style={styles(theme).completeButtonContainer}>
+          <TouchableOpacity
+            style={[
+              styles(theme).completeButton,
+              completedDays.includes(activeDay) &&
+                styles(theme).completedButton,
+            ]}
+            onPress={handleCompleteDay}
+          >
+            <Text style={styles(theme).completeButtonText}>
+              {completedDays.includes(activeDay)
+                ? 'Sudah Selesai'
+                : `Selesaikan Hari ${activeDay}`}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      )}
+    </View>
+  );
 }
 
-const styles = (theme: Theme) => StyleSheet.create({
+const styles = (theme: Theme) =>
+  StyleSheet.create({
     container: {
-        flex: 1,
-        backgroundColor: theme.background,
+      flex: 1,
+      backgroundColor: '#FFFFFF',
     },
     header: {
-        paddingTop: 16 * SCALE,
-        paddingHorizontal: 16 * SCALE,
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 16 * SCALE,
+      height: 48 * SCALE,
+      backgroundColor: '#FFFFFF',
     },
     backButton: {
-        width: 40 * SCALE,
-        height: 40 * SCALE,
-        justifyContent: 'center',
-        alignItems: 'flex-start',
+      position: 'absolute',
+      height: 48 * SCALE,
+      width: 48 * SCALE,
+      justifyContent: 'center',
+      alignItems: 'center',
+      zIndex: 1,
     },
-    headerContent: {
-        paddingHorizontal: 16 * SCALE,
-        marginBottom: 16 * SCALE,
-    },
-    title: {
-        fontSize: 20 * SCALE,
-        fontWeight: '700',
-        color: theme.textPrimary,
-        marginTop: 8 * SCALE,
-    },
-    subtitle: {
-        fontSize: 16 * SCALE,
-        color: theme.textSecondary,
-        marginTop: 4 * SCALE,
-    },
-    description: {
-        fontSize: 14 * SCALE,
-        color: theme.textSecondary,
-        lineHeight: 20 * SCALE,
-        marginHorizontal: 16 * SCALE,
-    },
-    dayTabsWrapper: {
-        borderBottomWidth: 1,
-        borderBottomColor: '#E2E8F0',
-        marginTop: 20 * SCALE,
-    },
-    dayTabsContent: {
-        paddingHorizontal: 16 * SCALE,
-    },
-    dayTab: {
-        paddingHorizontal: 16 * SCALE,
-        paddingVertical: 12 * SCALE,
-        marginRight: 16 * SCALE,
-        position: 'relative',
-    },
-    dayTabText: {
-        fontSize: 14 * SCALE,
-        color: theme.textSecondary,
-    },
-    activeTab: {
-        backgroundColor: 'transparent',
-    },
-    activeTabText: {
-        color: theme.primary,
-        fontWeight: '600',
-    },
-    tabIndicator: {
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        height: 2 * SCALE,
-        backgroundColor: theme.primary,
+    headerTitle: {
+      fontSize: 16 * SCALE,
+      fontWeight: '600',
+      color: '#000000',
+      textAlign: 'center',
+      width: '100%',
     },
     content: {
-        padding: 16 * SCALE,
+      flex: 1,
+    },
+    scrollContent: {
+      paddingBottom: 24 * SCALE,
+    },
+    weekDescriptionContainer: {
+      paddingHorizontal: 16 * SCALE,
+      paddingTop: 16 * SCALE,
+      paddingBottom: 16 * SCALE,
+      borderBottomWidth: 1,
+      borderBottomColor: '#E5E7EB',
+    },
+    weekTitle: {
+      fontSize: 20 * SCALE,
+      fontWeight: '500',
+      color: '#000000',
+    },
+    weekDescription: {
+      fontSize: 14 * SCALE,
+      lineHeight: 20 * SCALE,
+      color: '#6B7280',
+      paddingHorizontal: 16 * SCALE,
+      marginTop: 8 * SCALE,
+      marginBottom: 24 * SCALE,
+    },
+    dayTabsContainer: {
+      height: 44 * SCALE,
+      //   borderBottomWidth: 1,
+      borderBottomColor: '#E5E7EB',
+    },
+    dayTabsScrollContent: {
+      paddingLeft: 16 * SCALE,
+      height: '100%',
+    },
+    dayTab: {
+      height: '100%',
+      marginRight: 32 * SCALE,
+      justifyContent: 'center',
+      position: 'relative',
+    },
+    dayTabText: {
+      fontSize: 16 * SCALE,
+      color: '#6B7280',
+      fontWeight: '400',
+    },
+    activeDayTabText: {
+      color: theme.primary,
+      fontWeight: '600',
+    },
+    activeTabIndicator: {
+      position: 'absolute',
+      bottom: -1,
+      left: 0,
+      right: 0,
+      height: 2 * SCALE,
+      backgroundColor: theme.primary,
+    },
+    instructionContent: {
+      paddingHorizontal: 16 * SCALE,
+      paddingTop: 24 * SCALE,
     },
     section: {
-        marginBottom: 24 * SCALE,
+      marginBottom: 24 * SCALE,
     },
     sectionLabel: {
-        fontSize: 14 * SCALE,
-        color: theme.textSecondary,
-        marginBottom: 8 * SCALE,
+      fontSize: 14 * SCALE,
+      fontWeight: 'bold',
+
+      color: 'black',
+      marginBottom: 4 * SCALE,
     },
     topicText: {
-        fontSize: 18 * SCALE,
-        fontWeight: '700',
-        color: theme.textPrimary,
+      fontSize: 18 * SCALE,
+      fontWeight: '700',
+      color: '#000000',
+      marginTop: 4 * SCALE,
     },
     sectionText: {
-        fontSize: 14 * SCALE,
-        color: theme.textSecondary,
-        lineHeight: 20 * SCALE,
+      fontSize: 14 * SCALE,
+      lineHeight: 20 * SCALE,
+      color: '#6B7280',
+    },
+    completeButtonContainer: {
+      paddingHorizontal: 16 * SCALE,
+      paddingBottom: 36 * SCALE,
+      paddingTop: 16 * SCALE,
+      backgroundColor: '#FFFFFF',
     },
     completeButton: {
-        backgroundColor: theme.primary,
-        paddingVertical: 16 * SCALE,
-        borderRadius: 8 * SCALE,
-        alignItems: 'center',
-        marginTop: 8 * SCALE,
-        marginBottom: 24 * SCALE,
+      backgroundColor: '#0F766E',
+      paddingVertical: 16 * SCALE,
+      borderRadius: 8 * SCALE,
+      alignItems: 'center',
     },
     completeButtonText: {
-        color: '#FFFFFF',
-        fontSize: 16 * SCALE,
-        fontWeight: '600',
+      color: '#FFFFFF',
+      fontSize: 16 * SCALE,
+      fontWeight: '600',
     },
-});
+    emptyContainer: {
+      padding: 24 * SCALE,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    emptyText: {
+      fontSize: 14 * SCALE,
+      color: '#6B7280',
+      textAlign: 'center',
+    },
+    dayTabContent: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4 * SCALE,
+    },
+    checkmarkContainer: {
+      marginLeft: 4 * SCALE,
+    },
+    completedButton: {
+      backgroundColor: '#4B5563',
+    },
+  });

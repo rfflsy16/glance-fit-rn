@@ -1,4 +1,5 @@
 import { Theme } from '@/constants/Theme';
+import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { completePhoneProfile, handleGoogleSignIn } from '@/services/auth';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -30,11 +31,13 @@ export default function ReferralInput() {
   const [isFocused, setIsFocused] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const route = useRoute();
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   const { theme } = useTheme();
+  const { refreshUserData } = useAuth();
 
   // Setup keyboard dismiss when tapping outside
   useEffect(() => {
@@ -77,23 +80,73 @@ export default function ReferralInput() {
     // Convert to uppercase and remove spaces
     const formattedText = text.toUpperCase().replace(/\s/g, '');
     setReferralCode(formattedText);
+    // Clear any previous errors when user types
+    if (isError) {
+      setIsError(false);
+      setErrorMessage('');
+    }
   };
 
   // Complete profile with API
   const completeProfile = async () => {
     try {
       setIsLoading(true);
+      console.log('Starting profile completion...');
+      console.log('Auth type:', authType);
+      console.log('Email:', email);
+      console.log('Phone number:', phoneNumber);
+      console.log('Full name:', fullName);
+      console.log('Referral code:', referralCode || 'None provided');
+
+      let userData;
+
       if (authType === 'GOOGLE' && email) {
-        await handleGoogleSignIn(email, fullName, referralCode);
+        console.log('Completing Google profile...');
+        userData = await handleGoogleSignIn(email, fullName, referralCode);
       } else if (authType === 'PHONE' && phoneNumber) {
-        await completePhoneProfile(phoneNumber, fullName, referralCode);
+        console.log('Completing Phone profile...');
+        userData = await completePhoneProfile(
+          phoneNumber,
+          fullName,
+          referralCode
+        );
+      } else {
+        throw new Error('Invalid authentication type or missing required data');
       }
 
-      setShowSuccessModal(true);
+      if (userData) {
+        console.log(
+          'User data received from API:',
+          JSON.stringify(userData, null, 2)
+        );
+
+        // Verify that profileId exists in the response
+        if (!userData.profileId) {
+          console.warn('Warning: No profileId in API response');
+        }
+
+        // Refresh auth context with the latest user data
+        console.log('Refreshing user data in auth context...');
+        await refreshUserData();
+        console.log('User data refreshed successfully');
+
+        setShowSuccessModal(true);
+      } else {
+        throw new Error('No user data returned from API');
+      }
     } catch (error) {
       console.error('Profile completion error:', error);
-
+      const message =
+        error instanceof Error ? error.message : 'Unknown error occurred';
+      setErrorMessage(message);
       setIsError(true);
+
+      // Show alert with detailed error
+      Alert.alert(
+        'Profile Completion Failed',
+        `There was an error completing your profile: ${message}`,
+        [{ text: 'OK' }]
+      );
     } finally {
       setIsLoading(false);
     }
@@ -109,21 +162,54 @@ export default function ReferralInput() {
   const handleSkip = async () => {
     try {
       setIsLoading(true);
+      console.log('Skipping referral code...');
+      console.log('Auth type:', authType);
+      console.log('Email:', email);
+      console.log('Phone number:', phoneNumber);
+      console.log('Full name:', fullName);
+
+      let userData;
 
       if (authType === 'GOOGLE' && email) {
-        await handleGoogleSignIn(email, fullName);
+        console.log('Completing Google profile without referral...');
+        userData = await handleGoogleSignIn(email, fullName);
       } else if (authType === 'PHONE' && phoneNumber) {
-        console.log('phoneNumber', phoneNumber);
-
-        await completePhoneProfile(phoneNumber, fullName);
+        console.log('Completing Phone profile without referral...');
+        userData = await completePhoneProfile(phoneNumber, fullName);
+      } else {
+        throw new Error('Invalid authentication type or missing required data');
       }
 
-      navigation.navigate('BottomTab');
+      if (userData) {
+        console.log(
+          'User data received from API:',
+          JSON.stringify(userData, null, 2)
+        );
+
+        // Verify that profileId exists in the response
+        if (!userData.profileId) {
+          console.warn('Warning: No profileId in API response');
+        }
+
+        // Refresh auth context with the latest user data
+        console.log('Refreshing user data in auth context...');
+        await refreshUserData();
+        console.log('User data refreshed successfully');
+
+        navigation.navigate('BottomTab');
+      } else {
+        throw new Error('No user data returned from API');
+      }
     } catch (error) {
       console.error('Profile completion error:', error);
+      const message =
+        error instanceof Error ? error.message : 'Unknown error occurred';
+
+      // Show alert with detailed error
       Alert.alert(
-        'Error',
-        error instanceof Error ? error.message : 'Failed to complete profile'
+        'Profile Completion Failed',
+        `There was an error completing your profile: ${message}`,
+        [{ text: 'OK' }]
       );
     } finally {
       setIsLoading(false);
@@ -171,10 +257,7 @@ export default function ReferralInput() {
               placeholder="Contoh: AGD45"
               placeholderTextColor={theme.textTertiary}
               value={referralCode}
-              onChangeText={(text) => {
-                handleReferralChange(text);
-                setIsError(false);
-              }}
+              onChangeText={handleReferralChange}
               onFocus={() => setIsFocused(true)}
               onBlur={() => setIsFocused(false)}
               autoCapitalize="characters"
@@ -183,7 +266,7 @@ export default function ReferralInput() {
             />
             {isError && (
               <Text style={styles(theme).errorText}>
-                Kode referral anda tidak valid
+                {errorMessage || 'Kode referral anda tidak valid'}
               </Text>
             )}
           </View>
@@ -230,9 +313,16 @@ export default function ReferralInput() {
               </TouchableOpacity>
             </View>
           </View>
+
+          {/* Success Modal */}
+          {showSuccessModal && (
+            <RefferalModal
+              visible={showSuccessModal}
+              onClose={handleCloseModal}
+            />
+          )}
         </View>
       </TouchableOpacity>
-      <RefferalModal visible={showSuccessModal} onClose={handleCloseModal} />
     </KeyboardAvoidingView>
   );
 }
