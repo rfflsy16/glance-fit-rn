@@ -2,19 +2,21 @@ import { Theme } from '@/constants/Theme';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
     Dimensions,
     StyleSheet,
     Text,
     TouchableOpacity,
     View,
+    Animated,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import FoodSelection from './FoodSelection';
-import FoodResult from './FoodResult';
 import Header from '@/components/Header';
-
+import Nutrition from './Nutrition';
+import { FoodItem } from './types';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const SCALE = SCREEN_WIDTH / 375;
 
@@ -42,55 +44,80 @@ export default function FoodLog() {
     } = (route.params ?? {}) as FoodLogParams;
 
     // Screen states, mirip dgn Activity
-    const [screenState, setScreenState] = useState<
-        'info' | 'selection' | 'result'
-    >('selection');
+    const [screenState, setScreenState] = useState<'selection' | 'nutrition'>('selection');
+    const [selectedFoods, setSelectedFoods] = useState<FoodItem[]>([]);
+    const [totalNutrition, setTotalNutrition] = useState({
+        calories: 0,
+        carbs: 0,
+        fat: 0,
+        protein: 0
+    });
+
+    const slideAnim = useState(new Animated.Value(0))[0];
     
-    // State utk simpan makanan yg dipilih
-    const [selectedFoods, setSelectedFoods] = useState<any[]>([]);
-    const [totalCalories, setTotalCalories] = useState(0);
+    const animateScreen = (forward: boolean) => {
+        Animated.timing(slideAnim, {
+            toValue: forward ? 1 : 0,
+            duration: 300,
+            useNativeDriver: true,
+        }).start();
+    };
+
+    const handleFoodComplete = (foods: FoodItem[], nutrition: typeof totalNutrition) => {
+        setSelectedFoods(foods);
+        setTotalNutrition(nutrition);
+        animateScreen(true);
+        setScreenState('nutrition');
+    };
 
     const handleBack = () => {
-        if (screenState === 'result') {
-            navigation.goBack();
+        if (screenState === 'nutrition') {
+            animateScreen(false);
+            setScreenState('selection');
         } else {
             navigation.goBack();
         }
     };
 
-    const handleFoodComplete = (foods: any[], calories: number) => {
-        setSelectedFoods(foods);
-        setTotalCalories(calories);
-        setScreenState('result');
-    };
-
     return (
-        <View style={[styles(theme, isDark).container, { paddingTop: insets.top }]}>
-            <Header
-                title={screenState === 'selection' ? "Pilih asupan" : "Hasil"}
-                showBackButton={true}
-                onPressBack={handleBack}
-                rightContent={
-                    screenState === 'selection' ? (
-                        <TouchableOpacity>
-                            <Ionicons name="bar-chart" size={24} color={theme.iconPrimary} />
-                        </TouchableOpacity>
-                    ) : undefined
-                }
-            />
-
-            {screenState === 'selection' && (
-                <FoodSelection onComplete={handleFoodComplete} />
-            )}
-
-            {screenState === 'result' && (
-                <FoodResult 
-                    selectedFoods={selectedFoods}
-                    totalCalories={totalCalories}
-                    points={points}
+        <GestureHandlerRootView style={{ flex: 1 }}>
+            <View style={[styles(theme, isDark).container, { paddingTop: insets.top }]}>
+                <Header
+                    title={screenState === 'selection' ? "Pilih asupan" : "Catat Asupan"}
+                    showBackButton={true}
+                    onPressBack={handleBack}
+                    rightContent={
+                        screenState === 'selection' ? (
+                            <TouchableOpacity>
+                                <Ionicons name="bar-chart" size={24} color={theme.iconPrimary} />
+                            </TouchableOpacity>
+                        ) : undefined
+                    }
                 />
-            )}
-        </View>
+                
+                <Animated.View style={{
+                    flex: 1,
+                    flexDirection: 'row',
+                    transform: [{
+                        translateX: slideAnim.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: [0, -SCREEN_WIDTH]
+                        })
+                    }]
+                }}>
+                    <View style={{ width: SCREEN_WIDTH }}>
+                        <FoodSelection onComplete={handleFoodComplete} />
+                    </View>
+                    
+                    <View style={{ width: SCREEN_WIDTH }}>
+                        <Nutrition 
+                            selectedFoods={selectedFoods}
+                            totalNutrition={totalNutrition}
+                        />
+                    </View>
+                </Animated.View>
+            </View>
+        </GestureHandlerRootView>
     );
 }
 

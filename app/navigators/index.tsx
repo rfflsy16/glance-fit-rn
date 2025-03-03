@@ -28,6 +28,7 @@ export type RootStackParamList = {
   Distance: undefined;
   CaloriesIn: undefined;
   CaloriesOut: undefined;
+  FoodLog: undefined;
   Activity: {
     id: number;
     title: string;

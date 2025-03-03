@@ -13,36 +13,33 @@ import {
     Animated,
     ScrollView,
 } from 'react-native';
+import { FoodItem } from './types';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const SCALE = SCREEN_WIDTH / 375;
 
-// Definisikan tipe data makanan
-interface FoodItem {
-    id: number;
-    name: string;
-    portion: string;
-    calories: number;
-    category: string;
-}
-
 // Data dummy makanan
 const FOOD_DATA: FoodItem[] = [
-    { id: 1, name: 'Nasi putih', portion: '1 Porsi', calories: 195, category: 'Nasi' },
-    { id: 2, name: 'Ayam Bakar', portion: '1 Potong', calories: 180, category: 'Daging' },
-    { id: 3, name: 'Ayam Geprek', portion: '1 Porsi 300 (g)', calories: 789, category: 'Daging' },
-    { id: 4, name: 'Ayam Goreng McD - Regular', portion: '100 (g)', calories: 223, category: 'Daging' },
-    { id: 5, name: 'Bakso Ayam', portion: '1 Kemasan', calories: 342, category: 'Daging' },
-    { id: 6, name: 'Telur Dadar', portion: '1 Besar', calories: 130, category: 'Lainnya' },
-    { id: 7, name: 'Sate Ayam', portion: '10 Tusuk', calories: 1000, category: 'Daging' },
-    { id: 8, name: 'Steak Sapi', portion: '1 Porsi (300g)', calories: 344, category: 'Daging' },
+    { id: 1, name: 'Nasi putih', portion: '1 Porsi', calories: 195, category: 'Nasi', carbs: 45, fat: 0.5, protein: 4.5, mealTime: 'breakfast' },
+    { id: 2, name: 'Ayam Bakar', portion: '1 Potong', calories: 180, category: 'Daging', carbs: 0, fat: 10, protein: 20, mealTime: 'breakfast' },
+    { id: 3, name: 'Ayam Geprek', portion: '1 Porsi 300 (g)', calories: 789, category: 'Daging', carbs: 100, fat: 40, protein: 50, mealTime: 'breakfast' },
+    { id: 4, name: 'Ayam Goreng McD - Regular', portion: '100 (g)', calories: 223, category: 'Daging', carbs: 30, fat: 12, protein: 15, mealTime: 'breakfast' },
+    { id: 5, name: 'Bakso Ayam', portion: '1 Kemasan', calories: 342, category: 'Daging', carbs: 40, fat: 15, protein: 20, mealTime: 'breakfast' },
+    { id: 6, name: 'Telur Dadar', portion: '1 Besar', calories: 130, category: 'Lainnya', carbs: 1, fat: 9, protein: 12, mealTime: 'breakfast' },
+    { id: 7, name: 'Sate Ayam', portion: '10 Tusuk', calories: 1000, category: 'Daging', carbs: 100, fat: 50, protein: 70, mealTime: 'breakfast' },
+    { id: 8, name: 'Steak Sapi', portion: '1 Porsi (300g)', calories: 344, category: 'Daging', carbs: 0, fat: 20, protein: 30, mealTime: 'breakfast' },
 ];
 
 // Filter kategori
 const CATEGORIES = ['Semua', 'Nasi', 'Ikan', 'Sayur', 'Daging', 'Lainnya'];
 
 interface FoodSelectionProps {
-    onComplete: (foods: FoodItem[], calories: number) => void;
+    onComplete: (foods: FoodItem[], totalNutrition: {
+        calories: number;
+        carbs: number;
+        fat: number;
+        protein: number;
+    }) => void;
 }
 
 export default function FoodSelection({ onComplete }: FoodSelectionProps) {
@@ -122,9 +119,24 @@ export default function FoodSelection({ onComplete }: FoodSelectionProps) {
     };
     
     const handleAddFoods = () => {
-        const foods = FOOD_DATA.filter(food => selectedFoods.includes(food.id));
-        const totalCalories = foods.reduce((total, food) => total + food.calories, 0);
-        onComplete(foods, totalCalories);
+        const selectedFoodItems = selectedFoods.map(id => ({
+            ...FOOD_DATA.find(food => food.id === id)!,
+            mealTime: 'breakfast' as const
+        }));
+
+        const totalNutrition = selectedFoodItems.reduce((acc, food) => ({
+            calories: acc.calories + food.calories,
+            carbs: acc.carbs + food.carbs,
+            fat: acc.fat + food.fat,
+            protein: acc.protein + food.protein
+        }), {
+            calories: 0,
+            carbs: 0,
+            fat: 0,
+            protein: 0
+        });
+
+        onComplete(selectedFoodItems, totalNutrition);
     };
 
     return (
