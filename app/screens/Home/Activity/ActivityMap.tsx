@@ -1,7 +1,7 @@
 import { Theme } from '@/constants/Theme';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   Dimensions,
   Image,
@@ -31,7 +31,7 @@ export default function ActivityMap({ onStop }: ActivityMapProps) {
   // Dummy data for the activity stats
   const [distance, setDistance] = useState(0);
   const [duration, setDuration] = useState('00:00');
-  const [speed, setSpeed] = useState(6);
+  const [speed, setSpeed] = useState(0);
 
   // Format seconds to MM:SS
   const formatTime = (totalSeconds: number) => {
@@ -49,6 +49,22 @@ export default function ActivityMap({ onStop }: ActivityMapProps) {
         setSeconds((prev) => {
           const newSeconds = prev + 1;
           setDuration(formatTime(newSeconds));
+          
+          // Update distance based on time (simulation)
+          // Assuming average speed of 5 km/h = 1.39 m/s
+          const distancePerSecond = 0.00139; // in km
+          setDistance(prev => {
+            const newDistance = prev + distancePerSecond;
+            return parseFloat(newDistance.toFixed(2));
+          });
+          
+          // Update speed (random variation for simulation)
+          setSpeed(prev => {
+            const variation = Math.random() * 0.4 - 0.2; // -0.2 to 0.2
+            const newSpeed = 5 + variation;
+            return parseFloat(newSpeed.toFixed(1));
+          });
+          
           return newSeconds;
         });
       }, 1000);
@@ -68,7 +84,6 @@ export default function ActivityMap({ onStop }: ActivityMapProps) {
   };
 
   const handlePause = () => {
-    // Reset to initial state
     setIsStarted(false);
   };
 
@@ -78,10 +93,10 @@ export default function ActivityMap({ onStop }: ActivityMapProps) {
       clearInterval(timerRef.current);
     }
 
-    // Reset to initial state
+    // Reset state
     setIsStarted(false);
 
-    // Call the onStop callback
+    // Call onStop callback
     onStop();
   };
 
@@ -133,7 +148,7 @@ export default function ActivityMap({ onStop }: ActivityMapProps) {
             style={styles(theme, isDark).playButton}
             onPress={handleStart}
           >
-            <Ionicons name="pause" size={32} color="#2B6872" />
+            <Ionicons name="play" size={32} color="#2B6872" />
           </TouchableOpacity>
         ) : (
           // Active state - stop and pause buttons
@@ -149,7 +164,7 @@ export default function ActivityMap({ onStop }: ActivityMapProps) {
               style={styles(theme, isDark).pauseButton}
               onPress={handlePause}
             >
-              <Ionicons name="play" size={32} color="#FFFFFF" />
+              <Ionicons name="pause" size={32} color="#FFFFFF" />
             </TouchableOpacity>
           </View>
         )}

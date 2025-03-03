@@ -1,7 +1,7 @@
 import { Theme } from '@/constants/Theme';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Dimensions,
   Image,
@@ -12,6 +12,7 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import ActivityActionSheet from './common/ActivityActionSheet';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const SCALE = SCREEN_WIDTH / 375; // Base width dari design
@@ -83,7 +84,48 @@ const articles = [
 
 export default function HomeScreen({ navigation }: any) {
   const insets = useSafeAreaInsets();
-  const { theme } = useTheme();
+  const { theme, isDark } = useTheme();
+  const [showActionSheet, setShowActionSheet] = useState(false);
+  
+  // Options untuk activity action sheet
+  const activityOptions = [
+    {
+      id: 'walk',
+      icon: 'walk-outline',
+      label: 'Jalan kaki',
+      onPress: () => navigation.navigate('Activity', {
+        id: 'walk',
+        title: 'Jalan kaki',
+        icon: 'walk',
+        points: 30,
+        status: 'active',
+      }),
+    },
+    {
+      id: 'run',
+      icon: 'speedometer-outline',
+      label: 'Lari',
+      onPress: () => navigation.navigate('Activity', {
+        id: 'run',
+        title: 'Lari',
+        icon: 'speedometer',
+        points: 35,
+        status: 'active',
+      }),
+    },
+    {
+      id: 'food',
+      icon: 'restaurant-outline',
+      label: 'Makanan',
+      onPress: () => navigation.navigate('FoodLog'),
+    },
+    {
+      id: 'water',
+      icon: 'water-outline',
+      label: 'Air',
+      onPress: () => navigation.navigate('WaterLog'),
+    },
+  ];
 
   return (
     <View style={{ flex: 1 }}>
@@ -322,9 +364,19 @@ export default function HomeScreen({ navigation }: any) {
       </ScrollView>
 
       {/* Floating Action Button */}
-      <TouchableOpacity style={styles(theme).addButton}>
+      <TouchableOpacity 
+        style={styles(theme).addButton}
+        onPress={() => setShowActionSheet(true)}
+      >
         <Ionicons name="add" size={24} color={theme.background} />
       </TouchableOpacity>
+
+      {/* Activity Action Sheet */}
+      <ActivityActionSheet
+        visible={showActionSheet}
+        onClose={() => setShowActionSheet(false)}
+        options={activityOptions}
+      />
     </View>
   );
 }
