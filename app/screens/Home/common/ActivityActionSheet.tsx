@@ -236,7 +236,7 @@ const styles = (theme: Theme, isDark: boolean) =>
         optionButton: {
             width: '48%',
             height: 48,
-            backgroundColor: '#F0FEFF',
+            backgroundColor: theme.background,
             borderRadius: 12,
             paddingHorizontal: 16,
             flexDirection: 'row',

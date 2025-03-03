@@ -247,12 +247,12 @@ export default function FoodSelection({ onComplete }: FoodSelectionProps) {
 const styles = (theme: Theme) => StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#FFF',
+        backgroundColor: theme.background,
     },
     searchContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#F5F5F5',
+        backgroundColor: theme.background,
         borderRadius: 12,
         paddingHorizontal: 12,
         marginVertical: 16,
@@ -262,7 +262,7 @@ const styles = (theme: Theme) => StyleSheet.create({
     searchInput: {
         flex: 1,
         fontSize: 16,
-        color: '#333',
+        color: theme.textPrimary,
         height: '100%',
         marginRight: 8,
     },
@@ -285,7 +285,7 @@ const styles = (theme: Theme) => StyleSheet.create({
         borderWidth: 1,
         borderColor: '#2B6872',
         marginRight: 8,
-        backgroundColor: theme.background,
+        backgroundColor: '#FFF',
         height: 36,
         justifyContent: 'center',
         alignItems: 'center',
@@ -308,7 +308,7 @@ const styles = (theme: Theme) => StyleSheet.create({
     listTitle: {
         fontSize: 18,
         fontWeight: '500',
-        color: '#333',
+        color: theme.textPrimary,
         marginBottom: 16,
     },
     listContent: {
@@ -327,7 +327,7 @@ const styles = (theme: Theme) => StyleSheet.create({
     },
     foodName: {
         fontSize: 16,
-        color: '#333',
+        color: theme.textPrimary,
         marginBottom: 4,
         fontWeight: '500',
     },
@@ -354,7 +354,7 @@ const styles = (theme: Theme) => StyleSheet.create({
         bottom: 0,
         left: 0,
         right: 0,
-        backgroundColor: '#FFFFFF',
+        backgroundColor: theme.background,
         paddingHorizontal: 16,
         paddingTop: 8,
         paddingBottom: 24,
