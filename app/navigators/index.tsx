@@ -14,7 +14,7 @@ import React from 'react';
 import AuthStack from './Auth';
 import MyTabs from './BottomTab';
 import ProgramStack from './Program';
-
+import FoodLog from '@/screens/Home/FoodLog';
 export type RootStackParamList = {
   BottomTab: undefined;
   Settings: undefined;
@@ -66,9 +66,13 @@ export default function StackNavigator() {
       }}
     >
       <Stack.Screen name="BottomTab" component={MyTabs} />
+
+      {/* Profile */}
       <Stack.Screen name="Settings" component={Settings} />
       <Stack.Screen name="Wallet" component={Wallet} />
       <Stack.Screen name="Chat" component={Chat} />
+
+      {/* Auth */}
       <Stack.Screen
         name="Auth"
         component={AuthStack}
@@ -84,6 +88,8 @@ export default function StackNavigator() {
         component={ReferralInput}
         options={{ animation: 'slide_from_right' }}
       />
+
+      {/* Home */}
       <Stack.Screen
         name="Steps"
         component={Steps}
@@ -114,7 +120,12 @@ export default function StackNavigator() {
         component={ChallengeDetail}
         options={{ animation: 'slide_from_right' }}
       />
+
+      {/* Program */}
       <Stack.Screen name="ProgramStack" component={ProgramStack} options={{ animation: 'slide_from_right', headerShown: false }} />
+
+      {/* Food */}
+      <Stack.Screen name="FoodLog" component={FoodLog} options={{ animation: 'slide_from_right', headerShown: false }} />
     </Stack.Navigator>
   );
 }
