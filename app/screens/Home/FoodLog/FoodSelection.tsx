@@ -219,6 +219,7 @@ export default function FoodSelection({ onComplete, onSearchFocus }: FoodSelecti
                     placeholderTextColor="#999"
                     value={searchQuery}
                     onChangeText={setSearchQuery}
+                    autoCapitalize='none'
                     onFocus={() => handleSearchFocus(true)}
                     onBlur={() => handleSearchFocus(false)}
                 />
