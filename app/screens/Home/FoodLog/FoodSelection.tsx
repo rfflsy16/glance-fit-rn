@@ -12,11 +12,13 @@ import {
     FlatList,
     Animated,
     ScrollView,
+    Easing,
 } from 'react-native';
 import { FoodItem } from './types';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const SCALE = SCREEN_WIDTH / 375;
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+const SCALE = SCREEN_WIDTH / 430; // 430 adalah base width iPhone 14 Pro Max
 
 // Data dummy makanan
 const FOOD_DATA: FoodItem[] = [
@@ -40,18 +42,25 @@ interface FoodSelectionProps {
         fat: number;
         protein: number;
     }) => void;
+    onSearchFocus: (focused: boolean) => void;
 }
 
-export default function FoodSelection({ onComplete }: FoodSelectionProps) {
+export default function FoodSelection({ onComplete, onSearchFocus }: FoodSelectionProps) {
     const { theme, isDark } = useTheme();
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('Semua');
     const [selectedFoods, setSelectedFoods] = useState<number[]>([]);
     const [filteredFoods, setFilteredFoods] = useState<FoodItem[]>(FOOD_DATA);
+    const [isSearchFocused, setIsSearchFocused] = useState(false);
     
     // Tambah opacity animation
     const buttonAnim = useRef(new Animated.Value(100)).current;
     const opacityAnim = useRef(new Animated.Value(0)).current;
+    
+    const insets = useSafeAreaInsets();
+    const searchAnim = useRef(new Animated.Value(0)).current;
+    const headerAnim = useRef(new Animated.Value(1)).current;
+    const listAnim = useRef(new Animated.Value(0)).current;
     
     // Filter makanan berdasarkan kategori dan search
     useEffect(() => {
@@ -139,84 +148,169 @@ export default function FoodSelection({ onComplete }: FoodSelectionProps) {
         onComplete(selectedFoodItems, totalNutrition);
     };
 
+    const animateSearch = (focused: boolean) => {
+        Animated.parallel([
+            // Animasi search bar
+            Animated.spring(searchAnim, {
+                toValue: focused ? 1 : 0,
+                friction: 12,
+                tension: 30,
+                useNativeDriver: true
+            }),
+            // Animasi header & kategori
+            Animated.timing(headerAnim, {
+                toValue: focused ? 0 : 1,
+                duration: 300,
+                easing: Easing.bezier(0.4, 0, 0.2, 1),
+                useNativeDriver: true
+            }),
+            // Animasi list
+            Animated.timing(listAnim, {
+                toValue: focused ? 1 : 0,
+                duration: 300,
+                easing: Easing.bezier(0.4, 0, 0.2, 1),
+                useNativeDriver: true
+            })
+        ]).start();
+    };
+
+    const handleSearchFocus = (focused: boolean) => {
+        if (focused !== isSearchFocused) {
+            setIsSearchFocused(focused);
+            onSearchFocus(focused);
+            animateSearch(focused);
+        }
+    };
+
+    const handleCloseSearch = () => {
+        handleSearchFocus(false);
+        setSearchQuery('');
+        if (inputRef.current) {
+            inputRef.current.blur();
+        }
+    };
+
+    const inputRef = useRef<TextInput>(null);
+
     return (
-        <View style={styles(theme).container}>
-            {/* Search Bar */}
-            <View style={styles(theme).searchContainer}>
+        <View style={[styles(theme).container]}>
+            <Animated.View style={[
+                styles(theme).searchContainer,
+                {
+                    transform: [{
+                        translateY: searchAnim.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: [0, -60 * SCALE + insets.top]
+                        })
+                    }]
+                }
+            ]}>
                 <TextInput 
+                    ref={inputRef}
                     style={styles(theme).searchInput}
                     placeholder="Cari makanan / minuman"
                     placeholderTextColor="#999"
                     value={searchQuery}
                     onChangeText={setSearchQuery}
+                    onFocus={() => handleSearchFocus(true)}
+                    onBlur={() => handleSearchFocus(false)}
                 />
-                <Ionicons name="search" size={20} color="#999" />
-            </View>
+                <TouchableOpacity onPress={handleCloseSearch}>
+                    {isSearchFocused ? (
+                        <Ionicons name="close" size={20} color="#999" />
+                    ) : (
+                        <Ionicons name="search" size={20} color="#999" />
+                    )}
+                </TouchableOpacity>
+            </Animated.View>
             
-            {/* Category Filter - Full width */}
-            <View style={styles(theme).categoryOuterContainer}>
-                <ScrollView 
-                    horizontal 
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={styles(theme).categoryInnerContainer}
-                    style={styles(theme).categoryScrollView}
-                >
-                    {CATEGORIES.map(category => (
-                        <TouchableOpacity 
-                            key={category}
-                            style={[
-                                styles(theme).categoryButton,
-                                selectedCategory === category && styles(theme).categoryButtonActive
-                            ]}
-                            onPress={() => setSelectedCategory(category)}
-                        >
-                            <Text 
-                                style={[
-                                    styles(theme).categoryText,
-                                    selectedCategory === category && styles(theme).categoryTextActive
-                                ]}
-                            >
-                                {category}
-                            </Text>
-                        </TouchableOpacity>
-                    ))}
-                </ScrollView>
-            </View>
-            
-            {/* Food List Section */}
-            <View style={styles(theme).listSection}>
-                <Text style={styles(theme).listTitle}>Daftar makanan dan minuman</Text>
-                
-                <FlatList
-                    data={filteredFoods}
-                    keyExtractor={(item) => item.id.toString()}
-                    contentContainerStyle={styles(theme).listContent}
-                    renderItem={({ item }) => (
-                        <TouchableOpacity 
-                            style={styles(theme).foodItem}
-                            onPress={() => toggleFoodSelection(item.id)}
-                        >
-                            <View style={styles(theme).foodInfo}>
-                                <Text style={styles(theme).foodName}>{item.name}</Text>
-                                <Text style={styles(theme).foodPortion}>
-                                    {item.portion} • {item.calories} kcal
-                                </Text>
-                            </View>
+            {/* Header & Category dengan animasi */}
+            <Animated.View style={{
+                opacity: headerAnim,
+                transform: [{
+                    translateY: headerAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [20 * SCALE, 0]
+                    })
+                }]
+            }}>
+                {!isSearchFocused && (
+                    <>
+                        <View style={styles(theme).categoryOuterContainer}>
+                            <ScrollView horizontal>
+                                {CATEGORIES.map(category => (
+                                    <TouchableOpacity 
+                                        key={category}
+                                        style={[
+                                            styles(theme).categoryButton,
+                                            selectedCategory === category && styles(theme).categoryButtonActive
+                                        ]}
+                                        onPress={() => setSelectedCategory(category)}
+                                    >
+                                        <Text 
+                                            style={[
+                                                styles(theme).categoryText,
+                                                selectedCategory === category && styles(theme).categoryTextActive
+                                            ]}
+                                        >
+                                            {category}
+                                        </Text>
+                                    </TouchableOpacity>
+                                ))}
+                            </ScrollView>
+                        </View>
+                        <Text style={styles(theme).listTitle}>
+                            Daftar makanan dan minuman
+                        </Text>
+                    </>
+                )}
+            </Animated.View>
+
+            {/* List dengan animasi */}
+            <Animated.View style={{
+                flex: 1,
+                transform: [{
+                    translateY: listAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [0, -40 * SCALE]
+                    })
+                }]
+            }}>
+                <View style={styles(theme).listSection}>
+                    <FlatList
+                        data={filteredFoods}
+                        keyExtractor={(item) => item.id.toString()}
+                        contentContainerStyle={[
+                            styles(theme).listContent,
+                            isSearchFocused && { paddingTop: 60 * SCALE }
+                        ]}
+                        renderItem={({ item }) => (
                             <TouchableOpacity 
-                                style={[
-                                    styles(theme).checkbox,
-                                    selectedFoods.includes(item.id) && styles(theme).checkboxChecked
-                                ]}
+                                style={styles(theme).foodItem}
                                 onPress={() => toggleFoodSelection(item.id)}
                             >
-                                {selectedFoods.includes(item.id) && (
-                                    <Ionicons name="checkmark" size={20} color="#FFFFFF" />
-                                )}
+                                <View style={styles(theme).foodInfo}>
+                                    <Text style={styles(theme).foodName}>{item.name}</Text>
+                                    <Text style={styles(theme).foodPortion}>
+                                        {item.portion} • {item.calories} kcal
+                                    </Text>
+                                </View>
+                                <TouchableOpacity 
+                                    style={[
+                                        styles(theme).checkbox,
+                                        selectedFoods.includes(item.id) && styles(theme).checkboxChecked
+                                    ]}
+                                    onPress={() => toggleFoodSelection(item.id)}
+                                >
+                                    {selectedFoods.includes(item.id) && (
+                                        <Ionicons name="checkmark" size={20} color="#FFFFFF" />
+                                    )}
+                                </TouchableOpacity>
                             </TouchableOpacity>
-                        </TouchableOpacity>
-                    )}
-                />
-            </View>
+                        )}
+                    />
+                </View>
+            </Animated.View>
             
             {/* Updated Button & Counter with opacity animation */}
             <Animated.View
@@ -244,141 +338,148 @@ export default function FoodSelection({ onComplete }: FoodSelectionProps) {
     );
 }
 
-const styles = (theme: Theme) => StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: theme.background,
-    },
-    searchContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: theme.background,
-        borderRadius: 12,
-        paddingHorizontal: 12,
-        marginVertical: 16,
-        marginHorizontal: 16,
-        height: 48,
-    },
-    searchInput: {
-        flex: 1,
-        fontSize: 16,
-        color: theme.textPrimary,
-        height: '100%',
-        marginRight: 8,
-    },
-    categoryOuterContainer: {
-        height: 44,
-        marginBottom: 16,
-        width: '100%',
-    },
-    categoryScrollView: {
-        paddingLeft: 16, // Padding kiri sejajar dengan container
-    },
-    categoryInnerContainer: {
-        height: 36,
-        paddingRight: 16, // Padding kanan untuk item terakhir
-    },
-    categoryButton: {
-        paddingHorizontal: 16,
-        paddingVertical: 8,
-        borderRadius: 50,
-        borderWidth: 1,
-        borderColor: '#2B6872',
-        marginRight: 8,
-        backgroundColor: '#FFF',
-        height: 36,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    categoryButtonActive: {
-        backgroundColor: '#2B6872',
-        borderColor: '#2B6872',
-    },
-    categoryText: {
-        color: '#2B6872',
-        fontSize: 14,
-    },
-    categoryTextActive: {
-        color: '#FFFFFF',
-    },
-    listSection: {
-        flex: 1,
-        paddingHorizontal: 16,
-    },
-    listTitle: {
-        fontSize: 18,
-        fontWeight: '500',
-        color: theme.textPrimary,
-        marginBottom: 16,
-    },
-    listContent: {
-        paddingBottom: 120, // Tambah padding biar konten terakhir tidak tertutupi
-    },
-    foodItem: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingVertical: 16,
-        borderBottomWidth: 1,
-        borderBottomColor: '#EEEEEE',
-    },
-    foodInfo: {
-        flex: 1,
-    },
-    foodName: {
-        fontSize: 16,
-        color: theme.textPrimary,
-        marginBottom: 4,
-        fontWeight: '500',
-    },
-    foodPortion: {
-        fontSize: 14,
-        color: '#9E9E9E',
-    },
-    checkbox: {
-        width: 24,
-        height: 24,
-        borderRadius: 2,
-        borderWidth: 1,
-        borderColor: '#BDBDBD',
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#FFFFFF',
-    },
-    checkboxChecked: {
-        backgroundColor: '#2B6872',
-        borderColor: '#2B6872',
-    },
-    bottomContainer: {
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        backgroundColor: theme.background,
-        paddingHorizontal: 16,
-        paddingTop: 8,
-        paddingBottom: 24,
-        borderTopWidth: 1,
-        borderTopColor: '#EEEEEE',
-    },
-    itemCountText: {
-        fontSize: 14,
-        color: theme.textPrimary,
-        textAlign: 'left',
-        marginLeft: 16,
-        marginBottom: 12,
-    },
-    addButton: {
-        backgroundColor: '#2B6872',
-        borderRadius: 8,
-        paddingVertical: 16,
-        alignItems: 'center',
-        marginHorizontal: 16,
-        marginBottom: 16,
-    },
-    addButtonText: {
-        color: '#FFFFFF',
-        fontSize: 16,
-        fontWeight: '600',
-    },
-});
+const styles = (theme: Theme) => {
+    const { width: SCREEN_WIDTH } = Dimensions.get('window');
+    const SCALE = SCREEN_WIDTH / 430;
+
+    return StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.background,
+        },
+        searchContainer: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            backgroundColor: theme.background,
+            borderRadius: 12 * SCALE,
+            paddingHorizontal: 12 * SCALE,
+            marginVertical: 16 * SCALE,
+            marginHorizontal: 16 * SCALE,
+            height: 48 * SCALE,
+            zIndex: 1000,
+        },
+        searchInput: {
+            flex: 1,
+            fontSize: 16 * SCALE,
+            color: theme.textPrimary,
+            height: '100%',
+            marginRight: 8 * SCALE,
+        },
+        categoryOuterContainer: {
+            height: 44 * SCALE,
+            marginBottom: 16 * SCALE,
+            paddingHorizontal: 16 * SCALE,
+        },
+        categoryScrollView: {
+            paddingLeft: 16 * SCALE, // Padding kiri sejajar dengan container
+        },
+        categoryInnerContainer: {
+            height: 36 * SCALE,
+            paddingRight: 16 * SCALE, // Padding kanan untuk item terakhir
+        },
+        categoryButton: {
+            paddingHorizontal: 16 * SCALE,
+            paddingVertical: 8 * SCALE,
+            borderRadius: 50 * SCALE,
+            borderWidth: 1 * SCALE,
+            borderColor: '#2B6872',
+            marginRight: 8 * SCALE,
+            backgroundColor: '#FFF',
+            height: 36 * SCALE,
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+        categoryButtonActive: {
+            backgroundColor: '#2B6872',
+            borderColor: '#2B6872',
+        },
+        categoryText: {
+            color: '#2B6872',
+            fontSize: 14 * SCALE,
+        },
+        categoryTextActive: {
+            color: '#FFFFFF',
+        },
+        listSection: {
+            flex: 1,
+            paddingHorizontal: 16 * SCALE,
+        },
+        listTitle: {
+            fontSize: 18 * SCALE,
+            fontWeight: '500',
+            color: theme.textPrimary,
+            marginBottom: 16 * SCALE,
+            marginHorizontal: 16 * SCALE,
+        },
+        listContent: {
+            paddingBottom: 120 * SCALE,
+        },
+        foodItem: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            paddingVertical: 16 * SCALE,
+            borderBottomWidth: 1 * SCALE,
+            borderBottomColor: '#EEEEEE',
+        },
+        foodInfo: {
+            flex: 1,
+        },
+        foodName: {
+            fontSize: 16 * SCALE,
+            color: theme.textPrimary,
+            marginBottom: 4 * SCALE,
+            fontWeight: '500',
+        },
+        foodPortion: {
+            fontSize: 14 * SCALE,
+            color: '#9E9E9E',
+        },
+        checkbox: {
+            width: 24 * SCALE,
+            height: 24 * SCALE,
+            borderRadius: 2 * SCALE,
+            borderWidth: 1 * SCALE,
+            borderColor: '#BDBDBD',
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: '#FFFFFF',
+        },
+        checkboxChecked: {
+            backgroundColor: '#2B6872',
+            borderColor: '#2B6872',
+        },
+        bottomContainer: {
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            backgroundColor: theme.background,
+            paddingHorizontal: 16 * SCALE,
+            paddingTop: 8 * SCALE,
+            paddingBottom: 24 * SCALE,
+            borderTopWidth: 1 * SCALE,
+            borderTopColor: '#EEEEEE',
+        },
+        itemCountText: {
+            fontSize: 14 * SCALE,
+            color: theme.textPrimary,
+            textAlign: 'left',
+            marginLeft: 16 * SCALE,
+            marginBottom: 12 * SCALE,
+        },
+        addButton: {
+            backgroundColor: '#2B6872',
+            borderRadius: 8 * SCALE,
+            paddingVertical: 16 * SCALE,
+            alignItems: 'center',
+            marginHorizontal: 16 * SCALE,
+            marginBottom: 16 * SCALE,
+        },
+        addButtonText: {
+            color: '#FFFFFF',
+            fontSize: 16 * SCALE,
+            fontWeight: '600',
+        },
+    });
+};

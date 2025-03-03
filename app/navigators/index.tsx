@@ -15,6 +15,8 @@ import AuthStack from './Auth';
 import MyTabs from './BottomTab';
 import ProgramStack from './Program';
 import FoodLog from '@/screens/Home/FoodLog';
+import Meal from '@/screens/Home/FoodLog/Nutrition/Meal';
+import { FoodItem } from '@/screens/Home/FoodLog/types';
 export type RootStackParamList = {
   BottomTab: undefined;
   Settings: undefined;
@@ -41,12 +43,16 @@ export type RootStackParamList = {
     title: string;
     date: string;
   };
-    ProgramStack: {
-        screen: string;
-        params: {
-            id: number;
-        };
-    } | undefined;
+  ProgramStack: {
+    screen: string;
+    params: {
+      id: number;
+    };
+  } | undefined;
+  Meal: {
+    mealTime: 'breakfast' | 'lunch' | 'dinner' | 'snacks';
+    foods: FoodItem[];
+  };
 }
 
 declare global {
@@ -127,6 +133,13 @@ export default function StackNavigator() {
 
       {/* Food */}
       <Stack.Screen name="FoodLog" component={FoodLog} options={{ animation: 'slide_from_right', headerShown: false }} />
+
+      {/* Meal */}
+      <Stack.Screen 
+        name="Meal" 
+        component={Meal} 
+        options={{ animation: 'slide_from_right' }} 
+      />
     </Stack.Navigator>
   );
 }

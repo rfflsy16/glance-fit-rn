@@ -140,7 +140,18 @@ export default function Nutrition({ selectedFoods, totalNutrition }: NutritionPr
 
                 <View style={styles(theme).mealList}>
                     {mealData.map((meal, index) => (
-                        <TouchableOpacity key={index} style={styles(theme).mealCard}>
+                        <TouchableOpacity 
+                            key={index} 
+                            style={styles(theme).mealCard}
+                            onPress={() => {
+                                const mealTime = ['breakfast', 'lunch', 'dinner', 'snacks'][index] as 'breakfast' | 'lunch' | 'dinner' | 'snacks';
+                                const mealFoods = groupedFoods[mealTime]?.items || [];
+                                navigation.navigate('Meal', {
+                                    mealTime,
+                                    foods: mealFoods
+                                });
+                            }}
+                        >
                             <View style={styles(theme).mealLeft}>
                                 <Image 
                                     source={meal.icon}

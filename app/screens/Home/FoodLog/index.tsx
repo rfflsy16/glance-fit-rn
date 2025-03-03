@@ -17,6 +17,7 @@ import Header from '@/components/Header';
 import Nutrition from './Nutrition';
 import { FoodItem } from './types';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const SCALE = SCREEN_WIDTH / 375;
 
@@ -30,7 +31,7 @@ interface FoodLogParams {
 
 export default function FoodLog() {
     const insets = useSafeAreaInsets();
-    const { theme, isDark } = useTheme();
+    const { theme, isDark } = useTheme();   
     const navigation = useNavigation();
     const route = useRoute();
 
@@ -44,7 +45,7 @@ export default function FoodLog() {
     } = (route.params ?? {}) as FoodLogParams;
 
     // Screen states, mirip dgn Activity
-    const [screenState, setScreenState] = useState<'selection' | 'nutrition'>('selection');
+    const [screenState, setScreenState] = useState<'selection' | 'nutrition'| 'meal'>('selection');
     const [selectedFoods, setSelectedFoods] = useState<FoodItem[]>([]);
     const [totalNutrition, setTotalNutrition] = useState({
         calories: 0,
@@ -52,6 +53,7 @@ export default function FoodLog() {
         fat: 0,
         protein: 0
     });
+    const [isSearchFocused, setIsSearchFocused] = useState(false);
 
     const slideAnim = useState(new Animated.Value(0))[0];
     
@@ -82,18 +84,20 @@ export default function FoodLog() {
     return (
         <GestureHandlerRootView style={{ flex: 1 }}>
             <View style={[styles(theme, isDark).container, { paddingTop: insets.top }]}>
-                <Header
-                    title={screenState === 'selection' ? "Pilih asupan" : "Catat Asupan"}
-                    showBackButton={true}
-                    onPressBack={handleBack}
-                    rightContent={
-                        screenState === 'selection' ? (
-                            <TouchableOpacity>
-                                <Ionicons name="bar-chart" size={24} color={theme.iconPrimary} />
-                            </TouchableOpacity>
-                        ) : undefined
-                    }
-                />
+                {!isSearchFocused && (
+                    <Header
+                        title={screenState === 'selection' ? "Pilih asupan" : "Catat Asupan"}
+                        showBackButton={true}
+                        onPressBack={handleBack}
+                        rightContent={
+                            screenState === 'selection' ? (
+                                <TouchableOpacity>
+                                    <Ionicons name="bar-chart" size={24} color={theme.iconPrimary} />
+                                </TouchableOpacity>
+                            ) : undefined
+                        }
+                    />
+                )}
                 
                 <Animated.View style={{
                     flex: 1,
@@ -106,7 +110,10 @@ export default function FoodLog() {
                     }]
                 }}>
                     <View style={{ width: SCREEN_WIDTH }}>
-                        <FoodSelection onComplete={handleFoodComplete} />
+                        <FoodSelection 
+                            onComplete={handleFoodComplete} 
+                            onSearchFocus={(focused) => setIsSearchFocused(focused)}
+                        />
                     </View>
                     
                     <View style={{ width: SCREEN_WIDTH }}>
