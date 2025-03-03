@@ -21,30 +21,12 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const SCALE = SCREEN_WIDTH / 375;
 
-interface FoodLogParams {
-    id?: number;
-    title?: string;
-    icon?: string;
-    points?: number;
-    status?: string;
-}
-
 export default function FoodLog() {
     const insets = useSafeAreaInsets();
     const { theme, isDark } = useTheme();   
     const navigation = useNavigation();
     const route = useRoute();
 
-    // Tambahkan default values atau buat optional dgn ?
-    const { 
-        id = 1, 
-        title = "Catat konsumsi makanan", 
-        icon = "restaurant", 
-        points = 20, 
-        status = "active" 
-    } = (route.params ?? {}) as FoodLogParams;
-
-    // Screen states, mirip dgn Activity
     const [screenState, setScreenState] = useState<'selection' | 'nutrition'| 'meal'>('selection');
     const [selectedFoods, setSelectedFoods] = useState<FoodItem[]>([]);
     const [totalNutrition, setTotalNutrition] = useState({
