@@ -1,9 +1,25 @@
 import * as authService from '../../services/authService';
-import { Program } from './types';
+import { Profile_Programs, Program } from './types';
 
 const API_BASE_URL = 'http://localhost:3000/api'; // Change this to your actual API URL
 const OPENROUTER_API_KEY =
   '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';
+
+export type ApiResponse<T> = {
+  success: boolean;
+  data?: T;
+  message?: string;
+  error?: unknown;
+};
+
+const handleApiError = (error: unknown): ApiResponse<any> => {
+  console.error('API Error:', error);
+  return {
+    success: false,
+    message: error instanceof Error ? error.message : 'An error occurred',
+    error,
+  };
+};
 
 export const fetchAllPrograms = async (): Promise<Program[]> => {
   try {
@@ -184,10 +200,8 @@ export const checkIfProgramFollowed = async (programId: number) => {
 
     // Use the new endpoint format with route parameters
     const url = `${API_BASE_URL}/profile_programs/check/${numericProfileId}/${numericProgramId}`;
-    console.log(`Making API request to: ${url}`);
 
     const response = await fetch(url);
-    console.log(`API response status: ${response.status}`);
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -197,7 +211,6 @@ export const checkIfProgramFollowed = async (programId: number) => {
 
     // First get the response as text to safely handle potential circular references
     const responseText = await response.text();
-    console.log(`API response text: ${responseText}`);
 
     // Then parse it safely
     let data;
@@ -209,8 +222,8 @@ export const checkIfProgramFollowed = async (programId: number) => {
       return false;
     }
 
-    const isFollowed = data?.data?.isFollowed || false;
-    console.log(`Program is followed: ${isFollowed}`);
+    // Extract the isFollowed boolean value from the response
+    const isFollowed = data?.data?.isFollowed?.data === true;
 
     return isFollowed;
   } catch (error) {
@@ -222,31 +235,19 @@ export const checkIfProgramFollowed = async (programId: number) => {
 // Follow a program
 export const followProgram = async (programId: number) => {
   try {
-    console.log(`followProgram called with programId: ${programId}`);
-
     // Get the current user's profile ID from secure storage
     const profileId = await getProfileId();
 
     if (!profileId) {
-      console.log(
-        'No profile ID found in secure storage, cannot follow program'
-      );
       return {
         success: false,
         message: 'User not logged in or no profile found',
       };
     }
 
-    console.log(`Retrieved profileId: ${profileId} from secure storage`);
-
     // Ensure both IDs are numbers
     const numericProfileId = Number(profileId);
     const numericProgramId = Number(programId);
-
-    console.log(
-      `Converted to numbers: profileId=${numericProfileId}, programId=${numericProgramId}`
-    );
-
     if (isNaN(numericProfileId) || isNaN(numericProgramId)) {
       console.error(
         `Invalid IDs: profileId=${profileId}, programId=${programId}`
@@ -259,15 +260,14 @@ export const followProgram = async (programId: number) => {
 
     // First check if the program is already followed
     const isAlreadyFollowed = await checkIfProgramFollowed(numericProgramId);
+
     if (isAlreadyFollowed) {
-      console.log('Program is already followed');
       return {
         success: true,
         message: 'Program is already followed',
       };
     }
 
-    console.log(`Making API request to follow program: ${numericProgramId}`);
     const response = await fetch(`${API_BASE_URL}/profile_programs`, {
       method: 'POST',
       headers: {
@@ -276,10 +276,9 @@ export const followProgram = async (programId: number) => {
       body: JSON.stringify({
         profileId: numericProfileId,
         programId: numericProgramId,
+        completedDays: [], // Explicitly include empty completedDays array
       }),
     });
-
-    console.log(`API response status: ${response.status}`);
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -292,13 +291,11 @@ export const followProgram = async (programId: number) => {
 
     // First get the response as text to safely handle potential circular references
     const responseText = await response.text();
-    console.log(`API response text: ${responseText}`);
 
     // Then parse it safely
     let data;
     try {
       data = JSON.parse(responseText);
-      console.log('Parsed response data:', data);
     } catch (parseError) {
       console.error('Error parsing response:', parseError);
       return {
@@ -307,7 +304,6 @@ export const followProgram = async (programId: number) => {
       };
     }
 
-    console.log('Follow program response:', data);
     return {
       success: true,
       data: data.data,
@@ -334,7 +330,6 @@ const getProfileId = async (): Promise<number | null> => {
       return null;
     }
 
-    console.log('Retrieved profile ID from secure storage:', profileId);
     return Number(profileId);
   } catch (error) {
     console.error('Error getting profile ID:', error);
@@ -399,6 +394,76 @@ export const leaveProgram = async (programId: number) => {
   }
 };
 
+// Get completed days for a program
+export const fetchCompletedDays = async (
+  profileId: number,
+  programId: number
+): Promise<ApiResponse<Profile_Programs>> => {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/profile_programs/${profileId}/${programId}/completed-days`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch completed days');
+    }
+
+    const data = await response.json();
+    return {
+      success: true,
+      data: data,
+    };
+  } catch (error) {
+    return handleApiError(error);
+  }
+};
+
+// Update completed day for a program
+export const updateCompletedDay = async (
+  profileId: number,
+  programId: number,
+  dayNumber: number
+): Promise<ApiResponse<Profile_Programs>> => {
+  try {
+    // First update the completed day
+    const response = await fetch(
+      `${API_BASE_URL}/profile_programs/${profileId}/${programId}/complete-day`,
+      {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ dayNumber }),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error('Failed to update completed day');
+    }
+
+    // Get the updated data
+    const data = await response.json();
+
+    if (!data?.data?.completedDays) {
+      throw new Error('Invalid response format');
+    }
+
+    return {
+      success: true,
+      data: data.data,
+      message: 'Day completed successfully',
+    };
+  } catch (error) {
+    return handleApiError(error);
+  }
+};
+
 export const updateProgramProgress = async (
   programId: number,
   progress: number
@@ -424,5 +489,90 @@ export const updateProgramProgress = async (
   } catch (error) {
     console.error('Error updating program progress:', error);
     throw error;
+  }
+};
+
+// Get profile program data (includes follow status and completed days)
+export const fetchProfileProgramData = async (
+  programId: number
+): Promise<{
+  isFollowed: boolean;
+  completedDays: number[];
+}> => {
+  try {
+    console.log(`fetchProfileProgramData called with programId: ${programId}`);
+
+    // Get the current user's profile ID
+    const profileId = await getProfileId();
+    console.log('Retrieved profileId:', profileId);
+
+    if (!profileId) {
+      console.log('No profile ID found, user not logged in');
+      return { isFollowed: false, completedDays: [] };
+    }
+
+    // Ensure both IDs are numbers
+    const numericProfileId = Number(profileId);
+    const numericProgramId = Number(programId);
+    console.log('Converted IDs:', { numericProfileId, numericProgramId });
+
+    if (isNaN(numericProfileId) || isNaN(numericProgramId)) {
+      console.error(
+        `Invalid IDs: profileId=${profileId}, programId=${programId}`
+      );
+      return { isFollowed: false, completedDays: [] };
+    }
+
+    const url = `${API_BASE_URL}/profile_programs/data/${numericProfileId}/${numericProgramId}`;
+    console.log('Fetching from URL:', url);
+
+    const response = await fetch(url);
+    console.log('Response status:', response.status);
+
+    if (!response.ok) {
+      // If 404, it means the program is not followed
+      if (response.status === 404) {
+        console.log('Program is not followed (404 response)');
+        return { isFollowed: false, completedDays: [] };
+      }
+
+      const errorText = await response.text();
+      console.error(`API error: ${response.status} ${errorText}`);
+      return { isFollowed: false, completedDays: [] };
+    }
+
+    // Get the raw response text first
+    const responseText = await response.text();
+    console.log('Raw response:', responseText);
+
+    // Parse the response
+    let data;
+    try {
+      data = JSON.parse(responseText);
+      console.log('Parsed response data:', data);
+    } catch (parseError) {
+      console.error('Error parsing response:', parseError);
+      return { isFollowed: false, completedDays: [] };
+    }
+
+    // Check if we have valid data
+    if (data?.success && data?.data) {
+      const completedDays = Array.isArray(data.data.completedDays)
+        ? data.data.completedDays
+        : [];
+
+      console.log('Returning completed days:', completedDays);
+
+      return {
+        isFollowed: true,
+        completedDays,
+      };
+    }
+
+    console.log('No valid data found in response');
+    return { isFollowed: false, completedDays: [] };
+  } catch (error) {
+    console.error('Error fetching profile program data:', error);
+    return { isFollowed: false, completedDays: [] };
   }
 };

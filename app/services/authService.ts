@@ -63,7 +63,8 @@ export const saveProfileId = async (
  */
 export const getProfileId = async (): Promise<string | null> => {
   try {
-    return await SecureStore.getItemAsync(KEYS.PROFILE_ID);
+    const profileId = await SecureStore.getItemAsync(KEYS.PROFILE_ID);
+    return profileId;
   } catch (error) {
     console.error('Error getting profile ID:', error);
     return null;

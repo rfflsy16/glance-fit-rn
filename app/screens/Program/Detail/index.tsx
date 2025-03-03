@@ -20,8 +20,8 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
-  checkIfProgramFollowed,
   fetchInstructionsByProgramId,
+  fetchProfileProgramData,
   followProgram,
   leaveProgram,
 } from '../api';
@@ -59,35 +59,48 @@ export default function ProgramDetailScreen() {
   const [followLoading, setFollowLoading] = useState(false);
   const [showLeaveModal, setShowLeaveModal] = useState(false);
   const [leaveLoading, setLeaveLoading] = useState(false);
+  const [completedDays, setCompletedDays] = useState<number[]>([]);
 
-  // Fetch program details, instructions, and check if program is followed
+  // Calculate total days in the program
+  const calculateTotalDays = (instructions: Instruction[]) => {
+    return new Set(instructions.map((i) => i.dayNumber)).size;
+  };
+
+  // Calculate progress based on completed days and total days
+  const updateProgress = (completedDays: number[]) => {
+    if (instructions.length > 0) {
+      const totalDays = calculateTotalDays(instructions);
+      const newProgress = completedDays.length / totalDays;
+      setProgress(newProgress);
+      setCompletedDays(completedDays);
+    }
+  };
+
+  // Handle day completion callback
+  const handleDayComplete = (newCompletedDays: number[]) => {
+    updateProgress(newCompletedDays);
+  };
+
+  // Fetch program details, instructions, and profile program data
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       setError('');
       try {
-        // If we don't have the program details yet, we would fetch them here
-        // For now, we'll assume the program details are passed in the route params
-
         // Fetch instructions for this program
         const instructionsData = await fetchInstructionsByProgramId(id);
         setInstructions(instructionsData);
 
-        // Calculate progress
-        if (instructionsData.length > 0) {
-          const completedCount = instructionsData.filter(
-            (i: Instruction) => i.isCompleted
-          ).length;
-          setProgress(completedCount / instructionsData.length);
-        }
+        // Fetch profile program data (includes follow status and completed days)
+        const profileProgramData = await fetchProfileProgramData(id);
+        setIsProgramFollowed(profileProgramData.isFollowed);
 
-        // Check if the program is already followed by the user
-        try {
-          const isFollowed = await checkIfProgramFollowed(id);
-          setIsProgramFollowed(isFollowed);
-        } catch (followError) {
-          console.error('Error checking if program is followed:', followError);
-          setIsProgramFollowed(false);
+        // Update progress with the fetched completed days
+        if (profileProgramData.isFollowed && instructionsData.length > 0) {
+          updateProgress(profileProgramData.completedDays);
+        } else {
+          setProgress(0);
+          setCompletedDays([]);
         }
       } catch (err) {
         console.error('Error fetching program details:', err);
@@ -111,11 +124,17 @@ export default function ProgramDetailScreen() {
 
       if (result.success) {
         console.log('Successfully followed program');
-        setIsProgramFollowed(true);
 
-        // Refresh instructions to update progress
-        const instructionsData = await fetchInstructionsByProgramId(id);
-        setInstructions(instructionsData);
+        // Fetch the updated profile program data
+        const profileProgramData = await fetchProfileProgramData(id);
+        setIsProgramFollowed(profileProgramData.isFollowed);
+        setCompletedDays(profileProgramData.completedDays);
+
+        // Calculate progress based on completed days
+        if (instructions.length > 0) {
+          const totalDays = instructions.length;
+          setProgress(profileProgramData.completedDays.length / totalDays);
+        }
       } else {
         console.error('Failed to follow program:', result.message);
       }
@@ -165,13 +184,17 @@ export default function ProgramDetailScreen() {
   const isWeekUnlocked = (weekNumber: number) => {
     if (weekNumber === 1) return true;
 
-    // Previous week must be completed to unlock this week
-    const previousWeek = weeklyInstructions[weekNumber - 1];
-    if (!previousWeek) return false;
+    // For week 2 and beyond, check if at least one day from the previous week is completed
+    const previousWeekInstructions = weeklyInstructions[weekNumber - 1] || [];
+    if (previousWeekInstructions.length === 0) return false;
 
-    return previousWeek.every(
-      (instruction: Instruction) => instruction.isCompleted
+    // Get day numbers from previous week
+    const previousWeekDays = previousWeekInstructions.map(
+      (instruction) => instruction.dayNumber
     );
+
+    // Check if any day from previous week is completed
+    return previousWeekDays.some((day) => completedDays.includes(day));
   };
 
   // Format requirements as equipment
@@ -204,6 +227,17 @@ export default function ProgramDetailScreen() {
     if (lowerReq.includes('container') || lowerReq.includes('makanan'))
       return 'food-variant';
     return 'dumbbell'; // Default icon
+  };
+
+  // Update the navigation to Instruction screen to include the callback
+  const navigateToInstruction = (weekNumber: number) => {
+    navigation.navigate('Instruction', {
+      id,
+      programId: id,
+      weekNumber,
+      instructions,
+      onDayComplete: handleDayComplete,
+    });
   };
 
   if (loading) {
@@ -298,18 +332,20 @@ export default function ProgramDetailScreen() {
             <Text style={styles(theme).progressTitle}>
               Program Kemajuan Program
             </Text>
-            <View style={styles(theme).progressBarContainer}>
-              <View
-                style={[
-                  styles(theme).progressBar,
-                  { width: `${progress * 100}%` },
-                ]}
-              />
+            <View style={styles(theme).progressSection}>
+              <View style={styles(theme).progressBarContainer}>
+                <View
+                  style={[
+                    styles(theme).progressBar,
+                    { width: `${Math.min(progress * 100, 100)}%` },
+                  ]}
+                />
+              </View>
+              <Text style={styles(theme).progressText}>
+                {completedDays.length} hari dari{' '}
+                {calculateTotalDays(instructions)} hari
+              </Text>
             </View>
-            <Text style={styles(theme).progressText}>
-              {instructions.filter((i) => i.isCompleted).length} hari dari{' '}
-              {instructions.length} hari
-            </Text>
           </View>
         )}
 
@@ -330,7 +366,7 @@ export default function ProgramDetailScreen() {
           ) : (
             sortedWeeks.map((weekNumber) => {
               const weekInstructions = weeklyInstructions[weekNumber];
-              const isUnlocked = isWeekUnlocked(weekNumber);
+              const isUnlocked = isProgramFollowed;
               const isCompleted = weekInstructions.every((i) => i.isCompleted);
 
               // Get the first instruction for this week to display title and subtitle
@@ -345,12 +381,7 @@ export default function ProgramDetailScreen() {
                   ]}
                   onPress={() => {
                     if (isUnlocked) {
-                      navigation.navigate('Instruction', {
-                        id,
-                        programId: id,
-                        weekNumber,
-                        instructions: weekInstructions,
-                      });
+                      navigateToInstruction(weekNumber);
                     }
                   }}
                   disabled={!isUnlocked}
@@ -530,21 +561,24 @@ const styles = (theme: Theme) =>
       color: theme.textPrimary,
       marginBottom: 12 * SCALE,
     },
+    progressSection: {
+      marginTop: 8 * SCALE,
+    },
+    progressText: {
+      fontSize: 14 * SCALE,
+      color: theme.textSecondary,
+      marginTop: 8 * SCALE,
+    },
     progressBarContainer: {
       height: 8 * SCALE,
       backgroundColor: theme.border,
       borderRadius: 4 * SCALE,
       overflow: 'hidden',
-      marginBottom: 8 * SCALE,
     },
     progressBar: {
       height: '100%',
       backgroundColor: theme.primary,
       borderRadius: 4 * SCALE,
-    },
-    progressText: {
-      fontSize: 14 * SCALE,
-      color: theme.textSecondary,
     },
     section: {
       padding: 16 * SCALE,

@@ -42,6 +42,15 @@ export interface Equipment {
   bgColor: string;
 }
 
+export interface Profile_Programs {
+  id: number;
+  profileId: number;
+  programId: number;
+  completedDays: number[];
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 // Default categories
 export const CategoryData: Category[] = [
   { id: 1, name: 'Semua' },
