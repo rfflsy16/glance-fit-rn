@@ -1,11 +1,12 @@
 import { Theme } from '@/constants/Theme';
 import { useTheme } from '@/contexts/ThemeContext';
-import { Ionicons } from '@expo/vector-icons';
+import { useFetch } from '@/hooks/useFetch';
 import { useNavigation } from '@react-navigation/native';
 import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Dimensions,
+  Modal,
   ScrollView,
   StyleSheet,
   Text,
@@ -13,83 +14,123 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import {
-  fetchAllPrograms,
-  fetchExclusivePrograms,
-  fetchInstructionsByProgramId,
-  fetchProgramsByCategory,
-  getAIRecommendations,
-} from './api';
 import Card from './common/Card';
-import { CategoryData, Instruction, Program } from './types';
+import { CategoryData, Program } from './types';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const SCALE = SCREEN_WIDTH / 375; // Base width dari design
 
+interface JoinProgramSuccessProps {
+  visible: boolean;
+  onClose: () => void;
+}
+
+function JoinProgramSuccess({ visible, onClose }: JoinProgramSuccessProps) {
+  const { theme } = useTheme();
+
+  useEffect(() => {
+    if (visible) {
+      const timer = setTimeout(() => {
+        onClose();
+      }, 2000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [visible, onClose]);
+
+  return (
+    <Modal visible={visible} transparent animationType="fade">
+      <View style={joinSuccessStyles(theme).overlay}>
+        <View style={joinSuccessStyles(theme).container}>
+          <Text style={joinSuccessStyles(theme).text}>
+            Berhasil bergabung kedalam Program
+          </Text>
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+const joinSuccessStyles = (theme: Theme) =>
+  StyleSheet.create({
+    overlay: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+    container: {
+      backgroundColor: '#E8FFF1',
+      paddingVertical: 16 * SCALE,
+      paddingHorizontal: 24 * SCALE,
+      borderRadius: 100,
+      marginHorizontal: 16 * SCALE,
+    },
+    text: {
+      color: '#15803D',
+      fontSize: 14 * SCALE,
+      fontWeight: '500',
+      textAlign: 'center',
+    },
+  });
+
 export default function ProgramScreen() {
   const insets = useSafeAreaInsets();
   const { theme } = useTheme();
-  const [selectedCategoryId, setSelectedCategoryId] = useState(1); // Default: Semua
-  const [programs, setPrograms] = useState<Program[]>([]);
-  const [exclusivePrograms, setExclusivePrograms] = useState<Program[]>([]);
+  const [selectedCategoryId, setSelectedCategoryId] = useState(1);
   const [recommendedPrograms, setRecommendedPrograms] = useState<Program[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [instructions, setInstructions] = useState<Instruction[]>([]);
-  const [selectedProgramId, setSelectedProgramId] = useState<number | null>(
-    null
-  );
-  // @ts-ignore - Ignore type checking for navigation
   const navigation = useNavigation();
 
-  // Fetch programs based on selected category
-  useEffect(() => {
-    const fetchPrograms = async () => {
-      setLoading(true);
-      setError('');
-      try {
-        let fetchedPrograms: Program[];
+  // Fetch all programs
+  const { data: allPrograms = [], isLoading: allProgramsLoading } = useFetch<
+    Program[]
+  >({
+    endpoint: '/programs',
+    enabled: true, // Always fetch all programs for recommendations
+  });
 
-        if (selectedCategoryId === 1) {
-          // Fetch all programs
-          fetchedPrograms = await fetchAllPrograms();
-        } else {
-          // Fetch programs by category
-          fetchedPrograms = await fetchProgramsByCategory(selectedCategoryId);
-        }
+  // Fetch programs by category
+  const { data: categoryPrograms = [], isLoading: categoryProgramsLoading } =
+    useFetch<Program[]>({
+      endpoint: `/programs/category/${selectedCategoryId}`,
+      enabled: selectedCategoryId !== 1,
+    });
 
-        // Filter non-exclusive programs
-        const regularPrograms = fetchedPrograms.filter((p) => !p.isExclusive);
+  // Fetch exclusive programs
+  const { data: exclusivePrograms = [], isLoading: exclusiveProgramsLoading } =
+    useFetch<Program[]>({
+      endpoint: '/programs/exclusive',
+    });
 
-        // Get AI recommendations for regular programs
-        const recommendations = await getAIRecommendations(regularPrograms);
-        setRecommendedPrograms(recommendations);
-
-        // Fetch exclusive programs separately
-        const exclusives = await fetchExclusivePrograms();
-        setExclusivePrograms(exclusives);
-
-        // Store all programs for reference
-        setPrograms(fetchedPrograms);
-
-        // If we have programs, select the first one to show instructions
-        if (fetchedPrograms.length > 0) {
-          setSelectedProgramId(fetchedPrograms[0].id);
-          const instructionsData = await fetchInstructionsByProgramId(
-            fetchedPrograms[0].id
-          );
-          setInstructions(instructionsData);
-        }
-      } catch (err) {
-        console.error('Error fetching programs:', err);
-        setError('Failed to load programs. Please try again later.');
-      } finally {
-        setLoading(false);
+  // Get random recommendations from all programs
+  const getRandomRecommendations = (programs: Program[]) => {
+    // Fisher-Yates shuffle algorithm
+    const shuffleArray = (array: Program[]) => {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
       }
+      return array;
     };
 
-    fetchPrograms();
-  }, [selectedCategoryId]);
+    // Create a copy of the array to avoid mutating the original
+    const shuffledPrograms = shuffleArray([...programs]);
+
+    // Get first 3 programs after shuffling
+    return shuffledPrograms.slice(0, 3);
+  };
+
+  useEffect(() => {
+    if (allPrograms.length > 0) {
+      const recommendations = getRandomRecommendations(allPrograms);
+      setRecommendedPrograms(recommendations);
+    }
+  }, [allPrograms]);
+
+  const loading =
+    allProgramsLoading || categoryProgramsLoading || exclusiveProgramsLoading;
+  const programs = selectedCategoryId === 1 ? allPrograms : categoryPrograms;
+  const error = '';
 
   // Format duration string from weeklyDuration
   const formatDuration = (weeklyDuration: number): string => {
@@ -102,9 +143,7 @@ export default function ProgramScreen() {
     ...program,
     duration: formatDuration(program.weeklyDuration),
     image: program.imgUrl,
-    // Add isFollow property (required by Card component)
-    isFollow: false, // Default value since it's not in the backend schema
-    // Default equipment if not available from API
+    isFollow: false,
     equipment: [
       {
         id: 1,
@@ -114,37 +153,6 @@ export default function ProgramScreen() {
       },
     ],
   });
-
-  // Group instructions by week
-  const weeklyInstructions = instructions.reduce(
-    (acc: Record<number, Instruction[]>, instruction: Instruction) => {
-      const weekNumber = instruction.weekNumber;
-      if (!acc[weekNumber]) {
-        acc[weekNumber] = [];
-      }
-      acc[weekNumber].push(instruction);
-      return acc;
-    },
-    {} as Record<number, Instruction[]>
-  );
-
-  // Sort weeks by weekNumber
-  const sortedWeeks = Object.keys(weeklyInstructions)
-    .map(Number)
-    .sort((a, b) => a - b);
-
-  // Check if a week is unlocked (week 1 is always unlocked)
-  const isWeekUnlocked = (weekNumber: number) => {
-    if (weekNumber === 1) return true;
-
-    // Previous week must be completed to unlock this week
-    const previousWeek = weeklyInstructions[weekNumber - 1];
-    if (!previousWeek) return false;
-
-    return previousWeek.every(
-      (instruction: Instruction) => instruction.isCompleted
-    );
-  };
 
   return (
     <ScrollView
@@ -196,42 +204,45 @@ export default function ProgramScreen() {
           <Text style={styles(theme).errorText}>{error}</Text>
           <TouchableOpacity
             style={styles(theme).retryButton}
-            onPress={() => setSelectedCategoryId(selectedCategoryId)} // Trigger re-fetch
+            onPress={() => setSelectedCategoryId(selectedCategoryId)}
           >
             <Text style={styles(theme).retryButtonText}>Retry</Text>
           </TouchableOpacity>
         </View>
       )}
 
-      {/* Regular Programs (AI Recommended) */}
-      {!loading && !error && recommendedPrograms.length > 0 && (
-        <View style={styles(theme).section}>
-          <Text style={styles(theme).sectionTitle}>Rekomendasi untukmu</Text>
-          <Text style={styles(theme).sectionSubtitle}>
-            Temukan yg sesuai dgn kebutuhanmu
-          </Text>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles(theme).programsContainer}
-          >
-            {recommendedPrograms.map((item, index) => (
-              <View
-                key={item.id}
-                style={[
-                  styles(theme).cardWrapper,
-                  index === 0 && { marginLeft: 16 * SCALE },
-                  index === recommendedPrograms.length - 1 && {
-                    marginRight: 16 * SCALE,
-                  },
-                ]}
-              >
-                <Card item={mapProgramForDisplay(item)} />
-              </View>
-            ))}
-          </ScrollView>
-        </View>
-      )}
+      {/* AI Recommended Programs */}
+      {!loading &&
+        !error &&
+        recommendedPrograms.length > 0 &&
+        selectedCategoryId === 1 && (
+          <View style={styles(theme).section}>
+            <Text style={styles(theme).sectionTitle}>Rekomendasi untukmu</Text>
+            <Text style={styles(theme).sectionSubtitle}>
+              Temukan yang sesuai dengan kebutuhanmu
+            </Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles(theme).programsContainer}
+            >
+              {recommendedPrograms.map((item, index) => (
+                <View
+                  key={item.id}
+                  style={[
+                    styles(theme).cardWrapper,
+                    index === 0 && { marginLeft: 16 * SCALE },
+                    index === recommendedPrograms.length - 1 && {
+                      marginRight: 16 * SCALE,
+                    },
+                  ]}
+                >
+                  <Card item={mapProgramForDisplay(item)} />
+                </View>
+              ))}
+            </ScrollView>
+          </View>
+        )}
 
       {/* Exclusive Programs */}
       {!loading && !error && exclusivePrograms.length > 0 && (
@@ -240,7 +251,7 @@ export default function ProgramScreen() {
             Program eksklusif dari Glance Fit
           </Text>
           <Text style={styles(theme).sectionSubtitle}>
-            Program spesial dgn hasil maksimal
+            Temukan yang sesuai dengan kebutuhanmu
           </Text>
           <ScrollView
             horizontal
@@ -265,77 +276,43 @@ export default function ProgramScreen() {
         </View>
       )}
 
+      {/* Regular Programs */}
+      {!loading &&
+        !error &&
+        programs.length > 0 &&
+        selectedCategoryId !== 1 && (
+          <View style={styles(theme).section}>
+            <Text style={styles(theme).sectionTitle}>Program Tersedia</Text>
+            <Text style={styles(theme).sectionSubtitle}>
+              Temukan yang sesuai dengan kebutuhanmu
+            </Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles(theme).programsContainer}
+            >
+              {programs.map((item, index) => (
+                <View
+                  key={item.id}
+                  style={[
+                    styles(theme).cardWrapper,
+                    index === 0 && { marginLeft: 16 * SCALE },
+                    index === programs.length - 1 && {
+                      marginRight: 16 * SCALE,
+                    },
+                  ]}
+                >
+                  <Card item={mapProgramForDisplay(item)} />
+                </View>
+              ))}
+            </ScrollView>
+          </View>
+        )}
+
       {/* No Programs Found */}
       {!loading && !error && programs.length === 0 && (
         <View style={styles(theme).emptyContainer}>
           <Text style={styles(theme).emptyText}>No programs found</Text>
-        </View>
-      )}
-
-      {/* Weekly Guide */}
-      {!loading && !error && instructions.length > 0 && (
-        <View style={styles(theme).weeklyGuide}>
-          <Text style={styles(theme).weeklyGuideTitle}>Panduan Mingguan</Text>
-          {sortedWeeks.map((weekNumber) => {
-            const weekInstructions = weeklyInstructions[weekNumber];
-            const isUnlocked = isWeekUnlocked(weekNumber);
-            const isCompleted = weekInstructions.every(
-              (i: Instruction) => i.isCompleted
-            );
-
-            // Get the first instruction for this week to display title and subtitle
-            const firstInstruction = weekInstructions[0];
-
-            return (
-              <TouchableOpacity
-                key={`week-${weekNumber}`}
-                style={[
-                  styles(theme).weekItem,
-                  !isUnlocked && styles(theme).weekItemLocked,
-                ]}
-                onPress={() => {
-                  if (isUnlocked && selectedProgramId) {
-                    // Navigate to instruction screen through ProgramStack
-                    // @ts-ignore - Ignore type checking for navigation.navigate
-                    navigation.navigate('ProgramStack', {
-                      screen: 'Instruction',
-                      params: {
-                        id: selectedProgramId, // For backward compatibility
-                        programId: selectedProgramId,
-                        weekNumber,
-                        instructions: weekInstructions,
-                      },
-                    });
-                  }
-                }}
-                disabled={!isUnlocked}
-              >
-                <View style={styles(theme).weekContent}>
-                  <Text style={styles(theme).weekTitle}>
-                    Minggu ke {weekNumber}
-                  </Text>
-                  <Text style={styles(theme).weekSubtitle}>
-                    {firstInstruction.description}
-                  </Text>
-                </View>
-                <View style={styles(theme).weekIconContainer}>
-                  {isUnlocked ? (
-                    <Ionicons
-                      name="chevron-forward"
-                      size={24}
-                      color={theme.textSecondary}
-                    />
-                  ) : (
-                    <Ionicons
-                      name="lock-closed"
-                      size={24}
-                      color={theme.textSecondary}
-                    />
-                  )}
-                </View>
-              </TouchableOpacity>
-            );
-          })}
         </View>
       )}
     </ScrollView>
@@ -440,44 +417,5 @@ const styles = (theme: Theme) =>
       fontSize: 16 * SCALE,
       color: theme.textSecondary,
       textAlign: 'center',
-    },
-    weeklyGuide: {
-      padding: 16 * SCALE,
-    },
-    weeklyGuideTitle: {
-      fontSize: 20 * SCALE,
-      fontWeight: '600',
-      color: theme.textPrimary,
-      marginBottom: 16 * SCALE,
-    },
-    weekItem: {
-      padding: 12 * SCALE,
-      borderWidth: 1,
-      borderColor: theme.border,
-      borderRadius: 8 * SCALE,
-      marginBottom: 8 * SCALE,
-      flexDirection: 'row',
-      alignItems: 'center',
-    },
-    weekItemLocked: {
-      backgroundColor: theme.background,
-    },
-    weekContent: {
-      flex: 1,
-    },
-    weekTitle: {
-      fontSize: 16 * SCALE,
-      fontWeight: '600',
-      color: theme.textPrimary,
-    },
-    weekSubtitle: {
-      fontSize: 14 * SCALE,
-      color: theme.textSecondary,
-    },
-    weekIconContainer: {
-      width: 24 * SCALE,
-      height: 24 * SCALE,
-      justifyContent: 'center',
-      alignItems: 'center',
     },
   });

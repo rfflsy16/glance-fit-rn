@@ -1,3 +1,4 @@
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import * as SecureStore from 'expo-secure-store';
 
 // Keys for storing different pieces of auth data
@@ -18,9 +19,7 @@ export interface UserData {
   authType?: 'GOOGLE' | 'PHONE';
 }
 
-/**
- * Save user ID to secure storage
- */
+// Core storage functions
 export const saveUserId = async (userId: string | number): Promise<void> => {
   try {
     await SecureStore.setItemAsync(KEYS.USER_ID, String(userId));
@@ -31,9 +30,6 @@ export const saveUserId = async (userId: string | number): Promise<void> => {
   }
 };
 
-/**
- * Get user ID from secure storage
- */
 export const getUserId = async (): Promise<string | null> => {
   try {
     return await SecureStore.getItemAsync(KEYS.USER_ID);
@@ -43,9 +39,6 @@ export const getUserId = async (): Promise<string | null> => {
   }
 };
 
-/**
- * Save profile ID to secure storage
- */
 export const saveProfileId = async (
   profileId: string | number
 ): Promise<void> => {
@@ -58,9 +51,6 @@ export const saveProfileId = async (
   }
 };
 
-/**
- * Get profile ID from secure storage
- */
 export const getProfileId = async (): Promise<string | null> => {
   try {
     const profileId = await SecureStore.getItemAsync(KEYS.PROFILE_ID);
@@ -71,9 +61,6 @@ export const getProfileId = async (): Promise<string | null> => {
   }
 };
 
-/**
- * Save authentication token to secure storage
- */
 export const saveAuthToken = async (token: string): Promise<void> => {
   try {
     await SecureStore.setItemAsync(KEYS.AUTH_TOKEN, token);
@@ -84,9 +71,6 @@ export const saveAuthToken = async (token: string): Promise<void> => {
   }
 };
 
-/**
- * Get authentication token from secure storage
- */
 export const getAuthToken = async (): Promise<string | null> => {
   try {
     return await SecureStore.getItemAsync(KEYS.AUTH_TOKEN);
@@ -96,9 +80,6 @@ export const getAuthToken = async (): Promise<string | null> => {
   }
 };
 
-/**
- * Save complete user data object to secure storage
- */
 export const saveUserData = async (userData: UserData): Promise<void> => {
   try {
     // Save individual items for easy access
@@ -114,14 +95,10 @@ export const saveUserData = async (userData: UserData): Promise<void> => {
   }
 };
 
-/**
- * Get complete user data object from secure storage
- */
 export const getUserData = async (): Promise<UserData | null> => {
   try {
     const userDataString = await SecureStore.getItemAsync(KEYS.USER_DATA);
     if (!userDataString) return null;
-
     return JSON.parse(userDataString) as UserData;
   } catch (error) {
     console.error('Error getting user data:', error);
@@ -129,9 +106,6 @@ export const getUserData = async (): Promise<UserData | null> => {
   }
 };
 
-/**
- * Check if user is logged in
- */
 export const isLoggedIn = async (): Promise<boolean> => {
   try {
     const userId = await getUserId();
@@ -143,9 +117,6 @@ export const isLoggedIn = async (): Promise<boolean> => {
   }
 };
 
-/**
- * Clear all authentication data (logout)
- */
 export const logout = async (): Promise<void> => {
   try {
     await SecureStore.deleteItemAsync(KEYS.USER_ID);
@@ -158,3 +129,51 @@ export const logout = async (): Promise<void> => {
     throw error;
   }
 };
+
+// React Query Hook
+export function useAuth() {
+  const queryClient = useQueryClient();
+
+  // Get current user data
+  const { data: userData, isLoading: isLoadingUser } = useQuery({
+    queryKey: ['user'],
+    queryFn: getUserData,
+  });
+
+  // Check if user is logged in
+  const { data: isAuthenticated } = useQuery({
+    queryKey: ['isLoggedIn'],
+    queryFn: isLoggedIn,
+  });
+
+  // Save user data mutation
+  const { mutate: saveUser } = useMutation({
+    mutationFn: (data: UserData) => saveUserData(data),
+    onSuccess: () => {
+      // Invalidate user-related queries
+      queryClient.invalidateQueries({ queryKey: ['user'] });
+      queryClient.invalidateQueries({ queryKey: ['isLoggedIn'] });
+    },
+  });
+
+  // Logout mutation
+  const { mutate: logoutUser } = useMutation({
+    mutationFn: logout,
+    onSuccess: () => {
+      // Clear all user-related queries from cache
+      queryClient.removeQueries({ queryKey: ['user'] });
+      queryClient.removeQueries({ queryKey: ['isLoggedIn'] });
+    },
+  });
+
+  return {
+    user: userData,
+    isLoadingUser,
+    isLoggedIn: isAuthenticated,
+    saveUser,
+    logout: logoutUser,
+    getAuthToken,
+    getProfileId,
+    getUserId,
+  };
+}

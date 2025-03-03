@@ -7,8 +7,12 @@
 // 4. The /api prefix is included in the URL
 const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000/api';
 
-// Import our secure storage service
-import * as authService from './authService';
+// Import from useAuth hook
+import {
+  logout as clearAuth,
+  saveAuthToken,
+  saveUserData,
+} from '../hooks/useAuth';
 
 // Validate API URL
 if (!API_URL) {
@@ -98,7 +102,7 @@ export const handleGoogleSignIn = async (
         )
       );
 
-      await authService.saveUserData({
+      await saveUserData({
         userId: userData.id,
         profileId: userData.profileId || userData.id,
         email: userData.email,
@@ -313,7 +317,15 @@ export const completePhoneProfile = async (
         )
       );
 
-      await authService.saveUserData({
+      // Save auth token if it exists in the response
+      if (data.token) {
+        console.log('Saving auth token to secure storage');
+        await saveAuthToken(data.token);
+      } else {
+        console.warn('Warning: No auth token received from server');
+      }
+
+      await saveUserData({
         userId: userData.id,
         profileId: userData.profileId || userData.id,
         phone: userData.phoneNumber,
@@ -338,7 +350,7 @@ export const completePhoneProfile = async (
 export const logout = async (): Promise<void> => {
   try {
     console.log('=== Starting Logout ===');
-    await authService.logout();
+    await clearAuth();
     console.log('User logged out successfully');
     console.log('=== Logout Completed ===');
   } catch (error) {

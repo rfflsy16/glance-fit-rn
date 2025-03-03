@@ -1,9 +1,9 @@
 import { Theme } from '@/constants/Theme';
 import { useTheme } from '@/contexts/ThemeContext';
-import { getProfileId } from '@/services/authService';
+import { useProgram } from '@/hooks/useProgram';
 import { Ionicons } from '@expo/vector-icons';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
-import { useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import {
   Dimensions,
   ScrollView,
@@ -14,11 +14,6 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import {
-  fetchInstructionsByProgramId,
-  fetchProfileProgramData,
-  updateCompletedDay,
-} from '../../api';
 import { Instruction as InstructionType } from '../../types';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -48,87 +43,27 @@ export default function Instruction() {
     onDayComplete,
   } = route.params;
 
-  console.log('Route params received:', {
-    id,
-    routeProgramId,
-    weekNumber: routeWeekNumber,
-  });
-
-  const [programId, setProgramId] = useState<number>(Number(id) || 0);
+  const [programId] = useState<number>(Number(id) || 0);
   const [weekNumber, setWeekNumber] = useState<number>(
     Number(routeWeekNumber) || 1
   );
   const [activeDay, setActiveDay] = useState<number>(1);
-  const [completedDays, setCompletedDays] = useState<number[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [profileId, setProfileId] = useState<number>(0);
-  const [instructions, setInstructions] = useState<InstructionType[]>(
-    routeInstructions || []
-  );
-  const [loading, setLoading] = useState(!routeInstructions);
+
+  // Use the program hook
+  const {
+    profileProgram: { data: profileData, isLoading: profileLoading },
+    instructions: {
+      data: fetchedInstructions = [],
+      isLoading: instructionsLoading,
+    },
+    completeDay: { mutate: completeDay, isPending: isUpdating },
+  } = useProgram(programId);
+
+  const instructions = routeInstructions || fetchedInstructions;
+  const completedDays = profileData?.completedDays || [];
+  const loading = instructionsLoading || profileLoading;
 
   console.log('Initial state:', { programId, weekNumber, activeDay });
-
-  useEffect(() => {
-    const initializeProfileId = async () => {
-      const id = await getProfileId();
-      if (id) {
-        setProfileId(Number(id));
-      }
-    };
-
-    initializeProfileId();
-  }, []);
-
-  // Fetch instructions if not provided in route params
-  useEffect(() => {
-    if (!routeInstructions) {
-      const loadInstructions = async () => {
-        try {
-          setLoading(true);
-          const data = await fetchInstructionsByProgramId(programId);
-          setInstructions(data);
-
-          // Set week number from first instruction if not provided
-          if (!routeWeekNumber && data.length > 0) {
-            setWeekNumber(data[0].weekNumber);
-          }
-        } catch (error) {
-          console.error('Error loading instructions:', error);
-        } finally {
-          setLoading(false);
-        }
-      };
-
-      loadInstructions();
-    }
-  }, [programId, routeInstructions, routeWeekNumber]);
-
-  // Fetch completed days when component mounts
-  useEffect(() => {
-    const loadProfileProgramData = async () => {
-      try {
-        console.log('Fetching profile program data for programId:', programId);
-        const data = await fetchProfileProgramData(programId);
-        console.log('Received profile program data:', data);
-
-        if (data.completedDays && Array.isArray(data.completedDays)) {
-          console.log('Setting completedDays to:', data.completedDays);
-          setCompletedDays(data.completedDays);
-        } else {
-          console.log('No valid completedDays array, setting to empty array');
-          setCompletedDays([]);
-        }
-      } catch (error) {
-        console.error('Error loading profile program data:', error);
-        setCompletedDays([]);
-      }
-    };
-
-    loadProfileProgramData();
-  }, [programId]);
-
-  console.log(completedDays, 'completedDays');
 
   // Group instructions by day
   const instructionsByDay = instructions.reduce((acc, instruction) => {
@@ -157,22 +92,16 @@ export default function Instruction() {
       ?.description || '';
 
   // Handle day completion
-  const handleCompleteDay = async () => {
-    try {
-      setIsLoading(true);
-      const result = await updateCompletedDay(profileId, programId, activeDay);
-      if (result.success && result.data) {
-        const newCompletedDays = result.data.completedDays || [];
-        setCompletedDays(newCompletedDays);
-        // Call the callback to update parent component
-        onDayComplete?.(newCompletedDays);
-      }
-    } catch (error) {
-      console.error('Error completing day:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const handleCompleteDay = useCallback(() => {
+    completeDay({ dayNumber: activeDay });
+  }, [activeDay, completeDay]);
+
+  console.log('Profile data in instruction:', {
+    profileData,
+    completedDays,
+    activeDay,
+    isCompleted: completedDays.includes(activeDay),
+  });
 
   return (
     <View style={[styles(theme).container, { paddingTop: insets.top }]}>
@@ -295,6 +224,7 @@ export default function Instruction() {
                 styles(theme).completedButton,
             ]}
             onPress={handleCompleteDay}
+            disabled={isUpdating || completedDays.includes(activeDay)}
           >
             <Text style={styles(theme).completeButtonText}>
               {completedDays.includes(activeDay)

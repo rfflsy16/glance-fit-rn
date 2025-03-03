@@ -1,6 +1,11 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import {
+  UserData,
+  getProfileId,
+  getUserData,
+  getUserId,
+} from '../hooks/useAuth';
 import { logout } from '../services/auth';
-import * as authService from '../services/authService';
 
 // Define the shape of our auth context
 interface AuthContextType {
@@ -8,7 +13,7 @@ interface AuthContextType {
   isLoading: boolean;
   userId: string | null;
   profileId: string | null;
-  userData: authService.UserData | null;
+  userData: UserData | null;
   logout: () => Promise<void>;
   refreshUserData: () => Promise<void>;
 }
@@ -35,7 +40,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [isLoading, setIsLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
   const [profileId, setProfileId] = useState<string | null>(null);
-  const [userData, setUserData] = useState<authService.UserData | null>(null);
+  const [userData, setUserData] = useState<UserData | null>(null);
 
   // Function to refresh user data from secure storage
   const refreshUserData = async () => {
@@ -43,9 +48,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       setIsLoading(true);
 
       // Get user data from secure storage
-      const storedUserData = await authService.getUserData();
-      const storedUserId = await authService.getUserId();
-      const storedProfileId = await authService.getProfileId();
+      const storedUserData = await getUserData();
+      const storedUserId = await getUserId();
+      const storedProfileId = await getProfileId();
 
       // Update state
       setUserData(storedUserData);

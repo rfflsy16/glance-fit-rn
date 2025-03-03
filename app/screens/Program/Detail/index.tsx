@@ -1,15 +1,17 @@
-import LeaveProgramModal from '@/components/LeaveProgram/LeaveModal';
 import { Theme } from '@/constants/Theme';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useAuth } from '@/hooks/useAuth';
+import { useProgram } from '@/hooks/useProgram';
 import {
   Ionicons,
   MaterialCommunityIcons,
   MaterialIcons,
 } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { useEffect, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   Dimensions,
   Image,
   ScrollView,
@@ -19,13 +21,9 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import {
-  fetchInstructionsByProgramId,
-  fetchProfileProgramData,
-  followProgram,
-  leaveProgram,
-} from '../api';
 import { Instruction, Program } from '../types';
+import JoinProgramSuccess from './JoinProgramSuccess';
+import LeaveProgramModal from './LeaveModal';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const SCALE = SCREEN_WIDTH / 375;
@@ -47,19 +45,24 @@ export default function ProgramDetailScreen() {
   const navigation = useNavigation<NavigationProp>();
   const insets = useSafeAreaInsets();
   const { theme } = useTheme();
+  const { user } = useAuth();
 
   const [program, setProgram] = useState<Program | null>(
     initialProgram || null
   );
-  const [instructions, setInstructions] = useState<Instruction[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [progress, setProgress] = useState(0);
-  const [isProgramFollowed, setIsProgramFollowed] = useState(false);
-  const [followLoading, setFollowLoading] = useState(false);
   const [showLeaveModal, setShowLeaveModal] = useState(false);
-  const [leaveLoading, setLeaveLoading] = useState(false);
-  const [completedDays, setCompletedDays] = useState<number[]>([]);
+  const [showJoinSuccess, setShowJoinSuccess] = useState(false);
+
+  const {
+    profileProgram: { data: profileData, isLoading: profileLoading },
+    instructions: { data: instructions = [], isLoading: instructionsLoading },
+    followProgram: { mutate: followProgram, isPending: followLoading },
+    leaveProgram: { mutate: leaveProgram, isPending: leaveLoading },
+  } = useProgram(Number(id));
+
+  const loading = instructionsLoading || profileLoading;
+  const isProgramFollowed = !!profileData?.id;
+  const completedDays = profileData?.completedDays || [];
 
   // Calculate total days in the program
   const calculateTotalDays = (instructions: Instruction[]) => {
@@ -67,113 +70,64 @@ export default function ProgramDetailScreen() {
   };
 
   // Calculate progress based on completed days and total days
-  const updateProgress = (completedDays: number[]) => {
+  const progress = useMemo(() => {
     if (instructions.length > 0) {
       const totalDays = calculateTotalDays(instructions);
-      const newProgress = completedDays.length / totalDays;
-      setProgress(newProgress);
-      setCompletedDays(completedDays);
+      return completedDays.length / totalDays;
     }
-  };
+    return 0;
+  }, [instructions, completedDays]);
 
   // Handle day completion callback
-  const handleDayComplete = (newCompletedDays: number[]) => {
-    updateProgress(newCompletedDays);
-  };
-
-  // Fetch program details, instructions, and profile program data
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      setError('');
-      try {
-        // Fetch instructions for this program
-        const instructionsData = await fetchInstructionsByProgramId(id);
-        setInstructions(instructionsData);
-
-        // Fetch profile program data (includes follow status and completed days)
-        const profileProgramData = await fetchProfileProgramData(id);
-        setIsProgramFollowed(profileProgramData.isFollowed);
-
-        // Update progress with the fetched completed days
-        if (profileProgramData.isFollowed && instructionsData.length > 0) {
-          updateProgress(profileProgramData.completedDays);
-        } else {
-          setProgress(0);
-          setCompletedDays([]);
-        }
-      } catch (err) {
-        console.error('Error fetching program details:', err);
-        setError('Failed to load program details. Please try again later.');
-      } finally {
-        setLoading(false);
+  const handleDayComplete = useCallback(
+    (newCompletedDays: number[]) => {
+      if (profileData) {
+        // The cache update is now handled by the useProgram hook
+        console.log('Day completed:', newCompletedDays);
       }
-    };
-
-    fetchData();
-  }, [id]);
+    },
+    [profileData]
+  );
 
   // Handle follow program
   const handleFollowProgram = async () => {
-    if (!program) return;
-
-    setFollowLoading(true);
     try {
-      console.log(`Attempting to follow program ${id}`);
-      const result = await followProgram(id);
-
-      if (result.success) {
-        console.log('Successfully followed program');
-
-        // Fetch the updated profile program data
-        const profileProgramData = await fetchProfileProgramData(id);
-        setIsProgramFollowed(profileProgramData.isFollowed);
-        setCompletedDays(profileProgramData.completedDays);
-
-        // Calculate progress based on completed days
-        if (instructions.length > 0) {
-          const totalDays = instructions.length;
-          setProgress(profileProgramData.completedDays.length / totalDays);
-        }
-      } else {
-        console.error('Failed to follow program:', result.message);
+      if (!user?.profileId) {
+        Alert.alert('Error', 'Please log in to follow this program');
+        return;
       }
-    } catch (err) {
-      console.error('Error following program:', err);
-    } finally {
-      setFollowLoading(false);
+
+      await followProgram({
+        profileId: Number(user.profileId),
+        programId: Number(id),
+        completedDays: [],
+      });
+      setShowJoinSuccess(true);
+    } catch (error) {
+      console.error('Follow program error:', error);
     }
   };
 
-  const handleLeaveProgram = async () => {
+  // Handle leave program
+  const handleLeaveProgram = () => {
     if (!program) return;
-
-    setLeaveLoading(true);
-    try {
-      const result = await leaveProgram(id);
-      if (result.success) {
-        setIsProgramFollowed(false);
-        setShowLeaveModal(false);
-        navigation.goBack();
-      } else {
-        console.error('Failed to leave program:', result.message);
-      }
-    } catch (err) {
-      console.error('Error leaving program:', err);
-    } finally {
-      setLeaveLoading(false);
-    }
+    leaveProgram(undefined);
+    setShowLeaveModal(false);
+    navigation.goBack();
   };
 
   // Group instructions by week
-  const weeklyInstructions = instructions.reduce((acc, instruction) => {
-    const weekNumber = instruction.weekNumber;
-    if (!acc[weekNumber]) {
-      acc[weekNumber] = [];
-    }
-    acc[weekNumber].push(instruction);
-    return acc;
-  }, {} as Record<number, Instruction[]>);
+  const weeklyInstructions = instructions.reduce(
+    (acc: Record<number, Instruction[]>, instruction: Instruction) => {
+      const weekNumber = instruction.weekNumber;
+      if (!acc[weekNumber]) {
+        acc[weekNumber] = [];
+      }
+      acc[weekNumber].push(instruction);
+      return acc;
+    },
+    {} as Record<number, Instruction[]>
+  );
 
   // Sort weeks by weekNumber
   const sortedWeeks = Object.keys(weeklyInstructions)
@@ -190,11 +144,11 @@ export default function ProgramDetailScreen() {
 
     // Get day numbers from previous week
     const previousWeekDays = previousWeekInstructions.map(
-      (instruction) => instruction.dayNumber
+      (instruction: Instruction) => instruction.dayNumber
     );
 
     // Check if any day from previous week is completed
-    return previousWeekDays.some((day) => completedDays.includes(day));
+    return previousWeekDays.some((day: number) => completedDays.includes(day));
   };
 
   // Format requirements as equipment
@@ -261,7 +215,7 @@ export default function ProgramDetailScreen() {
     );
   }
 
-  if (error || !program) {
+  if (!program) {
     return (
       <View style={[styles(theme).container, { paddingTop: insets.top }]}>
         <View style={styles(theme).header}>
@@ -273,9 +227,7 @@ export default function ProgramDetailScreen() {
           </TouchableOpacity>
         </View>
         <View style={styles(theme).errorContainer}>
-          <Text style={styles(theme).errorText}>
-            {error || 'Program not found'}
-          </Text>
+          <Text style={styles(theme).errorText}>Program not found</Text>
           <TouchableOpacity
             style={styles(theme).retryButton}
             onPress={() => navigation.goBack()}
@@ -358,6 +310,12 @@ export default function ProgramDetailScreen() {
         {/* Weekly Guides */}
         <View style={styles(theme).section}>
           <Text style={styles(theme).sectionTitle}>Panduan Mingguan</Text>
+          {/* Debug info */}
+          {process.env.NODE_ENV === 'development' && (
+            <Text style={{ display: 'none' }}>
+              {JSON.stringify({ isProgramFollowed, sortedWeeks })}
+            </Text>
+          )}
 
           {sortedWeeks.length === 0 ? (
             <Text style={styles(theme).emptyText}>
@@ -366,8 +324,9 @@ export default function ProgramDetailScreen() {
           ) : (
             sortedWeeks.map((weekNumber) => {
               const weekInstructions = weeklyInstructions[weekNumber];
-              const isUnlocked = isProgramFollowed;
-              const isCompleted = weekInstructions.every((i) => i.isCompleted);
+              const isCompleted = weekInstructions.every(
+                (instruction: Instruction) => instruction.isCompleted
+              );
 
               // Get the first instruction for this week to display title and subtitle
               const firstInstruction = weekInstructions[0];
@@ -377,14 +336,14 @@ export default function ProgramDetailScreen() {
                   key={`week-${weekNumber}`}
                   style={[
                     styles(theme).weekItem,
-                    !isUnlocked && styles(theme).weekItemLocked,
+                    !isProgramFollowed && styles(theme).weekItemLocked,
                   ]}
                   onPress={() => {
-                    if (isUnlocked) {
+                    if (isProgramFollowed) {
                       navigateToInstruction(weekNumber);
                     }
                   }}
-                  disabled={!isUnlocked}
+                  disabled={!isProgramFollowed}
                 >
                   <View style={styles(theme).weekContent}>
                     <Text style={styles(theme).weekTitle}>
@@ -395,7 +354,7 @@ export default function ProgramDetailScreen() {
                     </Text>
                   </View>
                   <View style={styles(theme).weekIconContainer}>
-                    {isUnlocked ? (
+                    {isProgramFollowed ? (
                       <Ionicons
                         name="chevron-forward"
                         size={24}
@@ -475,6 +434,11 @@ export default function ProgramDetailScreen() {
         onClose={() => setShowLeaveModal(false)}
         onConfirm={handleLeaveProgram}
         loading={leaveLoading}
+      />
+
+      <JoinProgramSuccess
+        visible={showJoinSuccess}
+        onClose={() => setShowJoinSuccess(false)}
       />
     </View>
   );
