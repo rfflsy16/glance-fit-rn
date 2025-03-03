@@ -1,7 +1,7 @@
 import { Theme } from '@/constants/Theme';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
-import React, { useState, useEffect, useRef } from 'react';
+import  { useState, useEffect, useRef } from 'react';
 import {
     Dimensions,
     StyleSheet,
@@ -150,7 +150,7 @@ export default function FoodSelection({ onComplete, onSearchFocus }: FoodSelecti
 
     const animateSearch = (focused: boolean) => {
         Animated.parallel([
-            // Animasi search bar
+            // Update animasi search bar
             Animated.spring(searchAnim, {
                 toValue: focused ? 1 : 0,
                 friction: 12,
@@ -182,6 +182,13 @@ export default function FoodSelection({ onComplete, onSearchFocus }: FoodSelecti
         }
     };
 
+    const handleFoodItemPress = (id: number) => {
+        if (inputRef.current) {
+            inputRef.current.blur();
+        }
+        toggleFoodSelection(id);
+    };
+
     const handleCloseSearch = () => {
         handleSearchFocus(false);
         setSearchQuery('');
@@ -200,7 +207,7 @@ export default function FoodSelection({ onComplete, onSearchFocus }: FoodSelecti
                     transform: [{
                         translateY: searchAnim.interpolate({
                             inputRange: [0, 1],
-                            outputRange: [0, -60 * SCALE + insets.top]
+                            outputRange: [0, -(16 * SCALE)]
                         })
                     }]
                 }
@@ -280,6 +287,7 @@ export default function FoodSelection({ onComplete, onSearchFocus }: FoodSelecti
                     <FlatList
                         data={filteredFoods}
                         keyExtractor={(item) => item.id.toString()}
+                        keyboardShouldPersistTaps="handled"
                         contentContainerStyle={[
                             styles(theme).listContent,
                             isSearchFocused && { paddingTop: 60 * SCALE }
@@ -287,7 +295,7 @@ export default function FoodSelection({ onComplete, onSearchFocus }: FoodSelecti
                         renderItem={({ item }) => (
                             <TouchableOpacity 
                                 style={styles(theme).foodItem}
-                                onPress={() => toggleFoodSelection(item.id)}
+                                onPress={() => handleFoodItemPress(item.id)}
                             >
                                 <View style={styles(theme).foodInfo}>
                                     <Text style={styles(theme).foodName}>{item.name}</Text>
@@ -300,7 +308,7 @@ export default function FoodSelection({ onComplete, onSearchFocus }: FoodSelecti
                                         styles(theme).checkbox,
                                         selectedFoods.includes(item.id) && styles(theme).checkboxChecked
                                     ]}
-                                    onPress={() => toggleFoodSelection(item.id)}
+                                    onPress={() => handleFoodItemPress(item.id)}
                                 >
                                     {selectedFoods.includes(item.id) && (
                                         <Ionicons name="checkmark" size={20} color="#FFFFFF" />
@@ -357,6 +365,7 @@ const styles = (theme: Theme) => {
             marginHorizontal: 16 * SCALE,
             height: 48 * SCALE,
             zIndex: 1000,
+            elevation: 3,
         },
         searchInput: {
             flex: 1,
@@ -413,6 +422,7 @@ const styles = (theme: Theme) => {
         },
         listContent: {
             paddingBottom: 120 * SCALE,
+            paddingTop: 16 * SCALE,
         },
         foodItem: {
             flexDirection: 'row',
