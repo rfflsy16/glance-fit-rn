@@ -11,7 +11,9 @@ import Settings from '@/screens/Profile/Settings';
 import Wallet from '@/screens/Profile/Wallet';
 import DetailPembayaran from '@/screens/Profile/Wallet/DetailPembayaran';
 import Pembayaran from '@/screens/Profile/Wallet/Pembayaran';
+import RincianTransaksi from '@/screens/Profile/Wallet/RincianTransaksi';
 import TopUp from '@/screens/Profile/Wallet/TopUp';
+import TransactionList from '@/screens/Profile/Wallet/TransactionList';
 import { createStackNavigator } from '@react-navigation/stack';
 import React from 'react';
 import AuthStack from './Auth';
@@ -57,6 +59,16 @@ export type RootStackParamList = {
   DetailPembayaran: {
     amount: number;
     price: string;
+    transactionId?: string;
+  };
+  TransactionList: undefined;
+  RincianTransaksi: {
+    transactionId: string;
+    amount: number;
+    price: string;
+    status: 'pending' | 'success' | 'failed';
+    date: string;
+    time: string;
   };
 };
 
@@ -144,6 +156,16 @@ export default function StackNavigator() {
       <Stack.Screen
         name="DetailPembayaran"
         component={DetailPembayaran}
+        options={{ animation: 'slide_from_right' }}
+      />
+      <Stack.Screen
+        name="TransactionList"
+        component={TransactionList}
+        options={{ animation: 'slide_from_right' }}
+      />
+      <Stack.Screen
+        name="RincianTransaksi"
+        component={RincianTransaksi}
         options={{ animation: 'slide_from_right' }}
       />
     </Stack.Navigator>

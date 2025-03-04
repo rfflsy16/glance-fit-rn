@@ -128,7 +128,10 @@ export default function Wallet() {
               </View>
               <Text style={styles(theme).actionText}>Top up</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles(theme).actionButton}>
+            <TouchableOpacity
+              style={styles(theme).actionButton}
+              onPress={() => navigation.navigate('TransactionList')}
+            >
               <View style={styles(theme).actionIcon}>
                 <TransactionIcon size={24} />
               </View>
