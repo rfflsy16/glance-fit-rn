@@ -205,7 +205,7 @@ const styles = (theme: Theme, isDark: boolean) =>
     distanceValue: {
       fontSize: 64 * SCALE,
       fontWeight: '700',
-      color: theme.textPrimary,
+      color: '#0F766E',
     },
     distanceUnit: {
       fontSize: 16 * SCALE,
