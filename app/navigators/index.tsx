@@ -9,6 +9,8 @@ import Distance from '@/screens/Home/Distance';
 import Steps from '@/screens/Home/Steps';
 import Settings from '@/screens/Profile/Settings';
 import Wallet from '@/screens/Profile/Wallet';
+import Pembayaran from '@/screens/Profile/Wallet/Pembayaran';
+import TopUp from '@/screens/Profile/Wallet/TopUp';
 import { createStackNavigator } from '@react-navigation/stack';
 import React from 'react';
 import AuthStack from './Auth';
@@ -19,6 +21,7 @@ export type RootStackParamList = {
   BottomTab: undefined;
   Settings: undefined;
   Wallet: undefined;
+  TopUp: undefined;
   Chat: undefined;
   Auth: undefined;
   NameInput: undefined;
@@ -46,6 +49,10 @@ export type RootStackParamList = {
         params: any;
       }
     | undefined;
+  Pembayaran: {
+    amount: number;
+    price: string;
+  };
 };
 
 declare global {
@@ -68,6 +75,11 @@ export default function StackNavigator() {
       <Stack.Screen name="BottomTab" component={MyTabs} />
       <Stack.Screen name="Settings" component={Settings} />
       <Stack.Screen name="Wallet" component={Wallet} />
+      <Stack.Screen
+        name="TopUp"
+        component={TopUp}
+        options={{ animation: 'slide_from_right' }}
+      />
       <Stack.Screen name="Chat" component={Chat} />
       <Stack.Screen
         name="Auth"
@@ -118,6 +130,11 @@ export default function StackNavigator() {
         name="ProgramStack"
         component={ProgramStack}
         options={{ animation: 'slide_from_right', headerShown: false }}
+      />
+      <Stack.Screen
+        name="Pembayaran"
+        component={Pembayaran}
+        options={{ animation: 'slide_from_right' }}
       />
     </Stack.Navigator>
   );
