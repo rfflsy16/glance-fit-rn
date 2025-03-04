@@ -8,7 +8,6 @@ import {
     Text,
     StyleSheet,
     TouchableOpacity,
-    Pressable,
     Image,
     Dimensions,
 } from 'react-native';
@@ -19,7 +18,7 @@ interface DrinkItem {
     name: string;
     amount: number;
     size: string;
-    icon: any; // utk image source
+    icon: number; // utk require('@/assets/...')
 }
 
 const DRINK_ITEMS: DrinkItem[] = [
@@ -110,7 +109,11 @@ export default function DrinkLog() {
                 <View style={styles(theme).summary}>
                     <View style={styles(theme).waterInfo}>
                         <View style={styles(theme).waterIconContainer}>
-                            <Ionicons name="water" size={24} color="#1F2937" />
+                            <Image 
+                                source={require('@/assets/icons/water.png')}
+                                style={styles(theme).waterIcon}
+                                resizeMode="contain"
+                            />
                         </View>
                         <Text style={styles(theme).waterText}>Air</Text>
                     </View>
@@ -407,5 +410,10 @@ const styles = (theme: Theme, insets?: { top: number; bottom: number }) => Style
         fontSize: 16,
         color: theme.textSecondary,
         fontWeight: '500',
+    },
+    waterIcon: {
+        width: 24 * SCALE,
+        height: 24 * SCALE,
+        tintColor: '#1F2937',
     },
 });
