@@ -1,6 +1,6 @@
 import { Theme } from '@/constants/Theme';
 import { useTheme } from '@/contexts/ThemeContext';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons'; // Add this import
 import { useNavigation } from '@react-navigation/native';
 import { useState } from 'react';
 import {
@@ -9,42 +9,44 @@ import {
     StyleSheet,
     TouchableOpacity,
     Pressable,
+    Image,
+    Dimensions,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-// Tipe data utk drink item
 interface DrinkItem {
     id: 'glass' | 'bottle' | 'large-bottle';
     name: string;
     amount: number;
     size: string;
-    color?: string;
+    icon: any; // utk image source
 }
 
-// Data minuman yg tersedia
 const DRINK_ITEMS: DrinkItem[] = [
     {
         id: 'glass',
         name: 'Gelas',
         amount: 8,
         size: '(8 ons)',
-        color: '#2B6872'
+        icon: require('@/assets/icons/glass.png')
     },
     {
         id: 'bottle',
         name: 'Botol',
         amount: 168,
         size: '(168 ons)',
-        color: '#2B6872'
+        icon: require('@/assets/icons/bottle.png')
     },
     {
-        id: 'large-bottle', 
+        id: 'large-bottle',
         name: 'Botol besar',
         amount: 24,
         size: '(24 ons)',
-        color: '#2B6872'
+        icon: require('@/assets/icons/bottle.png')
     }
 ];
+
+const SCALE = Dimensions.get('window').width / 375; // Base width 375 utk scaling
 
 export default function DrinkLog() {
     const { theme } = useTheme();
@@ -58,17 +60,26 @@ export default function DrinkLog() {
         'large-bottle': 0
     });
 
-    // Hitung total minuman
     const totalAmount = Object.entries(drinkAmounts).reduce((total, [id, count]) => {
         const drink = DRINK_ITEMS.find(item => item.id === id);
         return total + (drink?.amount || 0) * count;
     }, 0);
 
-    // Target minuman harian (64 ons)
     const TARGET_AMOUNT = 64;
 
-    // Cek apakah ada input
     const hasInput = Object.values(drinkAmounts).some(amount => amount > 0);
+
+    const getIconForDrinkType = (id: string) => {
+        switch (id) {
+            case 'glass':
+                return require('@/assets/icons/glass.png');
+            case 'bottle':
+            case 'large-bottle':
+                return require('@/assets/icons/bottle.png');
+            default:
+                return require('@/assets/icons/water.png');
+        }
+    };
 
     return (
         <View style={styles(theme, insets).container}>
@@ -85,32 +96,32 @@ export default function DrinkLog() {
 
             <View style={styles(theme).card}>
                 <View style={styles(theme).dateSelector}>
-                    <TouchableOpacity style={styles(theme).dateArrow}>
-                        <Ionicons name="chevron-back" size={24} color={theme.textPrimary} />
+                    <TouchableOpacity hitSlop={8}>
+                        <Ionicons name="chevron-back" size={24} color="#1F2937" />
                     </TouchableOpacity>
-                    <Text style={styles(theme).dateText}>{selectedDate}</Text>
-                    <TouchableOpacity style={styles(theme).dateArrow}>
-                        <Ionicons name="chevron-forward" size={24} color={theme.textPrimary} />
+                    <Text style={styles(theme).dateText}>Hari ini</Text>
+                    <TouchableOpacity hitSlop={8}>
+                        <Ionicons name="chevron-forward" size={24} color="#1F2937" />
                     </TouchableOpacity>
                 </View>
 
                 <View style={styles(theme).divider} />
 
-                <View style={styles(theme).summaryContainer}>
-                    <View style={styles(theme).summaryLeft}>
+                <View style={styles(theme).summary}>
+                    <View style={styles(theme).waterInfo}>
                         <View style={styles(theme).waterIconContainer}>
-                            <Ionicons name="water" size={24} color={theme.textPrimary} />
+                            <Ionicons name="water" size={24} color="#1F2937" />
                         </View>
-                        <Text style={styles(theme).summaryTitle}>Air</Text>
+                        <Text style={styles(theme).waterText}>Air</Text>
                     </View>
-                    <View style={styles(theme).summaryRight}>
-                        <View style={styles(theme).summaryItem}>
-                            <Text style={styles(theme).summaryLabel}>Total</Text>
-                            <Text style={styles(theme).summaryValue}>{totalAmount} ons</Text>
+                    <View style={styles(theme).statsContainer}>
+                        <View style={styles(theme).stat}>
+                            <Text style={styles(theme).statLabel}>Total</Text>
+                            <Text style={styles(theme).statValue}>{totalAmount} ons</Text>
                         </View>
-                        <View style={styles(theme).summaryItem}>
-                            <Text style={styles(theme).summaryLabel}>Target</Text>
-                            <Text style={styles(theme).summaryValue}>{TARGET_AMOUNT} ons</Text>
+                        <View style={styles(theme).stat}>
+                            <Text style={styles(theme).statLabel}>Target</Text>
+                            <Text style={styles(theme).statValue}>{TARGET_AMOUNT} ons</Text>
                         </View>
                     </View>
                 </View>
@@ -126,12 +137,12 @@ export default function DrinkLog() {
                         <View style={styles(theme).drinkInfo}>
                             <View style={[
                                 styles(theme).drinkIconContainer,
-                                item.id !== 'glass' && { backgroundColor: '#E6F7F8' }
+                                item.id !== 'glass' && styles(theme).bottleIconContainer
                             ]}>
-                                <Ionicons 
-                                    name={item.id === 'glass' ? 'water' : 'beer'} 
-                                    size={24} 
-                                    color={item.color} 
+                                <Image 
+                                    source={item.icon}
+                                    style={styles(theme).icon}
+                                    resizeMode="contain"
                                 />
                             </View>
                             <View style={styles(theme).drinkTexts}>
@@ -139,12 +150,12 @@ export default function DrinkLog() {
                                 <Text style={styles(theme).drinkSize}>{item.size}</Text>
                             </View>
                         </View>
-                        <View style={styles(theme).amountControl}>
-                            <Text style={styles(theme).amountUnit}>ons</Text>
-                            <View style={styles(theme).amountActions}>
+                        <View style={styles(theme).counter}>
+                            <Text style={styles(theme).unit}>ons</Text>
+                            <View style={styles(theme).controls}>
                                 <TouchableOpacity 
                                     style={[
-                                        styles(theme).amountButton,
+                                        styles(theme).controlButton,
                                         drinkAmounts[item.id] === 0 && styles(theme).amountButtonDisabled
                                     ]}
                                     onPress={() => {
@@ -152,25 +163,20 @@ export default function DrinkLog() {
                                         setDrinkAmounts({...drinkAmounts, [item.id]: newAmount});
                                     }}
                                 >
-                                    <Text style={[
-                                        styles(theme).amountButtonText,
-                                        drinkAmounts[item.id] === 0 && styles(theme).amountButtonTextDisabled
-                                    ]}>-</Text>
+                                    <Text style={styles(theme).controlText}>-</Text>
                                 </TouchableOpacity>
-                                <Text style={styles(theme).amountValue}>
-                                    {drinkAmounts[item.id] || 0}
-                                </Text>
+                                <Text style={styles(theme).amount}>{drinkAmounts[item.id] || 0}</Text>
                                 <TouchableOpacity 
-                                    style={styles(theme).amountButton}
+                                    style={styles(theme).controlButton}
                                     onPress={() => {
                                         const newAmount = (drinkAmounts[item.id] || 0) + 1;
                                         setDrinkAmounts({...drinkAmounts, [item.id]: newAmount});
                                     }}
                                 >
-                                    <Text style={styles(theme).amountButtonText}>+</Text>
+                                    <Text style={styles(theme).controlText}>+</Text>
                                 </TouchableOpacity>
                             </View>
-                            <View style={styles(theme).amountDivider} />
+                            <View style={styles(theme).counterDivider} />
                         </View>
                     </View>
                 ))}
@@ -211,6 +217,12 @@ const styles = (theme: Theme, insets?: { top: number; bottom: number }) => Style
         width: 24,
         height: 24,
         justifyContent: 'center',
+        alignItems: 'center',
+    },
+    icon: {
+        width: 24 * SCALE,
+        height: 24 * SCALE,
+        tintColor: '#1F2937', // Utk glass icon
     },
     headerTitle: {
         fontSize: 16,
@@ -221,38 +233,39 @@ const styles = (theme: Theme, insets?: { top: number; bottom: number }) => Style
         width: 24,
     },
     card: {
-        margin: 16,
-        backgroundColor: theme.background,
+        width: 343 * SCALE,
+        alignSelf: 'center',
+        marginVertical: 16 * SCALE,
+        backgroundColor: 'white',
         borderRadius: 16,
         borderWidth: 1,
         borderColor: '#E5E7EB',
+        paddingTop: 24,
+        paddingHorizontal: 16,
+        paddingBottom: 24,
+        gap: 24,
     },
     dateSelector: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        paddingHorizontal: 16,
-        paddingVertical: 12,
-    },
-    dateArrow: {
-        padding: 4,
     },
     dateText: {
         fontSize: 16,
-        color: theme.textPrimary,
         fontWeight: '500',
+        color: '#1F2937',
     },
     divider: {
         height: 1,
         backgroundColor: '#E5E7EB',
+        marginVertical: 0,
     },
-    summaryContainer: {
+    summary: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        padding: 16,
     },
-    summaryLeft: {
+    waterInfo: {
         flexDirection: 'row',
         alignItems: 'center',
         gap: 12,
@@ -265,26 +278,26 @@ const styles = (theme: Theme, insets?: { top: number; bottom: number }) => Style
         justifyContent: 'center',
         alignItems: 'center',
     },
-    summaryTitle: {
+    waterText: {
         fontSize: 16,
-        color: theme.textPrimary,
         fontWeight: '500',
+        color: '#1F2937',
     },
-    summaryRight: {
+    statsContainer: {
         flexDirection: 'row',
         gap: 24,
     },
-    summaryItem: {
+    stat: {
         alignItems: 'flex-end',
     },
-    summaryLabel: {
+    statLabel: {
         fontSize: 14,
-        color: theme.textPrimary,
+        color: '#1F2937',
         marginBottom: 4,
     },
-    summaryValue: {
+    statValue: {
         fontSize: 14,
-        color: theme.textSecondary,
+        color: '#6B7280',
     },
     questionText: {
         fontSize: 20,
@@ -294,17 +307,20 @@ const styles = (theme: Theme, insets?: { top: number; bottom: number }) => Style
         marginBottom: 16,
     },
     drinkList: {
-        paddingHorizontal: 16,
-        gap: 12,
+        paddingHorizontal: 16 * SCALE,
+        gap: 12 * SCALE,
     },
     drinkItem: {
+        width: 343 * SCALE,
+        height: 104 * SCALE,
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        padding: 16,
-        backgroundColor: theme.background,
-        borderRadius: 12,
-        borderWidth: 1,
+        paddingVertical: 24,
+        paddingHorizontal: 16,
+        backgroundColor: 'white',
+        borderRadius: 8,
+        borderWidth: 1.5,
         borderColor: '#E5E7EB',
     },
     drinkInfo: {
@@ -313,55 +329,58 @@ const styles = (theme: Theme, insets?: { top: number; bottom: number }) => Style
         gap: 12,
     },
     drinkIconContainer: {
-        width: 40,
-        height: 40,
+        width: 40 * SCALE,
+        height: 40 * SCALE,
         borderRadius: 8,
         backgroundColor: '#F3F4F6',
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    bottleIconContainer: {
+        backgroundColor: '#E6F7F8',
     },
     drinkTexts: {
         gap: 4,
     },
     drinkName: {
         fontSize: 16,
-        color: theme.textPrimary,
         fontWeight: '500',
+        color: '#1F2937',
     },
     drinkSize: {
         fontSize: 14,
-        color: theme.textSecondary,
+        color: '#6B7280',
     },
-    amountControl: {
+    counter: {
         alignItems: 'flex-end',
     },
-    amountUnit: {
+    unit: {
         fontSize: 12,
-        color: theme.textSecondary,
+        color: '#6B7280',
         marginBottom: 4,
     },
-    amountActions: {
+    controls: {
         flexDirection: 'row',
         alignItems: 'center',
         gap: 12,
     },
-    amountButton: {
-        width: 24,
-        height: 24,
+    controlButton: {
+        width: 24 * SCALE,
+        height: 24 * SCALE,
         justifyContent: 'center',
         alignItems: 'center',
     },
-    amountButtonText: {
+    controlText: {
         fontSize: 20,
-        color: theme.textPrimary,
+        color: '#1F2937',
     },
-    amountValue: {
+    amount: {
         fontSize: 16,
-        color: theme.textPrimary,
-        minWidth: 24,
+        color: '#1F2937',
+        minWidth: 24 * SCALE,
         textAlign: 'center',
     },
-    amountDivider: {
+    counterDivider: {
         width: '100%',
         height: 1,
         backgroundColor: '#E5E7EB',
