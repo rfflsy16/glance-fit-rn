@@ -10,8 +10,10 @@ import {
     TouchableOpacity,
     Image,
     Dimensions,
+    Animated,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import SuccessModal from './SuccessModal';
 
 interface DrinkItem {
     id: 'glass' | 'bottle' | 'large-bottle';
@@ -58,6 +60,8 @@ export default function DrinkLog() {
         bottle: 0,
         'large-bottle': 0
     });
+    const [showModal, setShowModal] = useState(false);
+    const fadeAnim = useState(new Animated.Value(0))[0];
 
     const totalAmount = Object.entries(drinkAmounts).reduce((total, [id, count]) => {
         const drink = DRINK_ITEMS.find(item => item.id === id);
@@ -78,6 +82,36 @@ export default function DrinkLog() {
             default:
                 return require('@/assets/icons/water.png');
         }
+    };
+
+    const handleSubmit = () => {
+        if (!hasInput) return;
+        
+        setShowModal(true);
+        Animated.timing(fadeAnim, {
+            toValue: 1,
+            duration: 300,
+            useNativeDriver: true,
+        }).start();
+
+        // Auto hide after 2 seconds
+        setTimeout(() => {
+            Animated.timing(fadeAnim, {
+                toValue: 0,
+                duration: 300,
+                useNativeDriver: true,
+            }).start(() => {
+                setShowModal(false);
+                // Reset form
+                setDrinkAmounts({
+                    glass: 0,
+                    bottle: 0,
+                    'large-bottle': 0
+                });
+                // Navigate back
+                navigation.goBack();
+            });
+        }, 2000);
     };
 
     return (
@@ -190,6 +224,7 @@ export default function DrinkLog() {
                     styles(theme).submitButton,
                     hasInput && { backgroundColor: theme.primary }
                 ]}
+                onPress={handleSubmit}
             >
                 <Text style={[
                     styles(theme).submitButtonText,
@@ -198,6 +233,14 @@ export default function DrinkLog() {
                     Catat ini
                 </Text>
             </TouchableOpacity>
+
+            <SuccessModal 
+                visible={showModal}
+                fadeAnim={fadeAnim}
+                onAnimationFinish={() => {
+                    // Optional: bisa tambah logic disini klo mau
+                }}
+            />
         </View>
     );
 }
