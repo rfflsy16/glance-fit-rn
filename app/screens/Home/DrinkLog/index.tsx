@@ -96,11 +96,11 @@ export default function DrinkLog() {
             <View style={styles(theme).card}>
                 <View style={styles(theme).dateSelector}>
                     <TouchableOpacity hitSlop={8}>
-                        <Ionicons name="chevron-back" size={24} color="#1F2937" />
+                        <Ionicons name="chevron-back" size={24} color={theme.textPrimary} />
                     </TouchableOpacity>
                     <Text style={styles(theme).dateText}>Hari ini</Text>
                     <TouchableOpacity hitSlop={8}>
-                        <Ionicons name="chevron-forward" size={24} color="#1F2937" />
+                        <Ionicons name="chevron-forward" size={24} color={theme.textPrimary} />
                     </TouchableOpacity>
                 </View>
 
@@ -205,7 +205,7 @@ export default function DrinkLog() {
 const styles = (theme: Theme, insets?: { top: number; bottom: number }) => StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#F9FAFB',
+        backgroundColor: theme.background,
         paddingTop: insets?.top,
     },
     header: {
@@ -239,7 +239,7 @@ const styles = (theme: Theme, insets?: { top: number; bottom: number }) => Style
         width: 343 * SCALE,
         alignSelf: 'center',
         marginVertical: 16 * SCALE,
-        backgroundColor: 'white',
+        backgroundColor: theme.background,
         borderRadius: 16,
         borderWidth: 1,
         borderColor: '#E5E7EB',
@@ -256,7 +256,7 @@ const styles = (theme: Theme, insets?: { top: number; bottom: number }) => Style
     dateText: {
         fontSize: 16,
         fontWeight: '500',
-        color: '#1F2937',
+        color: theme.textPrimary,
     },
     divider: {
         height: 1,
@@ -284,7 +284,7 @@ const styles = (theme: Theme, insets?: { top: number; bottom: number }) => Style
     waterText: {
         fontSize: 16,
         fontWeight: '500',
-        color: '#1F2937',
+        color: theme.textPrimary,
     },
     statsContainer: {
         flexDirection: 'row',
@@ -295,12 +295,12 @@ const styles = (theme: Theme, insets?: { top: number; bottom: number }) => Style
     },
     statLabel: {
         fontSize: 14,
-        color: '#1F2937',
+        color: theme.textPrimary,
         marginBottom: 4,
     },
     statValue: {
         fontSize: 14,
-        color: '#6B7280',
+        color: theme.textSecondary,
     },
     questionText: {
         fontSize: 20,
@@ -321,10 +321,10 @@ const styles = (theme: Theme, insets?: { top: number; bottom: number }) => Style
         alignItems: 'center',
         paddingVertical: 24,
         paddingHorizontal: 16,
-        backgroundColor: 'white',
+        backgroundColor: theme.background,
         borderRadius: 8,
         borderWidth: 1.5,
-        borderColor: '#E5E7EB',
+        borderColor: theme.border,
     },
     drinkInfo: {
         flexDirection: 'row',
@@ -348,18 +348,18 @@ const styles = (theme: Theme, insets?: { top: number; bottom: number }) => Style
     drinkName: {
         fontSize: 16,
         fontWeight: '500',
-        color: '#1F2937',
+        color: theme.textPrimary,
     },
     drinkSize: {
         fontSize: 14,
-        color: '#6B7280',
+        color: theme.textSecondary,
     },
     counter: {
         alignItems: 'flex-end',
     },
     unit: {
         fontSize: 12,
-        color: '#6B7280',
+        color: theme.textSecondary,
         marginBottom: 4,
     },
     controls: {
@@ -375,18 +375,18 @@ const styles = (theme: Theme, insets?: { top: number; bottom: number }) => Style
     },
     controlText: {
         fontSize: 20,
-        color: '#1F2937',
+        color: theme.textPrimary,
     },
     amount: {
         fontSize: 16,
-        color: '#1F2937',
+        color: theme.textPrimary,
         minWidth: 24 * SCALE,
         textAlign: 'center',
     },
     counterDivider: {
         width: '100%',
         height: 1,
-        backgroundColor: '#E5E7EB',
+        backgroundColor: theme.border,
         marginTop: 4,
     },
     amountButtonDisabled: {
@@ -398,7 +398,7 @@ const styles = (theme: Theme, insets?: { top: number; bottom: number }) => Style
     submitButton: {
         margin: 16,
         padding: 16,
-        backgroundColor: '#E5E7EB',
+        backgroundColor: theme.border,
         borderRadius: 12,
         alignItems: 'center',
         position: 'absolute',
@@ -408,7 +408,7 @@ const styles = (theme: Theme, insets?: { top: number; bottom: number }) => Style
     },
     submitButtonText: {
         fontSize: 16,
-        color: theme.textSecondary,
+        color: theme.textPrimary,
         fontWeight: '500',
     },
     waterIcon: {
