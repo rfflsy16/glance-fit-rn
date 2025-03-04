@@ -1,7 +1,7 @@
 import { Theme } from '@/constants/Theme';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { Animated, Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -172,7 +172,7 @@ export function LeaveModal({ visible, onClose, onConfirm }: LeaveModalProps) {
                             onPress={onConfirm}
                         >
                             <Text style={styles(theme, isDark).leaveButtonText}>
-                                Keluar Program
+                                Tinggalkan
                             </Text>
                         </TouchableOpacity>
                     </View>

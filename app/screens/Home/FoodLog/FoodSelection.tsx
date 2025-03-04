@@ -1,7 +1,7 @@
 import { Theme } from '@/constants/Theme';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
-import  { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
     Dimensions,
     StyleSheet,
@@ -243,7 +243,7 @@ export default function FoodSelection({ onComplete, onSearchFocus }: FoodSelecti
                 }]
             }}>
                 {!isSearchFocused && (
-                    <>
+                    <View>
                         <View style={styles(theme).categoryOuterContainer}>
                             <ScrollView horizontal>
                                 {CATEGORIES.map(category => (
@@ -270,7 +270,7 @@ export default function FoodSelection({ onComplete, onSearchFocus }: FoodSelecti
                         <Text style={styles(theme).listTitle}>
                             Daftar makanan dan minuman
                         </Text>
-                    </>
+                    </View>
                 )}
             </Animated.View>
 
