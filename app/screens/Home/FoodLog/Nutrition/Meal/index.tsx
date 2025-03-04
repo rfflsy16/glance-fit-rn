@@ -27,19 +27,6 @@ export default function Meal() {
     
     const { mealTime = 'breakfast', foods = [] } = (route.params as MealRouteParams) ?? {};
     
-    // Hitung total nutrisi
-    const totalNutrition = foods.reduce((acc, food) => ({
-        calories: acc.calories + food.calories,
-        carbs: acc.carbs + food.carbs,
-        fat: acc.fat + food.fat,
-        protein: acc.protein + food.protein
-    }), {
-        calories: 0,
-        carbs: 0,
-        fat: 0,
-        protein: 0
-    });
-
     return (
         <View style={[styles(theme).container, { paddingTop: insets.top }]}>
             <Header

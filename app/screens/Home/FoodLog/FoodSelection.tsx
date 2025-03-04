@@ -46,18 +46,16 @@ interface FoodSelectionProps {
 }
 
 export default function FoodSelection({ onComplete, onSearchFocus }: FoodSelectionProps) {
-    const { theme, isDark } = useTheme();
+    const { theme } = useTheme();
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('Semua');
     const [selectedFoods, setSelectedFoods] = useState<number[]>([]);
     const [filteredFoods, setFilteredFoods] = useState<FoodItem[]>(FOOD_DATA);
     const [isSearchFocused, setIsSearchFocused] = useState(false);
     
-    // Tambah opacity animation
     const buttonAnim = useRef(new Animated.Value(100)).current;
     const opacityAnim = useRef(new Animated.Value(0)).current;
     
-    const insets = useSafeAreaInsets();
     const searchAnim = useRef(new Animated.Value(0)).current;
     const headerAnim = useRef(new Animated.Value(1)).current;
     const listAnim = useRef(new Animated.Value(0)).current;

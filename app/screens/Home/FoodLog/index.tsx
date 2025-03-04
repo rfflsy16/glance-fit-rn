@@ -23,7 +23,7 @@ const SCALE = SCREEN_WIDTH / 375;
 
 export default function FoodLog() {
     const insets = useSafeAreaInsets();
-    const { theme, isDark } = useTheme();   
+    const { theme } = useTheme();   
     const navigation = useNavigation();
     const route = useRoute();
 
@@ -65,7 +65,7 @@ export default function FoodLog() {
 
     return (
         <GestureHandlerRootView style={{ flex: 1 }}>
-            <View style={[styles(theme, isDark).container, { paddingTop: insets.top }]}>
+            <View style={[styles(theme).container, { paddingTop: insets.top }]}>
                 {!isSearchFocused && (
                     <Header
                         title={screenState === 'selection' ? "Pilih asupan" : "Catat Asupan"}
@@ -110,7 +110,7 @@ export default function FoodLog() {
     );
 }
 
-const styles = (theme: Theme, isDark: boolean) =>
+const styles = (theme: Theme) =>
     StyleSheet.create({
         container: {
             flex: 1,

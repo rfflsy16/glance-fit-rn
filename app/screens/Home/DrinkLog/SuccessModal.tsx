@@ -16,7 +16,6 @@ export default function SuccessModal({ visible, fadeAnim, onAnimationFinish }: S
     const { theme } = useTheme();
     const lottieRef = useRef<LottieView>(null);
 
-    // Reset lottie animation ketika modal visible berubah
     if (visible) {
         lottieRef.current?.reset();
         lottieRef.current?.play();
