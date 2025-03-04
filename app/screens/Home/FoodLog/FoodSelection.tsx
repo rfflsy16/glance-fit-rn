@@ -245,13 +245,18 @@ export default function FoodSelection({ onComplete, onSearchFocus }: FoodSelecti
                 {!isSearchFocused && (
                     <View>
                         <View style={styles(theme).categoryOuterContainer}>
-                            <ScrollView horizontal>
-                                {CATEGORIES.map(category => (
+                            <ScrollView
+                                horizontal
+                                showsHorizontalScrollIndicator={false}
+                                contentContainerStyle={styles(theme).categoryScrollContainer}
+                            >
+                                {CATEGORIES.map((category, index) => (
                                     <TouchableOpacity 
                                         key={category}
                                         style={[
                                             styles(theme).categoryButton,
-                                            selectedCategory === category && styles(theme).categoryButtonActive
+                                            selectedCategory === category && styles(theme).categoryButtonActive,
+                                            index === CATEGORIES.length - 1 && { marginRight: 0 }
                                         ]}
                                         onPress={() => setSelectedCategory(category)}
                                     >
@@ -288,6 +293,7 @@ export default function FoodSelection({ onComplete, onSearchFocus }: FoodSelecti
                     <FlatList
                         data={filteredFoods}
                         keyExtractor={(item) => item.id.toString()}
+                        showsVerticalScrollIndicator={false}
                         keyboardShouldPersistTaps="handled"
                         contentContainerStyle={[
                             styles(theme).listContent,
@@ -378,14 +384,9 @@ const styles = (theme: Theme) => {
         categoryOuterContainer: {
             height: 44 * SCALE,
             marginBottom: 16 * SCALE,
-            paddingHorizontal: 16 * SCALE,
         },
-        categoryScrollView: {
-            paddingLeft: 16 * SCALE, // Padding kiri sejajar dengan container
-        },
-        categoryInnerContainer: {
-            height: 36 * SCALE,
-            paddingRight: 16 * SCALE, // Padding kanan untuk item terakhir
+        categoryScrollContainer: {
+            paddingLeft: 16 * SCALE,
         },
         categoryButton: {
             paddingHorizontal: 16 * SCALE,
