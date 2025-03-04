@@ -106,7 +106,9 @@ export default function Wallet() {
           <Ionicons name="chevron-back" size={24} color="#374151" />
         </TouchableOpacity>
         <Text style={styles(theme).headerTitle}>Balance</Text>
-        <View style={{ width: 40 * SCALE }} /> {/* Placeholder for alignment */}
+        <View style={{ width: 40 * SCALE }}>
+          <Text style={{ opacity: 0 }}>Placeholder for alignment</Text>
+        </View>
       </View>
 
       {/* Balance Card */}

@@ -9,6 +9,7 @@ import Distance from '@/screens/Home/Distance';
 import Steps from '@/screens/Home/Steps';
 import Settings from '@/screens/Profile/Settings';
 import Wallet from '@/screens/Profile/Wallet';
+import DetailPembayaran from '@/screens/Profile/Wallet/DetailPembayaran';
 import Pembayaran from '@/screens/Profile/Wallet/Pembayaran';
 import TopUp from '@/screens/Profile/Wallet/TopUp';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -50,6 +51,10 @@ export type RootStackParamList = {
       }
     | undefined;
   Pembayaran: {
+    amount: number;
+    price: string;
+  };
+  DetailPembayaran: {
     amount: number;
     price: string;
   };
@@ -134,6 +139,11 @@ export default function StackNavigator() {
       <Stack.Screen
         name="Pembayaran"
         component={Pembayaran}
+        options={{ animation: 'slide_from_right' }}
+      />
+      <Stack.Screen
+        name="DetailPembayaran"
+        component={DetailPembayaran}
         options={{ animation: 'slide_from_right' }}
       />
     </Stack.Navigator>

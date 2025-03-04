@@ -181,7 +181,12 @@ export default function Pembayaran() {
         </View>
 
         {/* Payment Button */}
-        <TouchableOpacity style={styles(theme).paymentButton}>
+        <TouchableOpacity
+          style={styles(theme).paymentButton}
+          onPress={() =>
+            navigation.navigate('DetailPembayaran', { amount, price })
+          }
+        >
           <Text style={styles(theme).paymentButtonText}>
             Lakukan pembayaran
           </Text>
