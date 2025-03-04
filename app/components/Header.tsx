@@ -38,7 +38,7 @@ const styles = (theme: Theme) => StyleSheet.create({
         alignItems: 'center',
         paddingVertical: 14,
         paddingHorizontal: 16,
-        gap: 16,
+        // gap: 16,
         backgroundColor: theme.background
     },
     title: {

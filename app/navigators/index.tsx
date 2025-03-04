@@ -18,6 +18,7 @@ import FoodLog from '@/screens/Home/FoodLog';
 import Meal from '@/screens/Home/FoodLog/Nutrition/Meal';
 import { FoodItem } from '@/screens/Home/FoodLog/types';
 import DrinkLog from '@/screens/Home/DrinkLog';
+import Notification from '@/screens/Home/Notification';
 
 export type RootStackParamList = {
   BottomTab: undefined;
@@ -56,6 +57,7 @@ export type RootStackParamList = {
     mealTime: 'breakfast' | 'lunch' | 'dinner' | 'snacks';
     foods: FoodItem[];
   };
+  Notification: undefined;
 }
 
 declare global {
@@ -146,6 +148,9 @@ export default function StackNavigator() {
 
       {/* Drink */}
       <Stack.Screen name="DrinkLog" component={DrinkLog} options={{ animation: 'slide_from_right', headerShown: false }} />
+
+      {/* Notification */}
+      <Stack.Screen name="Notification" component={Notification} options={{ animation: 'slide_from_right', headerShown: false }} />
     </Stack.Navigator>
   );
 }

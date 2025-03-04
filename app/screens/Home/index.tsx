@@ -140,7 +140,9 @@ export default function HomeScreen({ navigation }: any) {
               />
               <Text style={styles(theme).pointText}>100 Poin</Text>
             </View>
-            <TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('Notification')}
+            >
               <Ionicons
                 name="notifications-outline"
                 size={24}
