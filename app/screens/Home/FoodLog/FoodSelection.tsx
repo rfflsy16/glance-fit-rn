@@ -15,7 +15,6 @@ import {
     Easing,
 } from 'react-native';
 import { FoodItem } from './types';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const SCALE = SCREEN_WIDTH / 430; // 430 adalah base width iPhone 14 Pro Max

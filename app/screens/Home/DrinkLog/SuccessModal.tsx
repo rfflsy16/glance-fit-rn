@@ -5,7 +5,6 @@ import LottieView from 'lottie-react-native';
 import { useRef } from 'react';
 
 const SCALE = Dimensions.get('window').width / 375;
-
 interface SuccessModalProps {
     visible: boolean;
     fadeAnim: Animated.Value;
