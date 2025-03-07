@@ -6,6 +6,9 @@ import CaloriesIn from '@/screens/Home/CaloriesIn';
 import CaloriesOut from '@/screens/Home/CaloriesOut';
 import ChallengeDetail from '@/screens/Home/Challenge';
 import Distance from '@/screens/Home/Distance';
+import FoodLog from '@/screens/Home/FoodLog';
+import Meal from '@/screens/Home/FoodLog/Nutrition/Meal';
+import { FoodItem } from '@/screens/Home/FoodLog/types';
 import Steps from '@/screens/Home/Steps';
 import Settings from '@/screens/Profile/Settings';
 import Wallet from '@/screens/Profile/Wallet';
@@ -19,9 +22,6 @@ import React from 'react';
 import AuthStack from './Auth';
 import MyTabs from './BottomTab';
 import ProgramStack from './Program';
-import FoodLog from '@/screens/Home/FoodLog';
-import Meal from '@/screens/Home/FoodLog/Nutrition/Meal';
-import { FoodItem } from '@/screens/Home/FoodLog/types';
 export type RootStackParamList = {
   BottomTab: undefined;
   Settings: undefined;
@@ -67,18 +67,19 @@ export type RootStackParamList = {
     date: string;
     time: string;
   };
-};
-  ProgramStack: {
-    screen: string;
-    params: {
-      id: number;
-    };
-  } | undefined;
+  ProgramStack:
+    | {
+        screen: string;
+        params: {
+          id: number;
+        };
+      }
+    | undefined;
   Meal: {
     mealTime: 'breakfast' | 'lunch' | 'dinner' | 'snacks';
     foods: FoodItem[];
   };
-}
+};
 
 declare global {
   namespace ReactNavigation {
@@ -159,16 +160,24 @@ export default function StackNavigator() {
       />
 
       {/* Program */}
-      <Stack.Screen name="ProgramStack" component={ProgramStack} options={{ animation: 'slide_from_right', headerShown: false }} />
+      <Stack.Screen
+        name="ProgramStack"
+        component={ProgramStack}
+        options={{ animation: 'slide_from_right', headerShown: false }}
+      />
 
       {/* Food */}
-      <Stack.Screen name="FoodLog" component={FoodLog} options={{ animation: 'slide_from_right', headerShown: false }} />
+      <Stack.Screen
+        name="FoodLog"
+        component={FoodLog}
+        options={{ animation: 'slide_from_right', headerShown: false }}
+      />
 
       {/* Meal */}
-      <Stack.Screen 
-        name="Meal" 
-        component={Meal} 
-        options={{ animation: 'slide_from_right' }} 
+      <Stack.Screen
+        name="Meal"
+        component={Meal}
+        options={{ animation: 'slide_from_right' }}
       />
       <Stack.Screen
         name="Pembayaran"
