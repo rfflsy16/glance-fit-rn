@@ -2,7 +2,7 @@ import { Theme } from '@/constants/Theme';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Dimensions,
   Image,
@@ -15,13 +15,10 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import LottieView from 'lottie-react-native';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const SCALE = SCREEN_WIDTH / 375;
-
-// Remove the remote URL and use local image instead
-// const MAPS_IMAGE_URL =
-//   'https://raw.githubusercontent.com/mapbox/mapbox-gl-js/master/test/integration/render-tests/raster-loading/basic/expected.png';
 
 // Add type for route params
 type ActivityResultParams = {
@@ -34,6 +31,9 @@ export default function ActivityResult() {
   const insets = useSafeAreaInsets();
   const route =
     useRoute<RouteProp<Record<string, ActivityResultParams>, string>>();
+  
+  // Reference for the Lottie animation
+  const lottieRef = useRef<LottieView>(null);
 
   // State for modal visibility
   const [modalVisible, setModalVisible] = useState(false);
@@ -59,11 +59,20 @@ export default function ActivityResult() {
   // Effect to handle auto-closing modal and navigation
   useEffect(() => {
     if (modalVisible) {
+      // Play the Lottie animation when modal opens
+      if (lottieRef.current) {
+        setTimeout(() => {
+          if (lottieRef.current) {
+            lottieRef.current.play();
+          }
+        }, 100); // Small delay to ensure the modal is fully rendered
+      }
+      
       const timer = setTimeout(() => {
         setModalVisible(false);
         // Navigate to home screen after modal closes
         navigation.goBack();
-      }, 1000);
+      }, 2000); // Increased time to allow animation to complete
 
       return () => clearTimeout(timer);
     }
@@ -87,10 +96,18 @@ export default function ActivityResult() {
       >
         <View style={styles(theme, isDark, insets).modalOverlay}>
           <View style={styles(theme, isDark, insets).modalContent}>
-            <Image
-              source={require('@/assets/images/success.png')}
-              style={styles(theme, isDark, insets).successIcon}
-              resizeMode="contain"
+            {/* Use Lottie animation with autoPlay set to true as a fallback */}
+            <LottieView
+              ref={lottieRef}
+              source={require('@/assets/lotties/Success.json')}
+              style={styles(theme, isDark, insets).successAnimation}
+              autoPlay={true} // Set to true to ensure it plays
+              loop={false}
+              speed={1.0} // Normal speed
+              resizeMode="cover"
+              hardwareAccelerationAndroid={true} // Better performance on Android
+              renderMode="HARDWARE" // Better performance option
+              onAnimationFinish={() => console.log('Animation finished')}
             />
             <Text style={styles(theme, isDark, insets).pointsTitle}>
               {activityData.points} Poin berhasil
@@ -285,9 +302,10 @@ const styles = (
       shadowOpacity: 0.25,
       shadowRadius: 3.84,
     },
-    successIcon: {
-      width: 80 * SCALE,
-      height: 80 * SCALE,
+    // Enhanced Lottie animation styles
+    successAnimation: {
+      width: 120 * SCALE, // Increased size for better visibility
+      height: 120 * SCALE,
       marginBottom: 20 * SCALE,
     },
     pointsTitle: {

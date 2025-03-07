@@ -1,10 +1,11 @@
 import { Theme } from '@/constants/Theme';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import { BlurView } from 'expo-blur';
-import React, { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import {
+  Animated,
   Dimensions,
   Image,
   ScrollView,
@@ -14,6 +15,7 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ConfirmModal, LeaveModal } from './Modal';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const SCALE = SCREEN_WIDTH / 375;
@@ -67,13 +69,21 @@ export default function ChallengeDetail() {
   const insets = useSafeAreaInsets();
   const { theme, isDark } = useTheme();
   const navigation = useNavigation();
-  const route = useRoute();
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [pageBlurred, setPageBlurred] = useState(false);
   const [showFullScreenSuccess, setShowFullScreenSuccess] = useState(false);
   const [hasJoined, setHasJoined] = useState(false);
   const [showLeaveModal, setShowLeaveModal] = useState(false);
-  const [showProgress, setShowProgress] = useState(false); // For testing purposes
+  const [blurIntensityValue, setBlurIntensityValue] = useState(0);
+
+  // Animated values untuk animasi success message
+  const successOpacity = useRef(new Animated.Value(0)).current;
+  const successPosition = useRef(new Animated.Value(-50)).current;
+  const blurIntensity = useRef(new Animated.Value(0)).current;
+
+  // Tambah animated values utk confirmation modal
+  const modalOpacity = useRef(new Animated.Value(0)).current;
+  const modalScale = useRef(new Animated.Value(0.8)).current;
 
   // Number of avatars to display directly
   const maxVisibleAvatars = 4;
@@ -85,42 +95,178 @@ export default function ChallengeDetail() {
 
   const handleJoinChallenge = () => {
     setShowConfirmModal(true);
+    
+    // Reset nilai animasi
+    modalOpacity.setValue(0);
+    modalScale.setValue(0.8);
+    
+    // Animasi fade in & scale up
+    Animated.parallel([
+        Animated.timing(modalOpacity, {
+            toValue: 1,
+            duration: 300,
+            useNativeDriver: true,
+        }),
+        Animated.timing(modalScale, {
+            toValue: 1,
+            duration: 300,
+            useNativeDriver: true,
+        }),
+    ]).start();
+  };
+
+  const handleCloseModal = () => {
+    // Animasi fade out & scale down
+    Animated.parallel([
+        Animated.timing(modalOpacity, {
+            toValue: 0,
+            duration: 250,
+            useNativeDriver: true,
+        }),
+        Animated.timing(modalScale, {
+            toValue: 0.8,
+            duration: 250,
+            useNativeDriver: true,
+        }),
+    ]).start(() => {
+        setShowConfirmModal(false);
+    });
   };
 
   const confirmJoinChallenge = () => {
-    setShowConfirmModal(false);
-    setPageBlurred(true);
-    setShowFullScreenSuccess(true);
-
-    setTimeout(() => {
-      setShowFullScreenSuccess(false);
-      setPageBlurred(false);
-      setHasJoined(true);
-    }, 1000);
+    // Animasi fade out utk modal
+    Animated.parallel([
+        Animated.timing(modalOpacity, {
+            toValue: 0,
+            duration: 250,
+            useNativeDriver: true,
+        }),
+        Animated.timing(modalScale, {
+            toValue: 0.8,
+            duration: 250,
+            useNativeDriver: true,
+        }),
+    ]).start(() => {
+        setShowConfirmModal(false);
+        setPageBlurred(true);
+        
+        // Lanjutin flow yg ada...
+        Animated.timing(blurIntensity, {
+            toValue: 40,
+            duration: 300,
+            useNativeDriver: false,
+        }).start();
+        
+        // Reset posisi dan opacity
+        successPosition.setValue(-50);
+        successOpacity.setValue(0);
+        
+        // Tunjukkan pesan sukses dgn animasi
+        setShowFullScreenSuccess(true);
+        
+        // Animasi fade in & slide down
+        Animated.parallel([
+          Animated.timing(successOpacity, {
+            toValue: 1,
+            duration: 400,
+            useNativeDriver: true,
+          }),
+          Animated.timing(successPosition, {
+            toValue: 0,
+            duration: 400,
+            useNativeDriver: true,
+          }),
+        ]).start();
+        
+        // Animasi fade out & slide up setelah delay
+        setTimeout(() => {
+          Animated.parallel([
+            Animated.timing(successOpacity, {
+              toValue: 0,
+              duration: 400,
+              useNativeDriver: true,
+            }),
+            Animated.timing(successPosition, {
+              toValue: -50,
+              duration: 400,
+              useNativeDriver: true,
+            }),
+            Animated.timing(blurIntensity, {
+              toValue: 0,
+              duration: 300,
+              useNativeDriver: false,
+            }),
+          ]).start(() => {
+            setShowFullScreenSuccess(false);
+            setPageBlurred(false);
+            setHasJoined(true);
+          });
+        }, 1500); // Ditambahin dikit durasinya biar lebih nyaman dilihat
+    });
   };
 
   const handleLeaveChallenge = () => {
     setShowLeaveModal(true);
+    
+    // Reset nilai animasi
+    modalOpacity.setValue(0);
+    modalScale.setValue(0.8);
+    
+    // Animasi fade in & scale up
+    Animated.parallel([
+        Animated.timing(modalOpacity, {
+            toValue: 1,
+            duration: 300,
+            useNativeDriver: true,
+        }),
+        Animated.timing(modalScale, {
+            toValue: 1,
+            duration: 300,
+            useNativeDriver: true,
+        }),
+    ]).start();
   };
 
   const confirmLeaveChallenge = () => {
-    setShowLeaveModal(false);
-    setHasJoined(false);
+    // Animasi fade out & scale down
+    Animated.parallel([
+        Animated.timing(modalOpacity, {
+            toValue: 0,
+            duration: 250,
+            useNativeDriver: true,
+        }),
+        Animated.timing(modalScale, {
+            toValue: 0.8,
+            duration: 250,
+            useNativeDriver: true,
+        }),
+    ]).start(() => {
+        setShowLeaveModal(false);
+        setHasJoined(false);
+    });
   };
 
-  const dismissFullScreenSuccess = () => {
-    setShowFullScreenSuccess(false);
-    setPageBlurred(false);
-  };
+  // Ganti nilai animated ke state normal
+  useEffect(() => {
+    const listener = blurIntensity.addListener(({ value }) => {
+      setBlurIntensityValue(value);
+    });
+    
+    return () => blurIntensity.removeListener(listener);
+  }, []);
 
   return (
     <View style={[styles(theme, isDark).container, { paddingTop: insets.top }]}>
       {/* Full Screen Success Message */}
       {showFullScreenSuccess && (
-        <View
+        <Animated.View
           style={[
             styles(theme, isDark).fullScreenSuccessContainer,
-            { top: insets.top + 16 },
+            { 
+              top: insets.top + 16,
+              opacity: successOpacity,
+              transform: [{ translateY: successPosition }]
+            },
           ]}
         >
           <View style={styles(theme, isDark).fullScreenSuccessContent}>
@@ -128,79 +274,32 @@ export default function ChallengeDetail() {
               Berhasil bergabung kedalam Program
             </Text>
           </View>
-        </View>
+        </Animated.View>
       )}
 
-      {/* Confirmation Modal */}
-      {showConfirmModal && (
-        <View style={styles(theme, isDark).modalOverlay}>
-          <View style={styles(theme, isDark).modalContainer}>
-            <TouchableOpacity
-              style={styles(theme, isDark).closeButton}
-              onPress={() => setShowConfirmModal(false)}
-            >
-              <Ionicons name="close" size={24} color={theme.textPrimary} />
-            </TouchableOpacity>
-
-            <View style={styles(theme, isDark).modalContentContainer}>
-              <Text style={styles(theme, isDark).modalTitle}>
-                2 Balance akan terpotong untuk mengikuti tantangan ini
-              </Text>
-
-              <TouchableOpacity
-                style={styles(theme, isDark).continueButton}
-                onPress={confirmJoinChallenge}
-              >
-                <Text style={styles(theme, isDark).continueButtonText}>
-                  Lanjutkan
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      )}
-
-      {/* Leave Challenge Modal */}
-      {showLeaveModal && (
-        <View style={styles(theme, isDark).modalOverlay}>
-          <View style={styles(theme, isDark).leaveModalContainer}>
-            <View style={styles(theme, isDark).modalContentContainer}>
-              <Text style={styles(theme, isDark).leaveModalTitle}>
-                Yakin ingin meninggalkan?
-              </Text>
-              <Text style={styles(theme, isDark).leaveModalSubtitle}>
-                2 Balance yang terpotong tidak dapat dikembalikan
-              </Text>
-              <View style={styles(theme, isDark).modalButtonsContainer}>
-                <TouchableOpacity
-                  style={styles(theme, isDark).cancelButton}
-                  onPress={() => setShowLeaveModal(false)}
-                >
-                  <Text style={styles(theme, isDark).cancelButtonText}>
-                    Batal
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles(theme, isDark).leaveButton}
-                  onPress={confirmLeaveChallenge}
-                >
-                  <Text style={styles(theme, isDark).leaveButtonText}>
-                    Tinggalkan
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        </View>
-      )}
+      {/* Modal untuk konfirmasi bergabung */}
+      <ConfirmModal 
+        visible={showConfirmModal} 
+        onClose={handleCloseModal}
+        onConfirm={confirmJoinChallenge} 
+      />
+      
+      {/* Modal untuk konfirmasi keluar */}
+      <LeaveModal 
+        visible={showLeaveModal} 
+        onClose={() => setShowLeaveModal(false)}
+        onConfirm={confirmLeaveChallenge} 
+      />
 
       {/* Page Blur Overlay */}
       {pageBlurred && (
-        <BlurView
-          intensity={40}
-          tint={isDark ? 'dark' : 'dark'}
-          style={styles(theme, isDark).blurOverlay}
-        />
+        <Animated.View style={styles(theme, isDark).blurOverlay}>
+          <BlurView
+            intensity={blurIntensityValue}
+            tint={isDark ? 'dark' : 'dark'}
+            style={{ flex: 1 }}
+          />
+        </Animated.View>
       )}
 
       {/* Header */}
@@ -275,7 +374,7 @@ export default function ChallengeDetail() {
             </View>
 
             {hasJoined ? (
-              <>
+              <View>
                 {/* Commented start time for when user has joined */}
                 <View style={styles(theme, isDark).joinedTimeWrapper}>
                   <Text style={styles(theme, isDark).startTime}>
@@ -303,7 +402,7 @@ export default function ChallengeDetail() {
                         Selesai
                       </Text> */}
                 {/* </View> */}
-              </>
+                </View>
             ) : null}
 
             {!hasJoined && (
@@ -826,3 +925,4 @@ const styles = (theme: Theme, isDark: boolean) =>
       marginTop: 8,
     },
   });
+``

@@ -18,17 +18,20 @@ import Countdown from './Countdown';
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const SCALE = SCREEN_WIDTH / 375;
 
+// Tambahkan type untuk icon
+type IconName = 'walk' | 'restaurant' | 'flame' | 'water'; 
+
 export default function Activity() {
   const insets = useSafeAreaInsets();
   const { theme, isDark } = useTheme();
   const navigation = useNavigation();
   const route = useRoute();
 
-  // Get params from route
+  // Update params dengan type yang tepat
   const { id, title, icon, points, status } = route.params as {
     id: number;
     title: string;
-    icon: string;
+    icon: IconName;
     points: number;
     status: string;
   };
@@ -70,7 +73,11 @@ export default function Activity() {
             {/* Icon centered in the upper portion */}
             <View style={styles(theme, isDark).iconWrapper}>
               <View style={styles(theme, isDark).iconContainer}>
-                <Ionicons name={icon as any} size={48} color="#FFFFFF" />
+                <Ionicons 
+                  name={icon} 
+                  size={72} // Ukuran ditambah dari 48 jadi 72
+                  color="#D4A456" 
+                />
               </View>
             </View>
 
@@ -190,10 +197,10 @@ const styles = (theme: Theme, isDark: boolean) =>
       paddingTop: 40 * SCALE,
     },
     iconContainer: {
-      width: 100 * SCALE,
-      height: 100 * SCALE,
-      borderRadius: 50 * SCALE,
-      backgroundColor: theme.primary,
+      width: 160 * SCALE,
+      height: 160 * SCALE,
+      borderRadius: 80 * SCALE,
+      backgroundColor: '#FDF7E6',
       justifyContent: 'center',
       alignItems: 'center',
     },
@@ -227,7 +234,7 @@ const styles = (theme: Theme, isDark: boolean) =>
       // fontWeight: '600',
     },
     startButton: {
-      backgroundColor: theme.primary,
+      backgroundColor: '#2B6872',
       paddingVertical: 16 * SCALE,
       borderRadius: 8,
       width: '100%',
