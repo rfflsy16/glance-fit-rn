@@ -1,6 +1,6 @@
 import { Theme } from '@/constants/Theme';
 import { useTheme } from '@/contexts/ThemeContext';
-import React from 'react';
+import { useEffect } from 'react';
 import { Dimensions, Modal, StyleSheet, Text, View } from 'react-native';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -17,7 +17,7 @@ export default function JoinProgramSuccess({
 }: JoinProgramSuccessProps) {
   const { theme } = useTheme();
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (visible) {
       const timer = setTimeout(() => {
         onClose();
