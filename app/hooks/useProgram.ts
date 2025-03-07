@@ -73,8 +73,8 @@ export function useProgram(programId: number) {
   });
 
   // Leave program mutation
-  const leaveProgram = useMutation<void>({
-    endpoint: `/profile_programs/${programId}`,
+  const leaveProgram = useMutation<ProfileProgram, { profileId: number }>({
+    endpoint: `/profile_programs/${user?.profileId}/${programId}`,
     method: 'DELETE',
     requiresAuth: true,
     onSuccess: () => {

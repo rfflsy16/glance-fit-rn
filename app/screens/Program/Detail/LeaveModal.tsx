@@ -1,9 +1,20 @@
 import { Theme } from '@/constants/Theme';
 import { useTheme } from '@/contexts/ThemeContext';
 import React from 'react';
-import { Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Dimensions,
+  Modal,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
-interface LeaveProgramModalProps {
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const SCALE = SCREEN_WIDTH / 375;
+
+interface LeaveModalProps {
   visible: boolean;
   onClose: () => void;
   onConfirm: () => void;
@@ -14,15 +25,15 @@ export default function LeaveProgramModal({
   visible,
   onClose,
   onConfirm,
-  loading = false,
-}: LeaveProgramModalProps) {
+  loading,
+}: LeaveModalProps) {
   const { theme } = useTheme();
 
   return (
     <Modal
-      animationType="fade"
-      transparent={true}
       visible={visible}
+      transparent
+      animationType="fade"
       onRequestClose={onClose}
     >
       <View style={styles(theme).overlay}>
@@ -33,27 +44,23 @@ export default function LeaveProgramModal({
 
           <View style={styles(theme).buttonContainer}>
             <TouchableOpacity
-              style={[styles(theme).button, styles(theme).cancelButton]}
+              style={styles(theme).cancelButton}
               onPress={onClose}
               disabled={loading}
             >
-              <Text
-                style={[styles(theme).buttonText, styles(theme).cancelText]}
-              >
-                Batal
-              </Text>
+              <Text style={styles(theme).cancelButtonText}>Batal</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles(theme).button, styles(theme).confirmButton]}
+              style={styles(theme).confirmButton}
               onPress={onConfirm}
               disabled={loading}
             >
-              <Text
-                style={[styles(theme).buttonText, styles(theme).confirmText]}
-              >
-                {loading ? 'Loading...' : 'Tinggalkan'}
-              </Text>
+              {loading ? (
+                <ActivityIndicator size="small" color={theme.textPrimary} />
+              ) : (
+                <Text style={styles(theme).confirmButtonText}>Tinggalkan</Text>
+              )}
             </TouchableOpacity>
           </View>
         </View>
@@ -71,48 +78,45 @@ const styles = (theme: Theme) =>
       alignItems: 'center',
     },
     modalContainer: {
+      width: '85%',
       backgroundColor: theme.background,
-      borderRadius: 16,
-      padding: 24,
-      width: '80%',
-      maxWidth: 400,
+      borderRadius: 16 * SCALE,
+      padding: 24 * SCALE,
     },
     title: {
-      fontSize: 18,
+      fontSize: 20 * SCALE,
       fontWeight: '600',
       color: theme.textPrimary,
       textAlign: 'center',
-      marginBottom: 24,
+      marginBottom: 24 * SCALE,
     },
     buttonContainer: {
       flexDirection: 'row',
       justifyContent: 'space-between',
-      gap: 12,
-    },
-    button: {
-      flex: 1,
-      paddingVertical: 12,
-      paddingHorizontal: 16,
-      borderRadius: 8,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    buttonText: {
-      fontSize: 16,
-      fontWeight: '600',
+      gap: 12 * SCALE,
     },
     cancelButton: {
+      flex: 1,
+      paddingVertical: 14 * SCALE,
+      borderRadius: 8 * SCALE,
       backgroundColor: theme.background,
-      borderWidth: 1,
-      borderColor: theme.border,
+      alignItems: 'center',
     },
     confirmButton: {
-      backgroundColor: '#EF4444',
+      flex: 1,
+      paddingVertical: 14 * SCALE,
+      borderRadius: 8 * SCALE,
+      backgroundColor: theme.background,
+      alignItems: 'center',
     },
-    cancelText: {
+    cancelButtonText: {
+      fontSize: 16 * SCALE,
+      fontWeight: '500',
+      color: '#FF0000',
+    },
+    confirmButtonText: {
+      fontSize: 16 * SCALE,
+      fontWeight: '500',
       color: theme.textPrimary,
-    },
-    confirmText: {
-      color: '#FFFFFF',
     },
   });
