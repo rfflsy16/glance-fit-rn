@@ -234,6 +234,10 @@ export default function HomeScreen({ navigation }: any) {
 
         {/* Profile Progress Card */}
         <View style={styles(theme).profileCard}>
+            <TouchableOpacity
+            onPress={() => navigation.navigate('Profile')}
+            
+            >
           <Text style={styles(theme).profileCardTitle}>
             Profile anda baru saja dimulai!
           </Text>
@@ -248,6 +252,7 @@ export default function HomeScreen({ navigation }: any) {
             </View>
             <Text style={styles(theme).percentageText}>30%</Text>
           </View>
+            </TouchableOpacity>
         </View>
 
         {/* Daily Activities */}
@@ -301,9 +306,9 @@ export default function HomeScreen({ navigation }: any) {
                     <Text style={styles(theme).activityPoints}>
                       +{activity.points} Poin
                     </Text>
-                  )}
+                )}
                 </View>
-              </TouchableOpacity>
+            </TouchableOpacity>
             ))}
           </View>
         </View>
@@ -361,7 +366,7 @@ export default function HomeScreen({ navigation }: any) {
                 {article.title}
               </Text>
             </TouchableOpacity>
-          ))}
+            ))}
         </ScrollView>
       </ScrollView>
 
@@ -736,4 +741,4 @@ export const styles = (theme: Theme) =>
     headerRight: {
       width: 32, // Match the width of the back button for alignment
     },
-  });
+});

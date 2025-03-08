@@ -14,7 +14,7 @@ import {
     ScrollView,
     Easing,
 } from 'react-native';
-import { FoodItem } from './types';
+import type { FoodItem } from './types';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const SCALE = SCREEN_WIDTH / 430; // 430 adalah base width iPhone 14 Pro Max

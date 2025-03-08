@@ -6,7 +6,6 @@ import { useState } from 'react';
 import {
     Dimensions,
     StyleSheet,
-    Text,
     TouchableOpacity,
     View,
     Animated,
