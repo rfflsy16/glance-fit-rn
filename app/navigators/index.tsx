@@ -22,6 +22,12 @@ import React from 'react';
 import AuthStack from './Auth';
 import MyTabs from './BottomTab';
 import ProgramStack from './Program';
+import FoodLog from '@/screens/Home/FoodLog';
+import Meal from '@/screens/Home/FoodLog/Nutrition/Meal';
+import { FoodItem } from '@/screens/Home/FoodLog/types';
+import DrinkLog from '@/screens/Home/DrinkLog';
+import Notification from '@/screens/Home/Notification';
+
 export type RootStackParamList = {
   BottomTab: undefined;
   Settings: undefined;
@@ -37,6 +43,7 @@ export type RootStackParamList = {
   CaloriesIn: undefined;
   CaloriesOut: undefined;
   FoodLog: undefined;
+  DrinkLog: undefined;
   Activity: {
     id: number;
     title: string;
@@ -79,7 +86,8 @@ export type RootStackParamList = {
     mealTime: 'breakfast' | 'lunch' | 'dinner' | 'snacks';
     foods: FoodItem[];
   };
-};
+  Notification: undefined;
+}
 
 declare global {
   namespace ReactNavigation {
@@ -199,6 +207,12 @@ export default function StackNavigator() {
         component={RincianTransaksi}
         options={{ animation: 'slide_from_right' }}
       />
+
+      {/* Drink */}
+      <Stack.Screen name="DrinkLog" component={DrinkLog} options={{ animation: 'slide_from_right', headerShown: false }} />
+
+      {/* Notification */}
+      <Stack.Screen name="Notification" component={Notification} options={{ animation: 'slide_from_right', headerShown: false }} />
     </Stack.Navigator>
   );
 }

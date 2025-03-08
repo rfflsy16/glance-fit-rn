@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import type { TabType } from './common/HMetricsView';
 import MetricsView from './common/HMetricsView';
 

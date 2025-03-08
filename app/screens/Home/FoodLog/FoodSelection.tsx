@@ -1,7 +1,7 @@
 import { Theme } from '@/constants/Theme';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
-import  { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
     Dimensions,
     StyleSheet,
@@ -14,8 +14,7 @@ import {
     ScrollView,
     Easing,
 } from 'react-native';
-import { FoodItem } from './types';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import type { FoodItem } from './types';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const SCALE = SCREEN_WIDTH / 430; // 430 adalah base width iPhone 14 Pro Max
@@ -46,18 +45,16 @@ interface FoodSelectionProps {
 }
 
 export default function FoodSelection({ onComplete, onSearchFocus }: FoodSelectionProps) {
-    const { theme, isDark } = useTheme();
+    const { theme } = useTheme();
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('Semua');
     const [selectedFoods, setSelectedFoods] = useState<number[]>([]);
     const [filteredFoods, setFilteredFoods] = useState<FoodItem[]>(FOOD_DATA);
     const [isSearchFocused, setIsSearchFocused] = useState(false);
     
-    // Tambah opacity animation
     const buttonAnim = useRef(new Animated.Value(100)).current;
     const opacityAnim = useRef(new Animated.Value(0)).current;
     
-    const insets = useSafeAreaInsets();
     const searchAnim = useRef(new Animated.Value(0)).current;
     const headerAnim = useRef(new Animated.Value(1)).current;
     const listAnim = useRef(new Animated.Value(0)).current;
@@ -219,6 +216,7 @@ export default function FoodSelection({ onComplete, onSearchFocus }: FoodSelecti
                     placeholderTextColor="#999"
                     value={searchQuery}
                     onChangeText={setSearchQuery}
+                    autoCapitalize='none'
                     onFocus={() => handleSearchFocus(true)}
                     onBlur={() => handleSearchFocus(false)}
                 />
@@ -242,15 +240,20 @@ export default function FoodSelection({ onComplete, onSearchFocus }: FoodSelecti
                 }]
             }}>
                 {!isSearchFocused && (
-                    <>
+                    <View>
                         <View style={styles(theme).categoryOuterContainer}>
-                            <ScrollView horizontal>
-                                {CATEGORIES.map(category => (
+                            <ScrollView
+                                horizontal
+                                showsHorizontalScrollIndicator={false}
+                                contentContainerStyle={styles(theme).categoryScrollContainer}
+                            >
+                                {CATEGORIES.map((category, index) => (
                                     <TouchableOpacity 
                                         key={category}
                                         style={[
                                             styles(theme).categoryButton,
-                                            selectedCategory === category && styles(theme).categoryButtonActive
+                                            selectedCategory === category && styles(theme).categoryButtonActive,
+                                            index === CATEGORIES.length - 1 && { marginRight: 0 }
                                         ]}
                                         onPress={() => setSelectedCategory(category)}
                                     >
@@ -269,7 +272,7 @@ export default function FoodSelection({ onComplete, onSearchFocus }: FoodSelecti
                         <Text style={styles(theme).listTitle}>
                             Daftar makanan dan minuman
                         </Text>
-                    </>
+                    </View>
                 )}
             </Animated.View>
 
@@ -287,6 +290,7 @@ export default function FoodSelection({ onComplete, onSearchFocus }: FoodSelecti
                     <FlatList
                         data={filteredFoods}
                         keyExtractor={(item) => item.id.toString()}
+                        showsVerticalScrollIndicator={false}
                         keyboardShouldPersistTaps="handled"
                         contentContainerStyle={[
                             styles(theme).listContent,
@@ -377,14 +381,9 @@ const styles = (theme: Theme) => {
         categoryOuterContainer: {
             height: 44 * SCALE,
             marginBottom: 16 * SCALE,
-            paddingHorizontal: 16 * SCALE,
         },
-        categoryScrollView: {
-            paddingLeft: 16 * SCALE, // Padding kiri sejajar dengan container
-        },
-        categoryInnerContainer: {
-            height: 36 * SCALE,
-            paddingRight: 16 * SCALE, // Padding kanan untuk item terakhir
+        categoryScrollContainer: {
+            paddingLeft: 16 * SCALE,
         },
         categoryButton: {
             paddingHorizontal: 16 * SCALE,

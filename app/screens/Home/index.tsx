@@ -1,7 +1,7 @@
 import { Theme } from '@/constants/Theme';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   Dimensions,
   Image,
@@ -123,7 +123,7 @@ export default function HomeScreen({ navigation }: any) {
       id: 'water',
       icon: 'water-outline',
       label: 'Air',
-      onPress: () => navigation.navigate('WaterLog'),
+      onPress: () => navigation.navigate('DrinkLog'),
     },
   ];
 
@@ -140,7 +140,9 @@ export default function HomeScreen({ navigation }: any) {
               />
               <Text style={styles(theme).pointText}>100 Poin</Text>
             </View>
-            <TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('Notification')}
+            >
               <Ionicons
                 name="notifications-outline"
                 size={24}
@@ -232,6 +234,10 @@ export default function HomeScreen({ navigation }: any) {
 
         {/* Profile Progress Card */}
         <View style={styles(theme).profileCard}>
+            <TouchableOpacity
+            onPress={() => navigation.navigate('Profile')}
+            
+            >
           <Text style={styles(theme).profileCardTitle}>
             Profile anda baru saja dimulai!
           </Text>
@@ -246,6 +252,7 @@ export default function HomeScreen({ navigation }: any) {
             </View>
             <Text style={styles(theme).percentageText}>30%</Text>
           </View>
+            </TouchableOpacity>
         </View>
 
         {/* Daily Activities */}
@@ -299,9 +306,9 @@ export default function HomeScreen({ navigation }: any) {
                     <Text style={styles(theme).activityPoints}>
                       +{activity.points} Poin
                     </Text>
-                  )}
+                )}
                 </View>
-              </TouchableOpacity>
+            </TouchableOpacity>
             ))}
           </View>
         </View>
@@ -359,7 +366,7 @@ export default function HomeScreen({ navigation }: any) {
                 {article.title}
               </Text>
             </TouchableOpacity>
-          ))}
+            ))}
         </ScrollView>
       </ScrollView>
 
@@ -550,7 +557,7 @@ export const styles = (theme: Theme) =>
       alignItems: 'center',
       padding: 16 * SCALE,
       gap: 12 * SCALE,
-      backgroundColor: '#FFFFFF',
+      backgroundColor: theme.background,
       borderRadius: 16,
       borderWidth: 1,
       borderColor: 'rgba(12, 12, 13, 0.10)',
@@ -633,7 +640,7 @@ export const styles = (theme: Theme) =>
       width: 150 * SCALE,
       marginRight: 16,
       padding: 12,
-      backgroundColor: '#FFFFFF',
+      backgroundColor: theme.background,
       borderRadius: 20,
       alignItems: 'center',
       justifyContent: 'space-between',
@@ -658,7 +665,7 @@ export const styles = (theme: Theme) =>
       fontSize: 16,
       width: '100%',
       fontWeight: '600',
-      color: '#1F2937',
+      color: theme.textPrimary,
       // textAlign: 'left',
       marginVertical: 4,
       lineHeight: 24,
@@ -666,7 +673,7 @@ export const styles = (theme: Theme) =>
     },
     challengeDate: {
       fontSize: 14,
-      color: '#64748B',
+      color: theme.textSecondary,
       marginBottom: 16,
       fontStyle: 'normal',
       textAlign: 'left',
@@ -734,4 +741,4 @@ export const styles = (theme: Theme) =>
     headerRight: {
       width: 32, // Match the width of the back button for alignment
     },
-  });
+});

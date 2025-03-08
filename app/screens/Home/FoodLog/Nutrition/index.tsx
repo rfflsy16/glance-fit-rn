@@ -1,5 +1,4 @@
 import { useNavigation } from '@react-navigation/native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Text, View, TouchableOpacity, ScrollView, StyleSheet, Image } from 'react-native';
@@ -9,7 +8,6 @@ import { Theme } from '@/constants/Theme';
 export default function Nutrition({ selectedFoods, totalNutrition }: NutritionProps) {
     const { theme } = useTheme();
     const navigation = useNavigation();
-    const insets = useSafeAreaInsets();
 
     // Target nutrisi harian (dalam gram)
     const DAILY_TARGETS = {

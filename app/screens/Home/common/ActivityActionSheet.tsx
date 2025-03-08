@@ -2,7 +2,7 @@ import { Theme } from '@/constants/Theme';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { 
     Animated, 
     Dimensions, 

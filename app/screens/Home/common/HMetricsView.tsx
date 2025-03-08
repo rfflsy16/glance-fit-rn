@@ -541,11 +541,11 @@ const styles = (theme: Theme) =>
   StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: '#FFFFFF',
+      backgroundColor: theme.background,
       padding: 16 * SCALE,
     },
     fixedHeader: {
-      backgroundColor: '#FFFFFF',
+      backgroundColor: theme.background,
       zIndex: 1,
     },
     scrollContainer: {
@@ -563,7 +563,7 @@ const styles = (theme: Theme) =>
     headerTitle: {
       fontSize: 18,
       fontWeight: '600',
-      color: '#000000',
+      color: theme.textPrimary,
       flex: 1,
       textAlign: 'center',
       marginRight: 28 * SCALE,
@@ -585,11 +585,11 @@ const styles = (theme: Theme) =>
     },
     tabText: {
       fontSize: 16,
-      color: '#9CA3AF',
+      color: theme.textSecondary, 
       fontWeight: '500',
     },
     activeTabText: {
-      color: '#2B6872',
+      color: theme.primary,
       fontWeight: '600',
     },
     activeTabIndicator: {
@@ -598,7 +598,7 @@ const styles = (theme: Theme) =>
       left: 0,
       right: 0,
       height: 3,
-      backgroundColor: '#2B6872',
+      backgroundColor: theme.primary,
       borderRadius: 1.5,
     },
     weekNavigation: {
@@ -615,7 +615,7 @@ const styles = (theme: Theme) =>
     weekNavText: {
       fontSize: 16,
       fontWeight: '500',
-      color: '#000000',
+      color: theme.textPrimary,
     },
     averageContainer: {
       alignItems: 'center',
@@ -625,11 +625,11 @@ const styles = (theme: Theme) =>
     averageNumber: {
       fontSize: 48,
       fontWeight: '400',
-      color: '#000000',
+      color: theme.textPrimary,
     },
     averageLabel: {
       fontSize: 14,
-      color: '#6B7280',
+      color: theme.textSecondary,
       marginTop: 4,
     },
     chartContainer: {
@@ -707,7 +707,7 @@ const styles = (theme: Theme) =>
       borderBottomColor: '#F3F4F6',
     },
     weeklyDetailItem: {
-      backgroundColor: '#F9FAFB',
+      backgroundColor: theme.background,
       padding: 16 * SCALE,
       borderRadius: 8,
       marginBottom: 8 * SCALE,
@@ -715,20 +715,20 @@ const styles = (theme: Theme) =>
     },
     detailDay: {
       fontSize: 16 * SCALE,
-      color: '#000000',
+      color: theme.textPrimary,
     },
     weeklyDetailDay: {
       fontSize: 14 * SCALE,
-      color: '#6B7280',
+      color: theme.textSecondary,
     },
     detailSteps: {
       fontSize: 16 * SCALE,
       fontWeight: '500',
-      color: '#000000',
+      color: theme.textPrimary,
     },
     weeklyDetailSteps: {
       fontSize: 16 * SCALE,
       fontWeight: '400',
-      color: '#000000',
+      color: theme.textPrimary,
     },
   });
