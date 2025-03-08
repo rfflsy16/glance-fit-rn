@@ -24,6 +24,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Instruction, Program } from '../types';
 import JoinProgramSuccess from './JoinProgramSuccess';
 import LeaveProgramModal from './LeaveModal';
+import OptionsDropdown from './OptionsDropdown';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const SCALE = SCREEN_WIDTH / 375;
@@ -52,6 +53,7 @@ export default function ProgramDetailScreen() {
   );
   const [showLeaveModal, setShowLeaveModal] = useState(false);
   const [showJoinSuccess, setShowJoinSuccess] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
 
   const {
     profileProgram: { data: profileData, isLoading: profileLoading },
@@ -108,12 +110,20 @@ export default function ProgramDetailScreen() {
     }
   };
 
-  // Handle leave program
-  const handleLeaveProgram = () => {
-    if (!program) return;
-    leaveProgram(undefined);
-    setShowLeaveModal(false);
-    navigation.goBack();
+  // Handle menu button press
+  const handleMenuPress = () => {
+    setShowDropdown(true);
+  };
+
+  // Handle leaving program
+  const handleLeaveProgram = async () => {
+    if (!user?.profileId) return;
+    try {
+      await leaveProgram({ profileId: Number(user.profileId) });
+      navigation.goBack();
+    } catch (error) {
+      console.error('Error leaving program:', error);
+    }
   };
 
   // Group instructions by week
@@ -257,7 +267,7 @@ export default function ProgramDetailScreen() {
           {isProgramFollowed && (
             <TouchableOpacity
               style={styles(theme).menuButton}
-              onPress={() => setShowLeaveModal(true)}
+              onPress={handleMenuPress}
             >
               <MaterialIcons name="more-vert" size={24} color="#FFFFFF" />
             </TouchableOpacity>
@@ -428,6 +438,18 @@ export default function ProgramDetailScreen() {
           </TouchableOpacity>
         </View>
       )}
+
+      {/* Options Dropdown */}
+      <OptionsDropdown
+        visible={showDropdown}
+        onClose={() => setShowDropdown(false)}
+        onLeavePress={() => {
+          setShowDropdown(false);
+          setShowLeaveModal(true);
+        }}
+        top={insets.top + 56 * SCALE}
+        right={16 * SCALE}
+      />
 
       <LeaveProgramModal
         visible={showLeaveModal}
@@ -676,12 +698,12 @@ const styles = (theme: Theme) =>
     },
     menuButton: {
       position: 'absolute',
-      top: 16,
-      right: 16,
+      top: 16 * SCALE,
+      right: 16 * SCALE,
       zIndex: 10,
-      width: 40,
-      height: 40,
-      borderRadius: 20,
+      width: 40 * SCALE,
+      height: 40 * SCALE,
+      borderRadius: 20 * SCALE,
       backgroundColor: 'rgba(0, 0, 0, 0.3)',
       justifyContent: 'center',
       alignItems: 'center',
