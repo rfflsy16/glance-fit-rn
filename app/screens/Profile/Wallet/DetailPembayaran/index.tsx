@@ -74,7 +74,10 @@ export default function DetailPembayaran() {
           <TouchableOpacity
             style={styles(theme).closeButton}
             onPress={() => {
-              navigation.navigate('BottomTab');
+              navigation.reset({
+                index: 0,
+                routes: [{ name: 'BottomTab' }],
+              });
             }}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >

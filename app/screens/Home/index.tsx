@@ -452,7 +452,7 @@ export const styles = (theme: Theme) =>
     circleNumber: {
       fontSize: 48,
       fontWeight: '700',
-      color: theme.textPrimary,
+      color: "#2B6872",
     },
     circleLabel: {
       fontSize: 14,
@@ -461,16 +461,16 @@ export const styles = (theme: Theme) =>
     statsIconsContainer: {
       flexDirection: 'row',
       justifyContent: 'center',
-      gap: 40,
+      gap: "18%",
     },
     statItem: {
       alignItems: 'center',
-      gap: 4,
+      gap: 10,
     },
     statIcon: {
-      width: 40,
-      height: 40,
-      borderRadius: 20,
+      width: 60,
+      height: 60,
+      borderRadius: 40,
       justifyContent: 'center',
       alignItems: 'center',
     },
