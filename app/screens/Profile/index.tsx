@@ -10,7 +10,6 @@ export default function ProfileScreen() {
     const insets = useSafeAreaInsets();
     const { theme } = useTheme();
     const navigation = useNavigation();
-    const logout = useLogout()
 
     // Data profil pengguna (nanti bisa diambil dari API/state)
     const userData = {
@@ -31,8 +30,8 @@ export default function ProfileScreen() {
         navigation.navigate('Wallet');
     };
 
-    const handleLogout = async () => {
-        await logout
+    const handleLogout =  () => {
+        useLogout()
         navigation.reset({
             index: 0,
             routes: [{ name: 'Auth' }],
