@@ -117,7 +117,7 @@ export const isLoggedIn = async (): Promise<boolean> => {
   }
 };
 
-export const logout = async (): Promise<void> => {
+export const useLogout = async (): Promise<void> => {
   try {
     await SecureStore.deleteItemAsync(KEYS.USER_ID);
     await SecureStore.deleteItemAsync(KEYS.PROFILE_ID);
@@ -158,7 +158,7 @@ export function useAuth() {
 
   // Logout mutation
   const { mutate: logoutUser } = useMutation({
-    mutationFn: logout,
+    mutationFn: useLogout,
     onSuccess: () => {
       // Clear all user-related queries from cache
       queryClient.removeQueries({ queryKey: ['user'] });

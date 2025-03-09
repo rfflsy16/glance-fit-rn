@@ -4,12 +4,13 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { Theme } from '@/constants/Theme';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-
+import { useLogout } from '@/hooks/useAuth';
 
 export default function ProfileScreen() {
     const insets = useSafeAreaInsets();
     const { theme } = useTheme();
     const navigation = useNavigation();
+    const logout = useLogout()
 
     // Data profil pengguna (nanti bisa diambil dari API/state)
     const userData = {
@@ -28,6 +29,14 @@ export default function ProfileScreen() {
 
     const navigateToWallet = () => {
         navigation.navigate('Wallet');
+    };
+
+    const handleLogout = async () => {
+        await logout
+        navigation.reset({
+            index: 0,
+            routes: [{ name: 'Auth' }],
+        });
     };
 
     return (
@@ -217,7 +226,7 @@ export default function ProfileScreen() {
                     <View style={styles(theme).menuIconContainer}>
                         <Ionicons name="log-out-outline" size={20} color="#FF3B30" />
                     </View>
-                    <Text style={styles(theme).logoutMenuText}>Logout</Text>
+                    <Text style={styles(theme).logoutMenuText} onPress={handleLogout}>Logout</Text>
                 </TouchableOpacity>
             </View>
 
