@@ -1,35 +1,48 @@
+import { createStackNavigator } from '@react-navigation/stack';
+import React from 'react';
+
+// Navigators
+import AuthStack from './Auth';
+import MyTabs from './BottomTab';
+import ProgramStack from './Program';
+import PaymentStack, { PaymentStackParamList } from './Payment';
+
+// Auth Screens
 import NameInput from '@/screens/Auth/NameInput';
 import ReferralInput from '@/screens/Auth/ReferralInput';
+
+// Community Screens
 import Chat from '@/screens/Community/Chat';
+
+// Home Screens
 import Activity from '@/screens/Home/Activity';
 import CaloriesIn from '@/screens/Home/CaloriesIn';
 import CaloriesOut from '@/screens/Home/CaloriesOut';
 import ChallengeDetail from '@/screens/Home/Challenge';
 import Distance from '@/screens/Home/Distance';
 import Steps from '@/screens/Home/Steps';
-import Settings from '@/screens/Profile/Settings';
-import Wallet from '@/screens/Profile/Wallet';
-import DetailPembayaran from '@/screens/Profile/Wallet/DetailPembayaran';
-import Pembayaran from '@/screens/Profile/Wallet/Pembayaran';
-import RincianTransaksi from '@/screens/Profile/Wallet/RincianTransaksi';
-import TopUp from '@/screens/Profile/Wallet/TopUp';
-import TransactionList from '@/screens/Profile/Wallet/TransactionList';
-import { createStackNavigator } from '@react-navigation/stack';
-import React from 'react';
-import AuthStack from './Auth';
-import MyTabs from './BottomTab';
-import ProgramStack from './Program';
 import FoodLog from '@/screens/Home/FoodLog';
-import Meal from '@/screens/Home/FoodLog/Nutrition/Meal';
-import { FoodItem } from '@/screens/Home/FoodLog/types';
 import DrinkLog from '@/screens/Home/DrinkLog';
 import Notification from '@/screens/Home/Notification';
+
+// Profile Screens
+import Settings from '@/screens/Profile/Settings';
+
+// Food Screens
+import Meal from '@/screens/Home/FoodLog/Nutrition/Meal';
+import { FoodItem } from '@/screens/Home/FoodLog/types';
+
+// Wallet Screens
+import Wallet from '@/screens/Profile/Wallet';
+import TopUp from '@/screens/Profile/Wallet/TopUp';
+import TransactionList from '@/screens/Profile/Wallet/TransactionList';
 
 export type RootStackParamList = {
   BottomTab: undefined;
   Settings: undefined;
   Wallet: undefined;
   TopUp: undefined;
+  TransactionList: undefined;
   Chat: undefined;
   Auth: undefined;
   NameInput: undefined;
@@ -53,24 +66,6 @@ export type RootStackParamList = {
     title: string;
     date: string;
   };
-  Pembayaran: {
-    amount: number;
-    price: string;
-  };
-  DetailPembayaran: {
-    amount: number;
-    price: string;
-    transactionId?: string;
-  };
-  TransactionList: undefined;
-  RincianTransaksi: {
-    transactionId: string;
-    amount: number;
-    price: string;
-    status: 'pending' | 'success' | 'failed';
-    date: string;
-    time: string;
-  };
   ProgramStack:
     | {
         screen: string;
@@ -84,6 +79,10 @@ export type RootStackParamList = {
     foods: FoodItem[];
   };
   Notification: undefined;
+  PaymentStack: {
+    screen: keyof PaymentStackParamList;
+    params?: PaymentStackParamList[keyof PaymentStackParamList];
+  };
 }
 
 declare global {
@@ -100,19 +99,13 @@ export default function StackNavigator() {
       initialRouteName="BottomTab"
       screenOptions={{
         headerShown: false,
-        animation: 'scale_from_center',
+        animation: 'slide_from_right',
       }}
     >
       <Stack.Screen name="BottomTab" component={MyTabs} />
 
       {/* Profile */}
-      <Stack.Screen name="Settings" component={Settings} />
-      <Stack.Screen name="Wallet" component={Wallet} />
-      <Stack.Screen
-        name="TopUp"
-        component={TopUp}
-        options={{ animation: 'slide_from_right' }}
-      />
+      <Stack.Screen name="Settings" component={Settings} options={{ animation: 'slide_from_right' }} />
       <Stack.Screen name="Chat" component={Chat} />
 
       {/* Auth */}
@@ -184,32 +177,24 @@ export default function StackNavigator() {
         component={Meal}
         options={{ animation: 'slide_from_right' }}
       />
-      <Stack.Screen
-        name="Pembayaran"
-        component={Pembayaran}
-        options={{ animation: 'slide_from_right' }}
-      />
-      <Stack.Screen
-        name="DetailPembayaran"
-        component={DetailPembayaran}
-        options={{ animation: 'slide_from_right' }}
-      />
-      <Stack.Screen
-        name="TransactionList"
-        component={TransactionList}
-        options={{ animation: 'slide_from_right' }}
-      />
-      <Stack.Screen
-        name="RincianTransaksi"
-        component={RincianTransaksi}
-        options={{ animation: 'slide_from_right' }}
-      />
 
       {/* Drink */}
       <Stack.Screen name="DrinkLog" component={DrinkLog} options={{ animation: 'slide_from_right', headerShown: false }} />
 
       {/* Notification */}
       <Stack.Screen name="Notification" component={Notification} options={{ animation: 'slide_from_right', headerShown: false }} />
+
+      {/* Payment Stack */}
+      <Stack.Screen
+        name="PaymentStack"
+        component={PaymentStack}
+        options={{ animation: 'slide_from_right' }}
+      />
+
+      {/* Wallet */}
+      <Stack.Screen name="Wallet" component={Wallet} />
+      <Stack.Screen name="TopUp" component={TopUp} />
+      <Stack.Screen name="TransactionList" component={TransactionList} />
     </Stack.Navigator>
   );
 }

@@ -132,13 +132,16 @@ export default function TransactionList() {
   });
 
   const handleTransactionPress = (transaction: Transaction) => {
-    navigation.navigate('RincianTransaksi', {
-      transactionId: transaction.id,
-      amount: transaction.amount,
-      price: transaction.price,
-      status: transaction.status,
-      date: transaction.date,
-      time: transaction.time,
+    navigation.navigate('PaymentStack', {
+      screen: 'RincianTransaksi',
+      params: {
+        transactionId: transaction.id,
+        amount: transaction.amount,
+        price: transaction.price,
+        status: transaction.status,
+        date: transaction.date,
+        time: transaction.time,
+      },
     });
   };
 

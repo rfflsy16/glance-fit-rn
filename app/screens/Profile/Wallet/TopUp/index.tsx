@@ -148,9 +148,12 @@ export default function TopUp() {
                 (plan) => plan.id === selectedPlan
               );
               if (selectedPlanData) {
-                navigation.navigate('Pembayaran', {
-                  amount: selectedPlanData.amount,
-                  price: selectedPlanData.price,
+                navigation.navigate('PaymentStack', {
+                  screen: 'Pembayaran',
+                  params: {
+                    amount: selectedPlanData.amount,
+                    price: selectedPlanData.price,
+                  },
                 });
               }
             }}
