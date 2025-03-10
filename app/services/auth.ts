@@ -9,7 +9,7 @@ const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000/api';
 
 // Import from useAuth hook
 import {
-  logout as clearAuth,
+  useLogout as clearAuth,
   saveAuthToken,
   saveUserData,
 } from '../hooks/useAuth';
