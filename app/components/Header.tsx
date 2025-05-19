@@ -17,7 +17,7 @@ export default function Header({ title, rightContent, showBackButton = false, on
         <View style={styles(theme).container}>
             {showBackButton && (
                 <Pressable onPress={onPressBack}>
-                    <Ionicons name="arrow-back" size={24} color={theme.iconPrimary} />
+                    <Ionicons name="chevron-back" size={24} color={theme.iconPrimary} />
                 </Pressable>
             )}
             
@@ -38,14 +38,15 @@ const styles = (theme: Theme) => StyleSheet.create({
         alignItems: 'center',
         paddingVertical: 14,
         paddingHorizontal: 16,
-        gap: 16,
+        // gap: 16,
         backgroundColor: theme.background
     },
     title: {
         fontSize: 24,
-        fontWeight: '800',
+        fontWeight: '500',
         color: theme.textPrimary,
         flex: 1,
+        textAlign: 'center'
     },
     rightContainer: {
         marginLeft: 'auto'
